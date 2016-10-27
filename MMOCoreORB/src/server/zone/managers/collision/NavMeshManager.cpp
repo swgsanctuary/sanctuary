@@ -11,13 +11,21 @@ const String NavMeshManager::TileQueue = "NavMeshWorker";
 // Higher thread count, used for building large static cities during initialization
 const String NavMeshManager::MeshQueue = "NavMeshBuilder";
 
-NavMeshManager::NavMeshManager() {
+NavMeshManager::NavMeshManager() : Logger("NavMeshManager") {
     maxConcurrentJobs = 4;
-    Core::getTaskManager()->initializeCustomQueue(TileQueue.toCharArray(), maxConcurrentJobs);
-    Core::getTaskManager()->initializeCustomQueue(MeshQueue.toCharArray(), maxConcurrentJobs*2);
+    stopped = false;
+}
+
+void NavMeshManager::initialize(int numThreads) {
+    maxConcurrentJobs = numThreads;
+    Core::getTaskManager()->initializeCustomQueue(TileQueue.toCharArray(), maxConcurrentJobs/2, false);
+    Core::getTaskManager()->initializeCustomQueue(MeshQueue.toCharArray(), maxConcurrentJobs, false);
 }
 
 void NavMeshManager::enqueueJob(Zone* zone, NavMeshRegion* region, AABB areaToBuild, const RecastSettings& recastConfig, const String& queue) {
+	if (stopped)
+		return;
+
     Locker locker(&jobQueueMutex);
 
     const String& name = region->getMeshName();
@@ -46,6 +54,8 @@ void NavMeshManager::enqueueJob(Zone* zone, NavMeshRegion* region, AABB areaToBu
 }
 
 void NavMeshManager::checkJobs() {
+	if (stopped)
+		return;
 
     Locker locker(&jobQueueMutex);
 
@@ -68,7 +78,7 @@ void NavMeshManager::checkJobs() {
 
             Locker locker(&jobQueueMutex);
             runningJobs.drop(name);
-        }, "updateNavMesh", MeshQueue.toCharArray());
+        }, "updateNavMesh", job->getQueue().toCharArray());
     }
 
     locker.release();
@@ -77,7 +87,7 @@ void NavMeshManager::checkJobs() {
 
 void NavMeshManager::startJob(Reference<NavMeshJob*> job) {
 
-    if(job == NULL) {
+    if (stopped || job == NULL) {
         return;
     }
 
@@ -126,14 +136,16 @@ void NavMeshManager::startJob(Reference<NavMeshJob*> job) {
 
     RecastNavMeshBuilder *builder = NULL;
 
-    builder = new RecastNavMeshBuilder(zone, filename);
+    const AtomicBoolean* running = job->getJobStatus();
+    builder = new RecastNavMeshBuilder(zone, filename, running);
 
 	builder->setRecastConfig(job->getRecastConfig());
 
     float poleDist = job->getRecastConfig().distanceBetweenPoles;
 
-    if(poleDist < 1.0f)
+    if(poleDist < 1.0f) {
         poleDist = zone->getPlanetManager()->getTerrainManager()->getProceduralTerrainAppearance()->getDistanceBetweenPoles();
+    }
 
     builder->initialize(meshData, bBox, poleDist);
     meshData.removeAll();
@@ -153,18 +165,21 @@ void NavMeshManager::startJob(Reference<NavMeshJob*> job) {
 
     info("Region->name: " + filename);
 
-    builder->saveAll(filename);
+    if(running->get())
+        builder->saveAll(filename);
 
     if(initialBuild) {
         if(navmesh == NULL)
             navmesh = new RecastNavMesh();
 
-        navmesh->setFileName(filename);
+        navmesh->setFileName("navmeshes/" + filename);
         navmesh->setDetourNavMesh(builder->getNavMesh());
         navmesh->setDetourNavMeshHeader(builder->getNavMeshHeader());
 
-        Locker locker(region);
-        region->setNavMesh(navmesh);
+        Core::getTaskManager()->executeTask([=]{
+            Locker locker(region);
+            region->setNavMesh(navmesh);
+        }, "setNavMesh");
     }
 
     Locker locker(&jobQueueMutex);
@@ -183,7 +198,49 @@ void NavMeshManager::startJob(Reference<NavMeshJob*> job) {
     //TODO: Fixme
     Core::getTaskManager()->scheduleTask([=]{
         checkJobs();
-    }, "checkNavJobs", 1000);
+    }, "checkNavJobs", 1000, TileQueue.toCharArray());
+}
+
+void NavMeshManager::cancelJobs(NavMeshRegion* region) {
+    Locker locker(&jobQueueMutex);
+
+    if (runningJobs.size() > 0) {
+        for (int i = runningJobs.size()-1; i >= 0; i--) {
+            auto& job = runningJobs.get(i);
+            if (job->getRegion () == region) {
+                job->cancel();
+                runningJobs.remove(i);
+            }
+        }
+    }
+
+    if (jobs.size() > 0) {
+        for (int i = jobs.size()-1; i >= 0; i--) {
+            auto& job = jobs.get(i);
+            if (job->getRegion () == region) {
+                jobs.remove(i);
+            }
+        }
+    }
+}
+
+void NavMeshManager::cancelAllJobs() {
+	Locker locker(&jobQueueMutex);
+
+	if (runningJobs.size() > 0) {
+		for (int i = runningJobs.size()-1; i >= 0; i--) {
+			auto& job = runningJobs.get(i);
+			job->cancel();
+			runningJobs.remove(i);
+		}
+	}
+
+	jobs.removeAll();
+}
+
+void NavMeshManager::stop() {
+	stopped = true;
+	cancelAllJobs();
 }
 
 bool NavMeshManager::AABBEncompasessAABB(const AABB& lhs, const AABB& rhs) {

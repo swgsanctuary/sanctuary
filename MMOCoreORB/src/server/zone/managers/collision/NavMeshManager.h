@@ -23,19 +23,23 @@ protected:
 	VectorMap<String, Reference<NavMeshJob*> > jobs;
 	VectorMap<String, Reference<NavMeshJob*> > runningJobs;
 	Mutex jobQueueMutex;
+	bool stopped;
 
 
 	void startJob(Reference<NavMeshJob*> job);
     void checkJobs();
 public:
 	NavMeshManager();
-
 	~NavMeshManager() { }
+	void initialize(int numThreads);
 
 	void enqueueJob(Zone* zone, NavMeshRegion* region, AABB areaToBuild, const RecastSettings& recastConfig, const String& queue);
 
-    static bool AABBEncompasessAABB(const AABB& lhs, const AABB& rhs);
+	void cancelJobs(NavMeshRegion* region);
+	void cancelAllJobs();
+	void stop();
 
+    static bool AABBEncompasessAABB(const AABB& lhs, const AABB& rhs);
 
     // Lower thread count, used during runtime
     static const String TileQueue; //"NavMeshWorker";

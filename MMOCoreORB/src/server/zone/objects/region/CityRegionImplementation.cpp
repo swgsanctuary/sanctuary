@@ -461,8 +461,13 @@ void CityRegionImplementation::createNavRegion() {
 
 void CityRegionImplementation::destroyNavRegion() {
 	if (navmeshRegion != NULL) {
+		NavMeshManager::instance()->cancelJobs(navmeshRegion);
 		Locker locker(navmeshRegion);
 		navmeshRegion->destroyObjectFromWorld(true);
+
+		if (navmeshRegion->isPersistent())
+			navmeshRegion->destroyObjectFromDatabase(true);
+
 		navmeshRegion = NULL;
 	}
 }
@@ -493,7 +498,7 @@ void CityRegionImplementation::createNavRegion(const String& queue, bool forceRe
 
 	Locker clocker(navmeshRegion, _this.getReferenceUnsafeStaticCast());
 
-	String name = getRegionName();
+	String name = getNavMeshName();
 	name = name.subString(name.lastIndexOf(':')+1);
 
 	if(isClientRegion()) {
@@ -1253,5 +1258,12 @@ void CityRegionImplementation::cleanupMissionTerminals(int limit) {
 
 uint64 CityRegionImplementation::getObjectID() {
 	return _this.getReferenceUnsafeStaticCast()->_getObjectID();
+}
+
+String CityRegionImplementation::getNavMeshName() {
+	if (navMeshName.length() > 0)
+		return navMeshName;
+
+	return getRegionName();
 }
 
