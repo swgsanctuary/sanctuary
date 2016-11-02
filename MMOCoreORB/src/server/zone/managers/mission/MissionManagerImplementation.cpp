@@ -935,6 +935,8 @@ void MissionManagerImplementation::randomizeGenericBountyMission(CreatureObject*
 		mission->setMissionTitle(stfFile + diffString, "m" + String::valueOf(randTexts) + "t");
 		mission->setMissionDescription(stfFile + diffString, "m" + String::valueOf(randTexts) + "d");
 	} else {
+		Locker listLocker(&playerBountyListMutex);
+
 		BountyTargetListElement* target = getRandomPlayerBounty(player);
 
 		if (target != NULL) {
@@ -1343,7 +1345,7 @@ void MissionManagerImplementation::randomizeGenericHuntingMission(CreatureObject
 		return;
 	}
 
-	String serverTemplate = templatesNames.get(0);
+	const String& serverTemplate = templatesNames.get(0);
 
 	SharedObjectTemplate* sharedTemplate = TemplateManager::instance()->getTemplate(serverTemplate.hashCode());
 
@@ -1933,6 +1935,7 @@ void MissionManagerImplementation::completePlayerBounty(uint64 targetId, uint64 
 		}
 
 		playerBountyList.remove(playerBountyList.find(targetId));
+		delete target;
 	}
 }
 
