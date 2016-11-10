@@ -46,8 +46,14 @@ function CityScreenPlay:spawnMob(num, controllingFaction, difficulty)
 
 	pNpc = spawnMobile(self.planet, npcTemplate .. scaling, 0, mobTable[3], mobTable[4], mobTable[5], mobTable[6], mobTable[7])
 
-	if pNpc ~= nil and npcMood ~= "" then
-		self:setMoodString(pNpc, npcMood)
+	if pNpc ~= nil then
+		if npcMood ~= "" then
+			self:setMoodString(pNpc, npcMood)
+		end
+		if mobTable[10] then
+			local aiAgent = AiAgent(pNpc)
+			aiAgent:setCreatureBit(SCANNING_FOR_CONTRABAND)
+		end
 	end
 
 	if pNpc ~= nil then
@@ -66,7 +72,7 @@ function CityScreenPlay:onDespawn(pAiAgent)
 	local mobNumber = readData(oid)
 	deleteData(oid)
 
-	createEvent(300000, self.screenplayName, "respawn", nil, tostring(mobnumber))
+	createEvent(300000, self.screenplayName, "respawn", nil, tostring(mobNumber))
 
 	return 1
 end
