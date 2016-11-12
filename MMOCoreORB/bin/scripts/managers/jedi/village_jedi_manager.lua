@@ -55,6 +55,14 @@ function VillageJediManager:onPlayerLoggedIn(pCreatureObject)
 
 	Glowing:onPlayerLoggedIn(pCreatureObject)
 
+	if (FsIntro:isOnIntro(pCreatureObject)) then
+		FsIntro:onLoggedIn(pCreatureObject)
+	end
+
+	if (FsOutro:isOnOutro(pCreatureObject)) then
+		FsOutro:onLoggedIn(pCreatureObject)
+	end
+
 	if (QuestManager.hasActiveQuest(pCreatureObject, QuestManager.quests.FS_PHASE_2_CRAFT_DEFENSES_MAIN) and not QuestManager.hasCompletedQuest(pCreatureObject, QuestManager.quests.FS_PHASE_2_CRAFT_DEFENSES_MAIN) and not VillageCommunityCrafting:isOnActiveCrafterList(pCreatureObject)) then
 		QuestManager.resetQuest(pCreatureObject, QuestManager.quests.FS_PHASE_2_CRAFT_DEFENSES_MAIN)
 		QuestManager.resetQuest(pCreatureObject, QuestManager.quests.FS_PHASE_2_CRAFT_DEFENSES_01)
@@ -92,6 +100,20 @@ function VillageJediManager:onPlayerLoggedIn(pCreatureObject)
 	end
 	if (currentPhase ~= 4) then
 		FsVillageDefense:doPhaseChangeFail(pCreatureObject)
+	end
+end
+
+function VillageJediManager:onPlayerLoggedOut(pCreatureObject)
+	if (pCreatureObject == nil) then
+		return
+	end
+
+	if (FsIntro:isOnIntro(pCreatureObject)) then
+		FsIntro:onLoggedOut(pCreatureObject)
+	end
+
+	if (FsOutro:isOnOutro(pCreatureObject)) then
+		FsOutro:onLoggedOut(pCreatureObject)
 	end
 end
 
@@ -145,17 +167,11 @@ function VillageJediManager:onFSTreeCompleted(pCreatureObject, branch)
 	-- Remove the "_04" from the end of the skill...
 	local branchSub = string.sub(branch, 0, (string.len(branch) - 3))
 
-	-- Set the screenplaystate...
 	CreatureObject(pCreatureObject):setScreenPlayState(4, "VillageUnlockScreenPlay:" .. branchSub)
 
-
-	-- check for finish...
 	if (ExperienceConverter:getMasteredBranches(pCreatureObject) >= NUMBEROFTREESTOMASTER) then
-		-- Set Screenplaystate.
 		VillageJediManagerCommon.setJediProgressionScreenPlayState(pCreatureObject, VILLAGE_JEDI_PROGRESSION_COMPLETED_VILLAGE)
-
-		-- Start Old Man.
-		OldManOutroEncounter:start(pCreatureObject)
+		FsOutro:startOldMan(pCreatureObject)
 	end
 end
 
