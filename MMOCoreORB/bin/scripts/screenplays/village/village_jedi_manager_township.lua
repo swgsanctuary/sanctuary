@@ -303,19 +303,15 @@ function VillageJediManagerTownship:handlePhaseChangeActiveQuests(phaseID, curre
 	VillageJediManagerCommon.removeActiveQuestList(phaseID)
 end
 
-function VillageJediManagerTownship:doOnlinePhaseChangeFails(pCreature, currentPhase)
+function VillageJediManagerTownship:doOnlinePhaseChangeFails(pPlayer, currentPhase)
 	if (currentPhase == 1) then
-		FsReflex1:doPhaseChangeFail(pCreature)
-		FsPatrol:doPhaseChangeFail(pCreature)
-		FsMedicPuzzle:doPhaseChange(pCreature)
-		FsCrafting1:doPhaseChangeFail(pCreature)
+		FsPhase1:doPhaseChangeFails(pPlayer)
 	elseif (currentPhase == 2) then
-		FsReflex2:doPhaseChangeFail(pCreature)
-		FsSad:doPhaseChangeFail(pCreature)
+		FsPhase2:doPhaseChangeFails(pPlayer)
 	elseif (currentPhase == 3) then
-		FsCounterStrike:doPhaseChangeFail(pCreature)
+		FsCounterStrike:doPhaseChangeFail(pPlayer)
 	elseif (currentPhase == 4) then
-		FsVillageDefense:doPhaseChangeFail(pCreature)
+		FsVillageDefense:doPhaseChangeFail(pPlayer)
 	end
 end
 

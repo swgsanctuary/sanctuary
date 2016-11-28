@@ -24,7 +24,7 @@ function villageQuharekPhase2ConvoHandler:runScreenHandlers(pConvTemplate, pPlay
 	local clonedConversation = LuaConversationScreen(pConvScreen)
 
 	if (screenID == "intro_questcompleted_activecrafter" or screenID == "intro_questcompleted_notactivecrafter" or screenID == "intro_communitycrafting_active") then
-		if (not VillageCommunityCrafting:isOnActiveCrafterList(pPlayer)) then
+		if (not VillageCommunityCrafting:isOnActiveCrafterList(pPlayer) and not VillageJediManagerCommon.hasActiveQuestThisPhase(pPlayer)) then
 			if (VillageCommunityCrafting:getCurrentActiveCrafters() >= VillageCommunityCrafting:getMaxCraftersPerPhase()) then
 				clonedConversation:addOption("@conversation/quharek_phase_2:s_955b2ddb", "max_crafters") -- I hear you're looking for crafters.
 			else
@@ -49,7 +49,7 @@ function villageQuharekPhase2ConvoHandler:runScreenHandlers(pConvTemplate, pPlay
 		local pGhost = CreatureObject(pPlayer):getPlayerObject()
 
 		if (pGhost ~= nil) then
-			PlayerObject(pGhost):addWaypoint("dathomir", "@npc_name:qtqc", "", 5193, -4195, WAYPOINTYELLOW, true, true, 0)
+			PlayerObject(pGhost):addWaypoint("dathomir", "@npc_name:qtqc", "", 5193, -4195, WAYPOINTYELLOW, true, true, WAYPOINTQUESTTASK)
 		end
 	elseif (screenID == "see_attributes") then
 		VillageCommunityCrafting:sendPlayerProjectAttributes(pPlayer, pNpc)

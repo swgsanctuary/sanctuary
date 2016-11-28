@@ -84,6 +84,10 @@ includeFile("tutorial/conversations/tutorialQuartermasterConvoHandler.lua")
 includeFile("tutorial/conversations/tutorialScaredSoldierConvoHandler.lua")
 includeFile("tutorial/conversations/tutorialTrainingRoomOfficerConvoHandler.lua")
 
+-- Junk Dealer
+includeFile("junk_dealer/junk_dealer.lua")
+includeFile("junk_dealer/junk_dealer_conv_handler.lua")
+
 -- Dungeons
 includeFile("dungeon/death_watch_bunker/deathWatchBunker.lua")
 includeFile("dungeon/death_watch_bunker/deathWatchContainerComponents.lua")
@@ -131,10 +135,12 @@ includeFile("village/phase1/fs_crafting1_goto2.lua")
 includeFile("village/phase1/fs_crafting1.lua")
 includeFile("village/phase1/fs_medic_puzzle.lua")
 includeFile("village/phase1/fs_patrol.lua")
+includeFile("village/phase1/fs_phase1.lua")
 includeFile("village/phase1/fs_reflex1_escort.lua")
 includeFile("village/phase1/fs_reflex1_goto.lua")
 includeFile("village/phase1/fs_reflex1_theater.lua")
 includeFile("village/phase1/fs_reflex1.lua")
+includeFile("village/phase2/fs_phase2.lua")
 includeFile("village/phase2/fs_reflex2_goback.lua")
 includeFile("village/phase2/fs_reflex2_goto.lua")
 includeFile("village/phase2/fs_reflex2_theater.lua")
@@ -148,6 +154,7 @@ includeFile("village/phase2/fs_sad_1_theaters/fs_sad_1_theater_6.lua")
 includeFile("village/phase2/fs_sad_1_theaters/fs_sad_1_theater_7.lua")
 includeFile("village/phase2/fs_sad_1_theaters/fs_sad_1_theater_8.lua")
 includeFile("village/phase2/fs_sad.lua")
+includeFile("village/phase3/fs_phase3.lua")
 includeFile("village/phase3/fs_counterstrike.lua")
 includeFile("village/phase3/fs_sad_2_theaters/fs_sad_2_theater_1.lua")
 includeFile("village/phase3/fs_sad_2_theaters/fs_sad_2_theater_2.lua")
@@ -158,6 +165,7 @@ includeFile("village/phase3/fs_sad_2_theaters/fs_sad_2_theater_6.lua")
 includeFile("village/phase3/fs_sad_2_theaters/fs_sad_2_theater_7.lua")
 includeFile("village/phase3/fs_sad_2_theaters/fs_sad_2_theater_8.lua")
 includeFile("village/phase3/fs_sad2.lua")
+includeFile("village/phase4/fs_phase4.lua")
 includeFile("village/phase4/fs_crafting4_goto.lua")
 includeFile("village/phase4/fs_crafting4_theater.lua")
 includeFile("village/phase4/fs_crafting4.lua")
@@ -187,6 +195,18 @@ includeFile("village/convos/phase4/med_droid_phase4_conv_handler.lua")
 includeFile("village/convos/phase4/sarguillo_phase4_conv_handler.lua")
 includeFile("village/convos/phase4/sivarra_phase4_conv_handler.lua")
 
+-- Jedi
+includeFile("jedi/shrine/ForceShrineMenuComponent.lua")
+
+-- Jedi Trials (Padawan)
+includeFile("jedi/padawan/jedi_padawan_trial.lua")
+includeFile("jedi/padawan/convos/trials_padawan_architect_01.lua")
+includeFile("jedi/padawan/convos/trials_padawan_architect_02.lua")
+includeFile("jedi/padawan/convos/trials_padawan_artist_01.lua")
+includeFile("jedi/padawan/convos/trials_padawan_artist_02.lua")
+includeFile("jedi/padawan/trials/trial_architect.lua")
+includeFile("jedi/padawan/trials/trial_artist.lua")
+
 -- Events - Bestine Election
 includeFile("events/conversations/bestine_election/bestine_election_conv_handler.lua")
 includeFile("events/conversations/bestine_election/bestine_election_questn_conv_handler.lua")
@@ -197,7 +217,7 @@ includeFile("events/conversations/bestine_election/hutt_informant_conv_handler.l
 includeFile("events/conversations/bestine_election/sean_contact_conv_handler.lua")
 includeFile("events/conversations/bestine_election/seans_historian_conv_handler.lua")
 includeFile("events/conversations/bestine_election/tour_aryon_conv_handler.lua")
---includeFile("events/conversations/bestine_election/victor_visalis_conv_handler.lua")
+includeFile("events/conversations/bestine_election/victor_visalis_conv_handler.lua")
 
 -- Events
 includeFile("events/conversations/bestine_artist_conv_handler.lua")
@@ -376,16 +396,19 @@ includeFile("tasks/tatooine/tekil_barje.lua")
 includeFile("tasks/tatooine/tolan_nokkar.lua")
 includeFile("tasks/tatooine/vardias_tyne.lua")
 includeFile("tasks/yavin4/captain_eso.lua")
+includeFile("tasks/yavin4/cx_425_trooper.lua")
 includeFile("tasks/yavin4/gins_darone.lua")
 includeFile("tasks/yavin4/jazeen_thurmm.lua")
 includeFile("tasks/yavin4/lian_byrne.lua")
 includeFile("tasks/yavin4/megan_drlar.lua")
 includeFile("tasks/yavin4/ruwan_tokai.lua")
+includeFile("tasks/yavin4/vraker_orde.lua")
 includeFile("tasks/yavin4/yith_seenath.lua")
 includeFile("tasks/misc/heralds.lua")
 includeFile("tasks/misc/theater_manager.lua")
 includeFile("tasks/misc/conversations/kidnappedNobleConvoHandler.lua")
 includeFile("tasks/misc/conversations/philosopher_conv_handler.lua")
+includeFile("tasks/misc/conversations/herald_tatooine2_conv_handler.lua")
 
 -- Caves
 includeFile("caves/corellia_afarathu_cave.lua")
@@ -540,6 +563,9 @@ includeFile("static_spawns/tatooine_static_spawns_south.lua")
 
 --Yavin4
 includeFile("static_spawns/yavin4_static_spawns.lua")
+
+--Magic Eight Ball
+includeFile("tools/MagicEightBallMenuComponent.lua")
 
 --Treasure Maps
 includeFile("treasure_map/EncodedDiskMenuComponent.lua")

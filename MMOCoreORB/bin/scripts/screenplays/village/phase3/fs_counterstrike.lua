@@ -9,6 +9,11 @@ FsCounterStrike = {
 	shieldRemoteRange = 75, -- Range player must be in to use remote on shield
 	maxCampsToSpawn = 20, -- Number of camps to spawn from campSpawns on phase change
 
+	reinforcementWaveMin = 90 * 1000, -- Min time before spawning a reinforcement wave
+	reinforcementWaveMax = 180 * 1000, -- Max time before spawning a reinforcement wave
+
+	commanderDespawnTime = 60 * 60 * 1000, -- Time after spawning before commander automatically despawns
+
 	-- Spawn locations for camps, names found in string file string/en/fs_quest_village.stf
 	campSpawns = {
 		{ "alpha", 5939, 122, -2030 },
@@ -81,36 +86,85 @@ FsCounterStrike = {
 		{ "object/static/structure/military/military_column_strong_imperial_style_01.iff", 24.5863, 0, -10.4868, 89.9992 },
 		{ "object/static/structure/military/military_wall_strong_imperial_style_01.iff", -6.55375, 0, -12.0536, -137.864 },
 		{ "object/static/structure/military/military_wall_strong_imperial_style_01.iff", 9.98578, 0, -10.665, -47.8645 },
-	--{ "object/installation/turret/generic_turret_block_sm.iff", -0.26149, 0, 5.8774, 0 },
-	--{ "object/installation/turret/generic_turret_block_sm.iff", 10.7884, 0, 26.21477, 0 },
-	--{ "object/installation/turret/generic_turret_block_sm.iff", -12.5269, 0, 25.66261, 0 },
+		{ "object/installation/turret/turret_fs_cs.iff", -0.26149, 0, 5.8774, 0 },
+		{ "object/installation/turret/turret_fs_cs.iff", 10.7884, 0, 26.21477, 0 },
+		{ "object/installation/turret/turret_fs_cs.iff", -12.5269, 0, 25.66261, 0 },
 	},
 
-	lootMobGroupList = {
-		{ template = "sith_shadow_thug_cs_nonaggro", minimumDistance = 5, maximumDistance = 16, referencePoint = 0 },
-		{ template = "sith_shadow_pirate_cs_nonaggro", minimumDistance = 4, maximumDistance = 14, referencePoint = 0 },
-		{ template = "sith_shadow_pirate_cs_nonaggro", minimumDistance = 4, maximumDistance = 14, referencePoint = 0 },
-		{ template = "sith_shadow_outlaw_cs_nonaggro", minimumDistance = 6, maximumDistance = 12, referencePoint = 0 },
-		{ template = "sith_shadow_outlaw_cs_nonaggro", minimumDistance = 6, maximumDistance = 12, referencePoint = 0 }
+	-- Defense wave data
+	lootMobDataTable = {
+		spawnerPulse = 120 * 1000, -- Time between spawn pulses
+		maxSpawn = 5, -- Max waves of mobiles to spawn over the entire lifetime of the spawner
+		maxPopulation = 5, -- Max mobs to have up at any one time
+		mobileLifespan = 1200 * 1000, -- Time until spawned mobs should be destroyed
+		expireTime = 1200 * 1000, -- Time until spawner should expire
+		aiHandlerFunc = "setupLootMob" -- Name of function that should setup a defender after it's spawned
 	},
+
+	lootMobSpawnList = {
+		-- { "template", minToSpawn, maxToSpawn, weight }
+		{ "sith_shadow_thug_nonaggro", 1, 1, 1 },
+		{ "sith_shadow_pirate_nonaggro", 2, 3, 2 },
+		{ "sith_shadow_outlaw_nonaggro", 2, 3, 2 },
+	},
+
 	maxLootMobGroups = 2, -- Max loot mob groups to have spawned at one time
 	lootMobGroupMinDist = 200, -- Min distance to spawn from camp
 	lootMobGroupMaxDist = 300, -- Max distance to spawn from camp
+	lootMobSpawnerInterval = 1200 * 1000, -- Time until a new set of spawners are created
 
 	droidTemplate = "fs_mouse_droid",
 	maxDroids = 5,
 	droidMinDist = 75,
 	droidMaxDist = 100,
+
+	-- Defense wave data
+	smallWaveDataTable = {
+		spawnerPulse = 10 * 1000, -- Time between spawn pulses
+		maxSpawn = 10, -- Max waves of mobiles to spawn over the entire lifetime of the spawner
+		maxPopulation = 10, -- Max mobs to have up at any one time
+		mobileLifespan = 30 * 1000, -- Time until spawned mobs should be destroyed
+		expireTime = 30 * 1000, -- Time until spawner should expire
+		aiHandlerFunc = "setupSpawnedDefender" -- Name of function that should setup a defender after it's spawned
+	},
+
+	smallWaveSpawnList = {
+		-- { "template", minToSpawn, maxToSpawn, weight }
+		{ "sith_shadow_thug_nonaggro", 3, 5, 2 },
+		{ "sith_shadow_thug_nonaggro", 3, 5, 2 },
+		{ "sith_shadow_thug_nonaggro", 0, 1, 1 },
+	},
+
+	mediumWaveDataTable = {
+		spawnerPulse = 10 * 1000, -- Time between spawn pulses
+		maxSpawn = 15, -- Max waves of mobiles to spawn over the entire lifetime of the spawner
+		maxPopulation = 15, -- Max mobs to have up at any one time
+		mobileLifespan = 30 * 1000, -- Time until spawned mobs should be destroyed
+		expireTime = 30 * 1000, -- Time until spawner should expire
+		aiHandlerFunc = "setupSpawnedDefender" -- Name of function that should setup a defender after it's spawned
+	},
+
+	mediumWaveSpawnList = {
+		-- { "template", minToSpawn, maxToSpawn, weight }
+		{ "sith_shadow_thug_nonaggro", 5, 7, 2 },
+		{ "sith_shadow_thug_nonaggro", 5, 7, 2 },
+		{ "sith_shadow_thug_nonaggro", 0, 2, 1 },
+	},
+
+	defenseWaves = {
+		small = { "smallWaveDataTable", "smallWaveSpawnList" },
+		medium = { "mediumWaveDataTable", "mediumWaveSpawnList" }
+	}
 }
 
 function FsCounterStrike:pickPhaseCamps()
 	local chosenCamps = { }
 	local allCamps = { }
-	
+
 	for i = 1, #self.campSpawns, 1 do
 		table.insert(allCamps, i)
 	end
-	
+
 	for i = 1, self.maxCampsToSpawn, 1 do
 		local randCamp = getRandomNumber(1, #allCamps)
 		table.insert(chosenCamps, allCamps[randCamp])
@@ -242,7 +296,30 @@ function FsCounterStrike:notifyKilledDroid(pVictim, pAttacker)
 	return 1
 end
 
-function FsCounterStrike:spawnLootMobGroup(pTheater, id)
+function FsCounterStrike:notifyDestructibleDisabled(pVictim, pAttacker)
+	if (pVictim == nil) then
+		return 1
+	end
+
+	if (pAttacker ~= nil) then
+		playClientEffectLoc(SceneObject(pAttacker):getObjectID(), "clienteffect/combat_explosion_lair_large.cef", "dathomir", SceneObject(pVictim):getPositionX(), SceneObject(pVictim):getPositionZ(), SceneObject(pVictim):getPositionY(), 0)
+	end
+
+	createEvent(2000, "FsCounterStrike", "destroyDestructible", pVictim, "")
+
+	return 1
+end
+
+function FsCounterStrike:destroyDestructible(pDestructible)
+	if (pDestructible == nil) then
+		return
+	end
+
+	SceneObject(pDestructible):destroyObjectFromWorld()
+end
+
+
+function FsCounterStrike:spawnLootMobGroup(pTheater)
 	if (pTheater == nil) then
 		return
 	end
@@ -252,84 +329,20 @@ function FsCounterStrike:spawnLootMobGroup(pTheater, id)
 	local theaterY = SceneObject(pTheater):getWorldPositionY()
 
 	local spawnPoint = getSpawnPoint("dathomir", theaterX, theaterY, self.lootMobGroupMinDist, self.lootMobGroupMaxDist, true)
-	local pSpawnLoc = spawnSceneObject("dathomir", "object/static/structure/nobuild/nobuild_32.iff", spawnPoint[1], spawnPoint[2], spawnPoint[3], 0, 0)
-
-	if (pSpawnLoc == nil) then
-		return
-	end
-
-	local spawnLocID = SceneObject(pSpawnLoc):getObjectID()
-	writeData(theaterID .. ":lootSpawnGroup" .. id, spawnLocID)
-	writeData(spawnLocID .. ":theaterID", theaterID)
-	writeData(spawnLocID .. ":spawnGroupNum", id)
-
-	local spawnedMobileList = SpawnMobiles.spawnMobiles(pSpawnLoc, "FsCounterStrike", self.lootMobGroupList, true)
-	writeData(theaterID .. ":lootSpawnGroup" .. id .. ":killableCount", #spawnedMobileList)
-
-	for i = 1, #spawnedMobileList, 1 do
-		if (spawnedMobileList[i] ~= nil) then
-			writeData(SceneObject(spawnedMobileList[i]):getObjectID() .. ":spawnGroupID", spawnLocID)
-			createObserver(OBJECTDESTRUCTION, "FsCounterStrike", "notifyKilledLootMobile", spawnedMobileList[i])
-		end
-	end
+	QuestSpawner:createQuestSpawner("FsCounterStrike", "lootMobDataTable", "lootMobSpawnList", spawnPoint[1], spawnPoint[2], spawnPoint[3], 0, "dathomir", pTheater)
 end
 
-function FsCounterStrike:destroyLootMobGroup(pTheater, id)
-	if (pTheater == nil) then
+function FsCounterStrike:setupLootMob(pMobile)
+	if (pMobile == nil) then
 		return
 	end
 
-	local theaterID = SceneObject(pTheater):getObjectID()
-	local spawnGroupID = readData(theaterID .. ":lootSpawnGroup" .. id)
-
-	local pSpawnGroup = getSceneObject(spawnGroupID)
-
-	if (pSpawnGroup == nil) then
-		return
-	end
-
-	local mobileList = SpawnMobiles.getSpawnedMobiles(pSpawnGroup, "FsCounterStrike")
-
-	for i = 1, #mobileList, 1 do
-		if (mobileList[i] ~= nil and not CreatureObject(mobileList[i]):isDead()) then
-			deleteData(SceneObject(mobileList[i]):getObjectID() .. ":spawnGroupID")
-			dropObserver(OBJECTDESTRUCTION, mobileList[i])
-			SceneObject(mobileList[i]):destroyObjectFromWorld()
-		end
-	end
-
-	SceneObject(pSpawnGroup):destroyObjectFromWorld()
-
-	deleteData(theaterID .. ":lootSpawnGroup" .. id)
-	deleteData(spawnGroupID .. ":theaterID")
-	deleteData(spawnGroupID .. ":spawnGroupNum")
-	deleteData(theaterID .. ":lootSpawnGroup" .. id .. ":killableCount")
+	createObserver(OBJECTDESTRUCTION, "FsCounterStrike", "notifyKilledLootMobile", pMobile)
 end
 
 function FsCounterStrike:notifyKilledLootMobile(pVictim, pAttacker)
-	if (pVictim == nil) then
+	if (pVictim == nil or getRandomNumber(1,100) < 80) then
 		return 1
-	end
-
-	local spawnGroupID = readData(SceneObject(pVictim):getObjectID() .. ":spawnGroupID")
-	local spawnGroupNum = readData(spawnGroupID .. ":spawnGroupNum")
-	local theaterID = readData(spawnGroupID .. ":theaterID")
-
-	local pTheater = getSceneObject(theaterID)
-
-	if (pTheater == nil) then
-		return 1
-	end
-
-	local numEnemies = readData(theaterID .. ":lootSpawnGroup" .. spawnGroupNum .. ":killableCount")
-	numEnemies = numEnemies - 1
-	writeData(theaterID .. ":lootSpawnGroup" .. spawnGroupNum .. ":killableCount", numEnemies)
-
-	deleteData(SceneObject(pVictim):getObjectID() .. ":spawnGroupID")
-
-	if (numEnemies <= 0) then
-		self:destroyLootMobGroup(pTheater, spawnGroupNum)
-		self:spawnLootMobGroup(pTheater, spawnGroupNum)
 	end
 
 	local pInventory = CreatureObject(pVictim):getSlottedObject("inventory")
@@ -338,10 +351,12 @@ function FsCounterStrike:notifyKilledLootMobile(pVictim, pAttacker)
 		return 1
 	end
 
-	for i = 1, SceneObject(pInventory):getContainerObjectsSize(), 1 do
+	createLoot(pInventory, "cs_datapad", 0, true)
+
+	for i = 0, SceneObject(pInventory):getContainerObjectsSize() - 1, 1 do
 		local pItem = SceneObject(pInventory):getContainerObject(i)
 
-		if pItem ~= nil then
+		if pItem ~= nil and SceneObject(pItem):getTemplateObjectPath() == "object/tangible/loot/quest/force_sensitive/camp_frequency_datapad.iff" or SceneObject(pItem):getTemplateObjectPath() == "object/tangible/loot/quest/force_sensitive/camp_waypoint_datapad.iff" then
 			local csItem = LuaFsCsObject(pItem)
 			csItem:setPhaseDuration(VillageJediManagerTownship.getVillagePhaseChangeTime())
 		end
@@ -350,14 +365,17 @@ function FsCounterStrike:notifyKilledLootMobile(pVictim, pAttacker)
 	return 1
 end
 
+
 function FsCounterStrike:spawnLootMobGroups(pTheater)
 	if (pTheater == nil) then
 		return
 	end
 
 	for i = 1, self.maxLootMobGroups, 1 do
-		self:spawnLootMobGroup(pTheater, i)
+		self:spawnLootMobGroup(pTheater)
 	end
+
+	createEvent(self.lootMobSpawnerInterval, "FsCounterStrike", "spawnLootMobGroups", pTheater, "")
 end
 
 function FsCounterStrike:spawnCamps()
@@ -383,6 +401,8 @@ function FsCounterStrike:spawnCamps()
 		self:erectShield(pTheater)
 
 		local spawnedFirstDoor = false
+		local spawnedFirstTurret = false
+		local spawnedSecondTurret = false
 
 		for i = 1, #self.campLayout, 1 do
 			local objectData = self.campLayout[i]
@@ -396,14 +416,33 @@ function FsCounterStrike:spawnCamps()
 				if (objectTemplate == "object/installation/battlefield/destructible/bfield_base_gate_impl.iff") then
 					if (spawnedFirstDoor) then
 						writeData(theaterID .. "campDoor2", SceneObject(pObject):getObjectID())
+						writeData(theaterID .. ":campDoor2Index", i)
 					else
 						writeData(theaterID .. "campDoor1", SceneObject(pObject):getObjectID())
+						writeData(theaterID .. ":campDoor1Index", i)
 						spawnedFirstDoor = true
 					end
+					createObserver(OBJECTDISABLED, "FsCounterStrike", "notifyDestructibleDisabled", pObject)
 					TangibleObject(pObject):setOptionBit(INVULNERABLE)
+				elseif (objectTemplate == "object/installation/turret/turret_fs_cs.iff") then
+					if (spawnedFirstTurret and spawnedSecondTurret) then
+						writeData(theaterID .. "turret3", SceneObject(pObject):getObjectID())
+						writeData(theaterID .. ":turret3Index", i)
+					elseif (spawnedFirstTurret) then
+						writeData(theaterID .. "turret2", SceneObject(pObject):getObjectID())
+						writeData(theaterID .. ":turret2Index", i)
+						spawnedSecondTurret = true
+					else
+						writeData(theaterID .. "turret1", SceneObject(pObject):getObjectID())
+						writeData(theaterID .. ":turret1Index", i)
+						spawnedFirstTurret = true
+					end
 				elseif (objectTemplate == "object/installation/battlefield/destructible/antenna_tatt_style_1.iff") then
 					writeData(theaterID .. "antenna", SceneObject(pObject):getObjectID())
+					createObserver(OBJECTDISABLED, "FsCounterStrike", "notifyDestructibleDisabled", pObject)
 					TangibleObject(pObject):setOptionBit(INVULNERABLE)
+				elseif (objectTemplate == "object/static/structure/corellia/corl_tent_hut_s01.iff") then
+					writeData(theaterID .. ":tentIndex", i)
 				end
 			end
 		end
@@ -460,10 +499,6 @@ function FsCounterStrike:despawnCamp(campNum)
 	local pTheater = getSceneObject(theaterID)
 
 	if (pTheater ~= nil) then
-		for i = 1, self.maxLootMobGroups, 1 do
-			self:destroyLootMobGroup(pTheater, i)
-		end
-
 		SceneObject(pTheater):destroyObjectFromWorld()
 	end
 
@@ -486,6 +521,7 @@ function FsCounterStrike:despawnCamp(campNum)
 		local pObject = getSceneObject(objID)
 
 		if (pObject ~= nil) then
+			dropObserver(OBJECTDISABLED, pObject)
 			SceneObject(pObject):destroyObjectFromWorld()
 		end
 
@@ -501,7 +537,16 @@ function FsCounterStrike:despawnCamp(campNum)
 	end
 
 	deleteData(theaterID .. "campDoor1")
+	deleteData(theaterID .. "campDoor1Index")
 	deleteData(theaterID .. "campDoor2")
+	deleteData(theaterID .. "campDoor2Index")
+	deleteData(theaterID .. "turret1")
+	deleteData(theaterID .. "turret1Index")
+	deleteData(theaterID .. "turret2")
+	deleteData(theaterID .. "turret2Index")
+	deleteData(theaterID .. "turret3")
+	deleteData(theaterID .. "turret3Index")
+	deleteData(theaterID .. "tentIndex")
 	deleteData(theaterID .. "antenna")
 	deleteData(theaterID .. ":campNum")
 	deleteData(theaterID .. ":shieldID")
@@ -511,6 +556,46 @@ end
 function FsCounterStrike:doPhaseChangeFail(pPlayer)
 	CreatureObject(pPlayer):sendSystemMessage("@fs_quest_village:combat_quest_failed_timeout")
 	self:resetPlayer(pPlayer)
+end
+
+function FsCounterStrike:startQuest(pPlayer)
+	if (pPlayer == nil) then
+		return
+	end
+
+	QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_CS_INTRO)
+	createObserver(OBJECTDESTRUCTION, "FsCounterStrike", "onPlayerKilled", pPlayer)
+
+	local pPlayerObj = CreatureObject(pPlayer):getPlayerObject()
+
+	if (pPlayerObj ~= nil) then
+		PlayerObject(pPlayerObj):setFactionStanding("sith_shadow_nonaggro", -5000)
+	end
+end
+
+function FsCounterStrike:onPlayerKilled(pPlayer, pKiller)
+	if (pPlayer == nil) then
+		return 1
+	end
+
+	local playerID = SceneObject(pPlayer):getObjectID()
+
+	if (QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_CS_KILL5_GUARDS)) then
+		QuestManager.failQuest(pPlayer, QuestManager.quests.FS_CS_KILL5_GUARDS)
+		QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_CS_LAST_CHANCE)
+		CreatureObject(pPlayer):sendSystemMessage("@fs_quest_village:fs_cs_last_chance_detail")
+
+		local theaterID = readData(playerID .. ":csTheater")
+		local pTheater = getSceneObject(theaterID)
+
+		self:createCommander(pTheater)
+	elseif (QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_CS_ESCORT_COMMANDER_PRI)) then
+
+	elseif (not QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_CS_INTRO) and not QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_CS_INTRO)) then
+		return 1
+	end
+
+	return 0
 end
 
 function FsCounterStrike:resetPlayer(pPlayer)
@@ -526,6 +611,12 @@ function FsCounterStrike:resetPlayer(pPlayer)
 	QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_CS_ESCORT_COMMANDER_SEC)
 	QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_CS_QUEST_DONE)
 	QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_CS_QUEST_FAILED_ESCORT)
+
+	local pPlayerObj = CreatureObject(pPlayer):getPlayerObject()
+
+	if (pPlayerObj ~= nil) then
+		PlayerObject(pPlayerObj):setFactionStanding("sith_shadow_nonaggro", 0)
+	end
 
 	--self:destroyCommanderWaypoint(pPlayer)
 end
@@ -627,11 +718,11 @@ function FsCounterStrike:giveCampWaypoint(pPlayer)
 
 	local randCamp = tonumber(campTable[getRandomNumber(#campTable)])
 	local campData = self.campSpawns[randCamp]
-	
+
 	local pGhost = CreatureObject(pPlayer):getPlayerObject()
-	
+
 	if (pGhost ~= nil) then
-		PlayerObject(pGhost):addWaypoint("dathomir", "Aurilian Enemy", "", randCamp[2], randCamp[4], WAYPOINTYELLOW, true, true, 0)
+		PlayerObject(pGhost):addWaypoint("dathomir", "Aurilian Enemy", "", campData[2], campData[4], WAYPOINTYELLOW, true, true, 0)
 	end
 end
 
@@ -687,11 +778,12 @@ function FsCounterStrike:attemptPowerDownShield(pPlayer, campName)
 				self:powerDownShield(pTheater)
 				QuestManager.completeQuest(pPlayer, QuestManager.quests.FS_CS_INTRO)
 				QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_CS_KILL5_GUARDS)
+				createObserver(KILLEDCREATURE, "FsCounterStrike", "notifyKilledGuard", pPlayer)
 
 				CreatureObject(pPlayer):sendSystemMessage("@fs_quest_village:fs_cs_step_intro_complete")
 
-				-- TODO: store id of theater on player that took down shield? unsure if needed yet
 				writeData(theaterID .. ":attackerID", SceneObject(pPlayer):getObjectID())
+				writeData(SceneObject(pPlayer):getObjectID() .. ":csTheater", theaterID)
 				return true
 			else
 				CreatureObject(pPlayer):sendSystemMessage("@fs_quest_village:shield_remote_wrong_camp")
@@ -702,6 +794,212 @@ function FsCounterStrike:attemptPowerDownShield(pPlayer, campName)
 
 	CreatureObject(pPlayer):sendSystemMessage("@fs_quest_village:remote_nothing_happens")
 	return false
+end
+
+function FsCounterStrike:notifyKilledGuard(pPlayer, pVictim)
+	if pVictim == nil or pPlayer == nil then
+		return 0
+	end
+
+	if (not QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_CS_KILL5_GUARDS) or QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_CS_KILL5_GUARDS)) then
+		return 1
+	end
+
+	local pQuest = getQuestInfo("fs_cs_kill5_guards")
+
+	if (pQuest == nil) then
+		return 0
+	end
+
+	local quest = LuaQuestInfo(pQuest)
+	local killsRequired = quest:getQuestParameter()
+	local killTarget = quest:getQuestTarget()
+
+	if (SceneObject(pVictim):getObjectName() ~= killTarget) then
+		return 0
+	end
+
+	local victimID = SceneObject(pVictim):getObjectID()
+	local theaterID = readData(victimID .. ":theaterID")
+	local pTheater = getSceneObject(theaterID)
+
+	if (pTheater == nil) then
+		return 0
+	end
+
+	local playerID = SceneObject(pPlayer):getObjectID()
+
+	local killedGuardCount = readData(playerID .. ":fsCounterStrike:guardsKilled")
+	killedGuardCount = killedGuardCount + 1
+
+	if (killedGuardCount == 5) then
+		CreatureObject(pPlayer):sendSystemMessage("@fs_quest_village:fs_cs_ensure_detail")
+
+		if (CreatureObject(pPlayer):isGrouped()) then
+			local groupSize = CreatureObject(pPlayer):getGroupSize()
+
+			for i = 0, groupSize - 1, 1 do
+				local pMember = CreatureObject(pPlayer):getGroupMember(i)
+				if pMember ~= nil and pMember ~= pPlayer and SceneObject(pMember):isInRangeWithObject(pPlayer, 100) and QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_CS_INTRO) then
+					CreatureObject(pMember):sendSystemMessage("@fs_quest_village:groupmate_powered_down")
+				end
+			end
+		end
+
+		QuestManager.completeQuest(pPlayer, QuestManager.quests.FS_CS_KILL5_GUARDS)
+		QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_CS_ENSURE_CAPTURE)
+		self:createCommander(pTheater)
+		deleteData(playerID .. ":fsCounterStrike:guardsKilled")
+		return 1
+	else
+		local messageString = LuaStringIdChatParameter("@quest/quests:kill_credit")
+		messageString:setTO(getStringId(quest:getJournalSummary()))
+		messageString:setDI(killsRequired - killedGuardCount)
+		CreatureObject(pPlayer):sendSystemMessage(messageString:_getObject())
+		writeData(playerID .. ":fsCounterStrike:guardsKilled", killedGuardCount)
+		deleteData(victimID .. ":theaterID")
+	end
+
+	return 0
+end
+
+function FsCounterStrike:createCommander(pTheater)
+	if (pTheater == nil) then
+		return
+	end
+
+	local theaterID = SceneObject(pTheater):getObjectID()
+
+	local commanderID = readData(theaterID .. ":commanderID")
+	local pCommander = getSceneObject(commanderID)
+
+	if (pCommander ~= nil) then
+		self:killCommander(pCommander)
+	end
+
+	local shieldKillerID = readData(theaterID .. ":attackerID")
+	local tentIndex = readData(theaterID .. ":tentIndex")
+
+	local theaterX = SceneObject(pTheater):getWorldPositionX()
+	local theaterZ = SceneObject(pTheater):getWorldPositionZ()
+	local theaterY = SceneObject(pTheater):getWorldPositionY()
+
+	local tentData = FsCounterStrike.campLayout[tentIndex]
+
+	local tentX = theaterX + tentData[2]
+	local tentZ = theaterZ + tentData[3]
+	local tentY = theaterY + tentData[4]
+
+	pCommander = spawnMobile("dathomir", "sith_shadow_mercenary_nofaction", 0, tentX, tentZ, tentY, 0, 0)
+
+	if (pCommander == nil) then
+		printf("Error in FsCounterStrike:createCommander, unable to create commander.")
+		return
+	end
+
+	commanderID = SceneObject(pCommander):getObjectID()
+	writeData(theaterID .. ":commanderID", commanderID)
+
+	TangibleObject(pCommander):setOptionBit(INVULNERABLE)
+
+	writeData(commanderID .. ":shieldKillerID", shieldKillerID)
+	writeData(commanderID .. ":theaterID", theaterID)
+
+	createEvent(self.commanderDespawnTime, "FsCounterStrike", "killCommander", pTheater, "")
+end
+
+function FsCounterStrike:killCommander(pTheater)
+	if (pTheater == nil) then
+		return
+	end
+
+	local theaterID = SceneObject(pTheater):getObjectID()
+
+	local commanderID = readData(theaterID .. ":commanderID")
+	local pCommander = getSceneObject(commanderID)
+
+	if (pCommander == nil) then
+		return
+	end
+
+	writeData(commanderID .. ":deathSequence", 1)
+	createEvent(5000, "FsCounterStrike", "doCommanderDeathSequence", pTheater, "")
+end
+
+function FsCounterStrike:doCommanderDeathSequence(pTheater)
+	if (pTheater == nil) then
+		return
+	end
+
+	local theaterID = SceneObject(pTheater):getObjectID()
+
+	local commanderID = readData(theaterID .. ":commanderID")
+	local pCommander = getSceneObject(commanderID)
+
+	if (pCommander == nil) then
+		return
+	end
+
+	local deathSequence = readData(commanderID .. ":deathSequence")
+
+	if (deathSequence == 0) then
+		return
+	end
+
+	local spatialString
+
+	if (deathSequence == 1) then
+		spatialString = "commander_pain"
+	elseif (deathSequence == 2) then
+		spatialString = "commander_pain2"
+	elseif (deathSequence == 3) then
+		spatialString = "commander_pain3"
+	else
+		local escorterID = readData(commanderID .. ":escorterID")
+		local pEscorter = getSceneObject(escorterID)
+
+		if (pEscorter ~= nil) then
+			self:notifyCommanderDied(pTheater, pEscorter, commanderID)
+		end
+
+		local shieldKillerID = readData(commanderID .. ":shieldKillerID")
+		local pShieldKiller = getSceneObject(shieldKillerID)
+
+		if (pShieldKiller ~= nil and pShieldKiller ~= pEscorter) then
+			self:notifyCommanderDied(pTheater, pShieldKiller, commanderID)
+		end
+
+		SceneObject(pCommander):destroyObjectFromWorld()
+
+		deleteData(commanderID .. ":shieldKillerID")
+		deleteData(commanderID .. ":theaterID")
+		deleteData(commanderID .. ":deathSequence")
+		deleteData(commanderID .. ":escorterID")
+		deleteData(theaterID .. ":commanderID")
+
+		return
+	end
+
+	spatialChat(pCommander, "@fs_quest_village:" .. spatialString)
+	writeData(commanderID .. ":deathSequence", deathSequence + 1)
+	createEvent(getRandomNumber(5, 10) * 1000, "FsCounterStrike", "doCommanderDeathSequence", pTheater, "")
+end
+
+function FsCounterStrike:notifyCommanderDied(pTheater, pPlayer, commanderID)
+	if (pTheater == nil or pPlayer == nil) then
+		return
+	end
+
+	local playerID = SceneObject(pPlayer):getObjectID()
+	local playerOwnedCommander = readData(playerID .. ":fsCounterStrike:commanderID")
+
+	if (commanderID ~= 0 and playerOwnedCommander ~= 0 and commanderID ~= playerOwnedCommander) then
+		return
+	end
+
+	deleteData(playerID .. ":fsCounterStrike:commanderID")
+	self:resetPlayerToStart(pPlayer)
+	CreatureObject(pPlayer):sendSystemMessage("@fs_quest_village:commander_died_toxins")
 end
 
 function FsCounterStrike:powerDownShield(pTheater)
@@ -743,6 +1041,59 @@ function FsCounterStrike:powerDownShield(pTheater)
 	local attackerID = readData(theaterID .. ":attackerID")
 
 	createEvent(self.shieldRebootTime, "FsCounterStrike", "resetCamp", pTheater, attackerID)
+
+	deleteData(theaterID .. ":shouldStopSpawn")
+	self:spawnDefenseWaves(pTheater)
+end
+
+function FsCounterStrike:spawnDefenseWaves(pTheater)
+	if (pTheater == nil) then
+		return
+	end
+
+	local theaterID = SceneObject(pTheater):getObjectID()
+	-- This is set when the player begins the escort portion
+	local shouldStopSpawn = readData(theaterID .. ":shouldStopSpawn")
+
+	if (shouldStopSpawn == 1) then
+		deleteData(theaterID .. ":shouldStopSpawn")
+		return
+	end
+
+	local theaterX = SceneObject(pTheater):getWorldPositionX()
+	local theaterY = SceneObject(pTheater):getWorldPositionY()
+
+	local nearbyPlayers = SceneObject(pTheater):getPlayersInRange(100)
+
+	local waveData = { self.defenseWaves.small }
+	local antennaExists = self:ifAntennaExists(pTheater)
+
+	if (#nearbyPlayers > 30) then
+		if (antennaExists) then
+			waveData = { self.defenseWaves.small, self.defenseWaves.small, self.defenseWaves.medium, self.defenseWaves.medium }
+		else
+			waveData = { self.defenseWaves.small, self.defenseWaves.small, self.defenseWaves.medium }
+		end
+	elseif (#nearbyPlayers > 20) then
+		if (antennaExists) then
+			waveData = { self.defenseWaves.small, self.defenseWaves.small, self.defenseWaves.medium }
+		else
+			waveData = { self.defenseWaves.small, self.defenseWaves.medium }
+		end
+	elseif (#nearbyPlayers > 10) then
+		if (antennaExists) then
+			waveData = { self.defenseWaves.small, self.defenseWaves.medium }
+		else
+			waveData = { self.defenseWaves.medium }
+		end
+	end
+
+	for i = 1, #waveData, 1 do
+		local spawnPoint = getSpawnPoint("dathomir", theaterX, theaterY, 50, 100, true)
+		QuestSpawner:createQuestSpawner("FsCounterStrike", waveData[i][1], waveData[i][2], spawnPoint[1], spawnPoint[2], spawnPoint[3], 0, "dathomir", pTheater)
+	end
+
+	createEvent(getRandomNumber(self.reinforcementWaveMin, self.reinforcementWaveMax), "FsCounterStrike", "spawnDefenseWaves", pTheater, "")
 end
 
 function FsCounterStrike:resetCamp(pTheater, attackerID)
@@ -757,7 +1108,32 @@ function FsCounterStrike:resetCamp(pTheater, attackerID)
 		return
 	end
 
+	-- In case the defense waves are still spawning
+	writeData(theaterID .. ":shouldStopSpawn", 1)
+
 	deleteData(theaterID .. ":attackerID")
+	deleteData(attackerID .. ":csTheater", theaterID)
+
+	local turret1ID = readData(theaterID .. "turret1")
+	local pTurret1 = getSceneObject(turret1ID)
+
+	if (pTurret1 ~= nil) then
+		SceneObject(pTurret1):destroyObjectFromWorld()
+	end
+
+	local turret2ID = readData(theaterID .. "turret2")
+	local pTurret2 = getSceneObject(turret2ID)
+
+	if (pTurret2 ~= nil) then
+		SceneObject(pTurret2):destroyObjectFromWorld()
+	end
+
+	local turret3ID = readData(theaterID .. "turret3")
+	local pTurret3 = getSceneObject(turret3ID)
+
+	if (pTurret3 ~= nil) then
+		SceneObject(pTurret3):destroyObjectFromWorld()
+	end
 
 	local door1ID = readData(theaterID .. "campDoor1")
 	local pDoor1 = getSceneObject(door1ID)
@@ -787,6 +1163,8 @@ function FsCounterStrike:resetCamp(pTheater, attackerID)
 	local campName = campLoc[1]
 
 	local spawnedFirstDoor = false
+	local spawnedFirstTurret = false
+	local spawnedSecondTurret = false
 
 	for i = 1, #self.campLayout, 1 do
 		local objectData = self.campLayout[i]
@@ -805,6 +1183,16 @@ function FsCounterStrike:resetCamp(pTheater, attackerID)
 						spawnedFirstDoor = true
 					end
 					TangibleObject(pObject):setOptionBit(INVULNERABLE)
+				elseif (objectData[1] == "object/installation/turret/turret_fs_cs.iff") then
+					if (spawnedFirstTurret and spawnedSecondTurret) then
+						writeData(theaterID .. "turret3", SceneObject(pObject):getObjectID())
+					elseif (spawnedFirstTurret) then
+						writeData(theaterID .. "turret2", SceneObject(pObject):getObjectID())
+						spawnedSecondTurret = true
+					else
+						writeData(theaterID .. "turret1", SceneObject(pObject):getObjectID())
+						spawnedFirstTurret = true
+					end
 				elseif (objectData[1] == "object/installation/battlefield/destructible/antenna_tatt_style_1.iff") then
 					writeData(theaterID .. "antenna", SceneObject(pObject):getObjectID())
 					TangibleObject(pObject):setOptionBit(INVULNERABLE)
@@ -812,6 +1200,98 @@ function FsCounterStrike:resetCamp(pTheater, attackerID)
 			end
 		end
 	end
+end
+
+function FsCounterStrike:setupSpawnedDefender(pMobile)
+	if (pMobile == nil) then
+		return
+	end
+
+	local mobileID = SceneObject(pMobile):getObjectID()
+	local spawnerID = readData(mobileID .. ":spawnerID")
+
+	local pSpawner = getSceneObject(spawnerID)
+
+	if pSpawner == nil then
+		return
+	end
+
+	local theaterID = readData(spawnerID .. ":parentID")
+
+	local pTheater = getSceneObject(theaterID)
+
+	if (pTheater == nil) then
+		return
+	end
+
+	writeData(mobileID .. ":theaterID", theaterID)
+
+	createEvent(getRandomNumber(10, 30) * 1000, "FsCounterStrike", "doMobileSpatial", pMobile, "")
+
+	AiAgent(pMobile):setAiTemplate("villageraider")
+	AiAgent(pMobile):setFollowState(4)
+
+	local theaterX = SceneObject(pTheater):getWorldPositionX()
+	local theaterZ = SceneObject(pTheater):getWorldPositionZ()
+	local theaterY = SceneObject(pTheater):getWorldPositionY()
+
+	local door1Index = readData(theaterID .. ":campDoor1Index")
+	local door1Data = FsCounterStrike.campLayout[door1Index]
+
+	local door1X = theaterX + door1Data[2]
+	local door1Z = theaterZ + door1Data[3]
+	local door1Y = theaterY + door1Data[4] + 4 -- Adjust to be slightly outside gate
+
+	local distToDoor1 = SceneObject(pMobile):getDistanceToPosition(door1X, door1Z, door1Y)
+
+	local door2Index = readData(theaterID .. ":campDoor2Index")
+	local door2Data = FsCounterStrike.campLayout[door2Index]
+
+	local door2X = theaterX + door2Data[2]
+	local door2Z = theaterZ + door2Data[3]
+	local door2Y = theaterY + door2Data[4] - 4 -- Adjust to be slightly outside gate
+
+	local distToDoor2 = SceneObject(pMobile):getDistanceToPosition(door2X, door2Z, door2Y)
+
+	local door1ID = readData(theaterID .. "campDoor1")
+	local pDoor1 = getSceneObject(door1ID)
+	local door1Destroyed = false
+
+	if (pDoor1 == nil) then
+		door1Destroyed = true
+	end
+
+	AiAgent(pMobile):stopWaiting()
+	AiAgent(pMobile):setWait(0)
+
+	if (distToDoor1 < distToDoor2 or not door1Destroyed) then
+		AiAgent(pMobile):setNextPosition(door1X, door1Z, door1Y, 0)
+		AiAgent(pMobile):setHomeLocation(door1X, door1Z, door1Y, 0)
+	else
+		AiAgent(pMobile):setNextPosition(door2X, door2Z, door2Y, 0)
+		AiAgent(pMobile):setHomeLocation(door2X, door2Z, door2Y, 0)
+	end
+
+	AiAgent(pMobile):executeBehavior()
+end
+
+function FsCounterStrike:doMobileSpatial(pMobile)
+	if (pMobile == nil or getRandomNumber(100) <= 75) then
+		return
+	end
+
+	spatialChat(pMobile, "@fs_quest_village:camp_defender_" .. getRandomNumber(1,10))
+end
+
+function FsCounterStrike:ifAntennaExists(pTheater)
+	if (pTheater == nil) then
+		return false
+	end
+
+	local antennaID = readData(SceneObject(pTheater):getObjectID() .. ":antenna")
+	local pAntenna = getSceneObject(antennaID)
+
+	return pAntenna ~= nil
 end
 
 FsCampRemoteMenuComponent = {}
