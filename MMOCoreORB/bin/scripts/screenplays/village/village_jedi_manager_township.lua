@@ -57,12 +57,27 @@ function VillageJediManagerTownship.getCurrentPhase()
 end
 
 function VillageJediManagerTownship:switchToNextPhase()
+	if (not isZoneEnabled("dathomir")) then
+		rescheduleServerEvent("VillagePhaseChange", 60 * 60 * 1000)
+	end
+
 	local currentPhase = VillageJediManagerTownship.getCurrentPhase()
 	local phaseID = VillageJediManagerTownship.getCurrentPhaseID()
 	VillageJediManagerTownship:despawnMobiles(currentPhase)
 	VillageJediManagerTownship:despawnSceneObjects(currentPhase)
 	VillageJediManagerTownship:handlePhaseChangeActiveQuests(phaseID, currentPhase)
 	VillageCommunityCrafting:doEndOfPhaseCheck()
+	VillageCommunityCrafting:doEndOfPhasePrizes()
+	VillageJediManagerTownship:destroyVillageMasterObject()
+
+	-- Despawn camps going into phase 4
+	if (currentPhase == 3) then
+		FsCounterStrike:despawnAllCamps()
+	end
+
+	if (currentPhase == 3 or currentPhase == 4) then
+		VillageRaids:despawnTurrets()
+	end
 
 	currentPhase = currentPhase + 1
 
@@ -75,9 +90,21 @@ function VillageJediManagerTownship:switchToNextPhase()
 	VillageJediManagerTownship:spawnMobiles(currentPhase, false)
 	VillageJediManagerTownship:spawnSceneObjects(currentPhase, false)
 
-	if (currentPhase == 2) then
+	-- Spawn camps going into phase 3
+	if (currentPhase == 3) then
+		FsCounterStrike:pickPhaseCamps()
+	end
+
+	if (currentPhase == 2 or currentPhase == 3) then
 		VillageCommunityCrafting:createAttributeValueTables()
 		VillageCommunityCrafting:createProjectStatsTables()
+	end
+
+	VillageJediManagerTownship:createVillageMasterObject()
+
+	if (currentPhase == 3 or currentPhase == 4) then
+		local pMaster = VillageJediManagerTownship:getMasterObject()
+		createEvent(60 * 1000, "VillageRaids", "doPhaseInit", pMaster, "")
 	end
 
 	Logger:log("Switching village phase to " .. currentPhase, LT_INFO)
@@ -93,11 +120,67 @@ end
 function VillageJediManagerTownship:start()
 	if (isZoneEnabled("dathomir")) then
 		Logger:log("Starting the Village Township Screenplay.", LT_INFO)
+
 		local currentPhase = VillageJediManagerTownship.getCurrentPhase()
 		VillageJediManagerTownship.setCurrentPhaseInit()
 		VillageJediManagerTownship:spawnMobiles(currentPhase, true)
 		VillageJediManagerTownship:spawnSceneObjects(currentPhase, true)
+		VillageJediManagerTownship:createVillageMasterObject()
+
+		createNavMesh("dathomir", 5292, -4119, 210, true, "village_township")
+
+		if (currentPhase == 3 or currentPhase == 4) then
+			local pMaster = VillageJediManagerTownship:getMasterObject()
+			createEvent(60 * 1000, "VillageRaids", "doPhaseInit", pMaster, "")
+
+			if (currentPhase == 3) then
+				local campList = FsCounterStrike:getPhaseCampList()
+
+				if (campList == nil) then
+					FsCounterStrike:pickPhaseCamps()
+				else
+					FsCounterStrike:spawnCamps()
+				end
+			end
+		end
 	end
+end
+
+function VillageJediManagerTownship:createVillageMasterObject()
+	local phaseID = VillageJediManagerTownship.getCurrentPhaseID()
+	local pMaster = spawnSceneObject("dathomir", "object/tangible/spawning/quest_spawner.iff", 5291, 78.5, -4126, 0, 0)
+
+	if (pMaster == nil) then
+		printf("Error in VillageJediManagerTownship:createVillageMasterObject(), unable to create master village object.\n")
+		return
+	end
+
+	VillageJediManagerTownship:setMasterID(SceneObject(pMaster):getObjectID())
+end
+
+function VillageJediManagerTownship:destroyVillageMasterObject()
+	local pMaster = VillageJediManagerTownship:getMasterObject()
+
+	if (pMaster == nil) then
+		return
+	end
+
+	SceneObject(pMaster):destroyObjectFromWorld()
+
+	local phaseID = VillageJediManagerTownship.getCurrentPhaseID()
+	deleteData("Village:masterID:" .. phaseID)
+end
+
+function VillageJediManagerTownship:setMasterID(objectID)
+	local phaseID = VillageJediManagerTownship.getCurrentPhaseID()
+	writeData("Village:masterID:" .. phaseID, objectID)
+end
+
+function VillageJediManagerTownship:getMasterObject()
+	local phaseID = VillageJediManagerTownship.getCurrentPhaseID()
+	local masterID = readData("Village:masterID:" .. phaseID)
+
+	return getSceneObject(masterID)
 end
 
 -- Spawning functions.
@@ -220,15 +303,15 @@ function VillageJediManagerTownship:handlePhaseChangeActiveQuests(phaseID, curre
 	VillageJediManagerCommon.removeActiveQuestList(phaseID)
 end
 
-function VillageJediManagerTownship:doOnlinePhaseChangeFails(pCreature, currentPhase)
+function VillageJediManagerTownship:doOnlinePhaseChangeFails(pPlayer, currentPhase)
 	if (currentPhase == 1) then
-		FsReflex1:doPhaseChangeFail(pCreature)
-		FsPatrol:doPhaseChangeFail(pCreature)
-		FsMedicPuzzle:doPhaseChange(pCreature)
-		FsCrafting1:doPhaseChangeFail(pCreature)
+		FsPhase1:doPhaseChangeFails(pPlayer)
 	elseif (currentPhase == 2) then
-		FsReflex2:doPhaseChangeFail(pCreature)
-		FsSad:doPhaseChangeFail(pCreature)
+		FsPhase2:doPhaseChangeFails(pPlayer)
+	elseif (currentPhase == 3) then
+		FsCounterStrike:doPhaseChangeFail(pPlayer)
+	elseif (currentPhase == 4) then
+		FsVillageDefense:doPhaseChangeFail(pPlayer)
 	end
 end
 
@@ -388,7 +471,7 @@ function VillageJediManagerTownship:getObjOwner(pObj)
 	return nil
 end
 
-function VillageJediManagerTownship.initQtQcPhase2(pNpc)
+function VillageJediManagerTownship.initQtQcComponent(pNpc)
 	SceneObject(pNpc):setContainerComponent("QtQcContainerComponent")
 end
 

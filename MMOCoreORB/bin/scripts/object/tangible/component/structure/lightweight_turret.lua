@@ -43,7 +43,7 @@
 
 object_tangible_component_structure_lightweight_turret = object_tangible_component_structure_shared_lightweight_turret:new {
 	numberExperimentalProperties = {1, 1, 1, 1},
-	experimentalProperties = {"XX", "XX", "XX", "XX"},
+	experimentalProperties = {"XX", "XX", "BK", "BK"},
 	experimentalWeights = {1, 1, 1, 1},
 	experimentalGroupTitles = {"null", "null", "accuracy", "speed"},
 	experimentalSubGroupTitles = {"null", "null", "accuracy", "speed"},

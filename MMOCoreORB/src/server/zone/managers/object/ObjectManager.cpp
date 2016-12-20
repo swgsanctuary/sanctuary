@@ -94,10 +94,10 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<SpawnArea>(SceneObjectType::SPAWNAREA);
 	objectFactory.registerObject<CampSiteActiveArea>(SceneObjectType::CAMPAREA);
 	objectFactory.registerObject<Region>(SceneObjectType::REGIONAREA);
+	objectFactory.registerObject<NavMeshRegion>(SceneObjectType::NAVMESHAREA);
 	objectFactory.registerObject<StaticObject>(SceneObjectType::STATICOBJECT);
 	objectFactory.registerObject<Creature>(SceneObjectType::CREATURE);
 	objectFactory.registerObject<NonPlayerCreatureObject>(SceneObjectType::NPCCREATURE);
-	objectFactory.registerObject<JunkdealerCreature>(SceneObjectType::JUNKDEALERCREATURE);
 	objectFactory.registerObject<NonPlayerCreatureObject>(SceneObjectType::PROBOTCREATURE);
 	objectFactory.registerObject<TangibleObject>(SceneObjectType::VENDOR);
 
@@ -144,6 +144,7 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<Container>(SceneObjectType::STATICLOOTCONTAINER);
 	objectFactory.registerObject<TangibleObject>(SceneObjectType::PLAYERLOOTCRATE);
 	objectFactory.registerObject<PlantObject>(SceneObjectType::GROWABLEPLANT);
+	objectFactory.registerObject<FsCsObject>(SceneObjectType::FSCSOBJECT);
 
 	objectFactory.registerObject<SlicingTool>(SceneObjectType::SLICINGTOOL);
 	objectFactory.registerObject<SlicingTool>(SceneObjectType::FLOWANALYZER);
@@ -190,7 +191,7 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<HarvesterObject>(SceneObjectType::HARVESTER);
 	objectFactory.registerObject<FactoryObject>(SceneObjectType::FACTORY);
 	objectFactory.registerObject<GeneratorObject>(SceneObjectType::GENERATOR);
-	objectFactory.registerObject<InstallationObject>(SceneObjectType::TURRET);
+	objectFactory.registerObject<InstallationObject>(SceneObjectType::DESTRUCTIBLE);
 	objectFactory.registerObject<InstallationObject>(SceneObjectType::MINEFIELD);
 
 	objectFactory.registerObject<WeaponObject>(SceneObjectType::WEAPON);

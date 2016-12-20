@@ -203,3 +203,5 @@ WebErrorLog = "../log/weberror.log"
 WebSessionTimeout = 600 -- Length that inactive web sessions expire
 
 PurgeDeletedCharacters = 10 --How often in minutes to purge deleted characters
+MaxNavMeshJobs = 6
+DumpObjFiles = 1

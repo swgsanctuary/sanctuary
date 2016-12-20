@@ -265,14 +265,8 @@ function ThemeParkLogic:isOnLeave(pPlayer)
 	if (pPlayer == nil) then
 		return false
 	end
-
-	local pGhost = CreatureObject(pPlayer):getPlayerObject()
-
-	if (pGhost == nil) then
-		return false
-	end
-
-	return PlayerObject(pGhost):isOnLeave()
+	
+	return CreatureObject(pPlayer):isOnLeave()
 end
 
 function ThemeParkLogic:hasEnoughFaction(pPlayer)
@@ -443,6 +437,10 @@ function ThemeParkLogic:getCurrentMissionNumber(npcNumber, pConversingPlayer)
 	local npcName = npcData.spawnData.npcTemplate
 	local numberOfMissionsTotal = #npcData.missions
 
+	if numberOfMissionsTotal == 0 then
+		return 0
+	end
+
 	local missionsCompleted = 0
 	local stateToCheck = 1
 	for i = 1, numberOfMissionsTotal, 1 do
@@ -527,6 +525,7 @@ function ThemeParkLogic:handleMissionAccept(npcNumber, missionNumber, pConversin
 	end
 
 	writeData(SceneObject(pQuestArea):getObjectID() .. ":ownerID", SceneObject(pConversingPlayer):getObjectID())
+	writeData(SceneObject(pConversingPlayer):getObjectID() .. ":questAreaID", SceneObject(pQuestArea):getObjectID())
 	self:writeData(pConversingPlayer, ":activeMission", 1)
 
 	return true
@@ -552,6 +551,10 @@ function ThemeParkLogic:notifyEnteredQuestArea(pActiveArea, pPlayer)
 
 	local mission = self:getMission(npcNumber, missionNumber)
 
+	if mission == nil then
+		return 0
+	end
+
 	local spawnSuccess = false
 	if mission.missionType == "deliver" then
 		spawnSuccess = self:handleDeliverMissionSpawn(mission, pPlayer, missionNumber, pActiveArea)
@@ -568,6 +571,9 @@ function ThemeParkLogic:notifyEnteredQuestArea(pActiveArea, pPlayer)
 	end
 
 	if (spawnSuccess) then
+		SceneObject(pActiveArea):destroyObjectFromWorld()
+		deleteData(SceneObject(pActiveArea):getObjectID() .. ":ownerID")
+		deleteData(SceneObject(pPlayer):getObjectID() .. ":questAreaID")
 		return 1
 	else
 		return 0
@@ -830,14 +836,15 @@ function ThemeParkLogic:spawnMissionNpcs(mission, pConversingPlayer, pActiveArea
 		end
 
 		AiAgent(pNpc):setNoAiAggro()
+		writeData(CreatureObject(pNpc):getObjectID() .. ":missionOwnerID", playerID)
 
 		if i == 1 then
 			if (self:isValidConvoString(stfFile, ":npc_breech_" .. missionNumber)) then
+				writeData(playerID .. ":breechNpcID", SceneObject(pNpc):getObjectID())
+
 				local pBreechArea = spawnActiveArea(planetName, "object/active_area.iff", spawnPoints[i][1], spawnPoints[i][2], spawnPoints[i][3], 32, 0)
 				if pBreechArea ~= nil then
 					createObserver(ENTEREDAREA, self.className, "notifyEnteredBreechArea", pBreechArea)
-					writeData(SceneObject(pNpc):getObjectID() .. ":missionOwnerID", playerID)
-					writeData(playerID .. ":breechNpcID", SceneObject(pNpc):getObjectID())
 					writeData(playerID .. ":breechAreaID", SceneObject(pBreechArea):getObjectID())
 				end
 			end
@@ -848,17 +855,14 @@ function ThemeParkLogic:spawnMissionNpcs(mission, pConversingPlayer, pActiveArea
 		if mission.missionType == "assassinate" then
 			createObserver(OBJECTDESTRUCTION, self.className, "notifyDefeatedTarget", pNpc)
 			createObserver(DEFENDERADDED, self.className, "notifyTriggeredBreechAggro", pNpc)
-			writeData(CreatureObject(pNpc):getObjectID() .. ":missionOwnerID", playerID)
 		elseif mission.missionType == "confiscate" then
 			createObserver(OBJECTDESTRUCTION, self.className, "notifyDefeatedTargetWithLoot", pNpc)
 			createObserver(DEFENDERADDED, self.className, "notifyTriggeredBreechAggro", pNpc)
-			writeData(CreatureObject(pNpc):getObjectID() .. ":missionOwnerID", playerID)
 			CreatureObject(pNpc):setOptionBit(INTERESTING)
 		elseif mission.missionType == "escort" then
 			CreatureObject(pNpc):setPvpStatusBitmask(0)
 			CreatureObject(pNpc):setOptionBit(INTERESTING)
 			self:normalizeNpc(pNpc, 16, 3000)
-			writeData(CreatureObject(pNpc):getObjectID() .. ":missionOwnerID", playerID)
 		elseif mission.missionType == "retrieve" or mission.missionType == "deliver" then
 			CreatureObject(pNpc):setPvpStatusBitmask(0)
 			CreatureObject(pNpc):setOptionBit(INTERESTING)
@@ -1089,27 +1093,43 @@ function ThemeParkLogic:notifyEnteredBreechArea(pActiveArea, pPlayer)
 	end
 
 	local playerID = CreatureObject(pPlayer):getObjectID()
-	local breechNpcID = readData(playerID .. ":breechNpcID")
-	local breechAreaID = readData(playerID .. ":breechAreaID")
 
 	if (readData(playerID .. ":breechTriggered") == 1) then
 		return 0
 	end
+
+	local breechNpcID = readData(playerID .. ":breechNpcID")
+	local breechAreaID = readData(playerID .. ":breechAreaID")
 
 	if (SceneObject(pActiveArea):getObjectID() == breechAreaID and breechNpcID ~= nil and breechNpcID ~= 0) then
 		local npcNumber = self:getActiveNpcNumber(pPlayer)
 		local missionNumber = self:getCurrentMissionNumber(npcNumber, pPlayer)
 		local stfFile = self:getStfFile(npcNumber)
 		local pNpc = getSceneObject(breechNpcID)
+		local includePrimary = true
+		local aggro = true
 
 		if pNpc ~= nil then
+			if TangibleObject(pNpc):hasOptionBit(CONVERSABLE) then
+				includePrimary = false
+
+				local mission = self:getMission(npcNumber, missionNumber)
+				if mission ~= nil and (mission.missionType == "assassinate" or mission.missionType == "confiscate") then
+					aggro = false
+				end 
+			end
+
 			spatialChat(pNpc, stfFile .. ":npc_breech_" .. missionNumber)
+			writeData(playerID .. ":breechNpcID", 0)
+			writeData(playerID .. ":breechTriggered", 1)
 		end
 
-		writeData(playerID .. ":breechNpcID", 0)
-		writeData(playerID .. ":breechTriggered", 1)
 		SceneObject(pActiveArea):destroyObjectFromWorld()
-		self:setNpcDefender(pPlayer)
+
+		if aggro then
+			self:setNpcDefender(pPlayer, includePrimary)
+		end
+
 		return 1
 	end
 
@@ -1140,19 +1160,23 @@ function ThemeParkLogic:notifyTriggeredBreechAggro(pNpc, pPlayer)
 		return 0
 	end
 
-	if (missionOwnerID == playerID and readData(playerID .. ":breechTriggered") ~= 1) then
-		local npcNumber = self:getActiveNpcNumber(pPlayer)
-		local missionNumber = self:getCurrentMissionNumber(npcNumber, pPlayer)
-		local stfFile = self:getStfFile(npcNumber)
-		spatialChat(pBreechNpc, stfFile .. ":npc_breech_" .. missionNumber)
-		writeData(playerID .. ":breechNpcID", 0)
-		writeData(playerID .. ":breechTriggered", 1)
+	if missionOwnerID == playerID then
+		if readData(playerID .. ":breechTriggered") ~= 1 then
+			local npcNumber = self:getActiveNpcNumber(pPlayer)
+			local missionNumber = self:getCurrentMissionNumber(npcNumber, pPlayer)
+			local stfFile = self:getStfFile(npcNumber)
+			spatialChat(pBreechNpc, stfFile .. ":npc_breech_" .. missionNumber)
+			writeData(playerID .. ":breechNpcID", 0)
+			writeData(playerID .. ":breechTriggered", 1)
+		end
+
+		return 1
 	end
 
 	return 0
 end
 
-function ThemeParkLogic:setNpcDefender(pPlayer)
+function ThemeParkLogic:setNpcDefender(pPlayer, includePrimary)
 	if (pPlayer == nil) then
 		return
 	end
@@ -1175,7 +1199,7 @@ function ThemeParkLogic:setNpcDefender(pPlayer)
 			local pNpc = getSceneObject(objectID)
 			if pNpc ~= nil and SceneObject(pNpc):isAiAgent() then
 				if (i <= #mission.primarySpawns) then
-					if currentMissionType == "assassinate" or currentMissionType == "confiscate" or currentMissionType == "destroy" then
+					if includePrimary then
 						AiAgent(pNpc):setDefender(pPlayer)
 					end
 				elseif i > #mission.primarySpawns then
@@ -1350,26 +1374,31 @@ function ThemeParkLogic:getMissionDescription(pConversingPlayer, direction)
 
 	local curMission = self:getMission(activeNpcNumber, missionNumber)
 
-	local npcNumber = 1
-	while (npcNumber < activeNpcNumber) do
-		missionNumber = missionNumber + #self:getNpcData(npcNumber).missions
-		npcNumber = npcNumber * 2
-	end
 	if curMission ~= nil and curMission.missionDescription ~= "" and curMission.missionDescription ~= nil and direction == "target" then
 		return curMission.missionDescription
 	elseif self.missionDescriptionStf == "" then
 		local stfFile = self:getStfFile(activeNpcNumber)
-		if not self:isValidConvoString(stfFile, ":waypoint_description_" .. missionNumber) or not self:isValidConvoString(stfFile, ":waypoint_name_" .. missionNumber) or not self:isValidConvoString(stfFile, ":return_waypoint_name_" .. missionNumber) then
-			return self:getDefaultWaypointName(pConversingPlayer, direction)
-		else
-			if direction == "target" then
+		if direction == "target" then
+			if self:isValidConvoString(stfFile, ":waypoint_name_" .. missionNumber) then
 				return stfFile .. ":waypoint_name_" .. missionNumber
 			else
+				return self:getDefaultWaypointName(pConversingPlayer, direction)
+			end
+		else
+			if self:isValidConvoString(stfFile, ":return_waypoint_name_" .. missionNumber) then
 				return stfFile .. ":return_waypoint_name_" .. missionNumber
+			else
+				return self:getDefaultWaypointName(pConversingPlayer, direction)
 			end
 		end
 	else
 		if direction == "target" then
+			local npcNumber = 1
+			while (npcNumber < activeNpcNumber) do
+				missionNumber = missionNumber + #self:getNpcData(npcNumber).missions
+				npcNumber = npcNumber * 2
+			end
+
 			local message = self.missionDescriptionStf .. missionNumber
 			return message
 		else
@@ -1958,8 +1987,10 @@ function ThemeParkLogic:cleanUpMission(pConversingPlayer)
 		local pObj = getSceneObject(objectID)
 		if pObj ~= nil then
 			SceneObject(pObj):destroyObjectFromWorld()
+			deleteData(playerID .. ":missionStaticObject:no" .. i)
 		end
 	end
+	deleteData(playerID .. ":missionStaticObjects")
 
 	local numberOfSpawns = readData(playerID .. ":missionSpawns")
 	for i = 1, numberOfSpawns, 1 do
@@ -1967,7 +1998,17 @@ function ThemeParkLogic:cleanUpMission(pConversingPlayer)
 		local pNpc = getSceneObject(objectID)
 		if pNpc ~= nil then
 			SceneObject(pNpc):destroyObjectFromWorld()
+			deleteData(playerID .. ":missionSpawn:no" .. i)
 		end
+	end
+	deleteData(playerID .. ":missionSpawns")
+
+	local questAreaID = readData(playerID .. ":questAreaID")
+	local pQuestArea = getSceneObject(questAreaID)
+	if pQuestArea ~= nil then
+		SceneObject(pQuestArea):destroyObjectFromWorld()
+		deleteData(SceneObject(pQuestArea):getObjectID() .. ":ownerID")
+		deleteData(playerID .. ":questAreaID")
 	end
 end
 
@@ -2036,12 +2077,12 @@ function ThemeParkLogic:followPlayer(pConversingNpc, pConversingPlayer)
 	AiAgent(pConversingNpc):setFollowObject(pConversingPlayer)
 
 	local playerFaction = CreatureObject(pConversingPlayer)
-	if (playerFaction == FACTIONREBEL or playerFaction == FACTIONIMPERIAL) and not PlayerObject(pGhost):isOnLeave() then
+	if (playerFaction == FACTIONREBEL or playerFaction == FACTIONIMPERIAL) and not CreatureObject(pConversingPlayer):isOnLeave() then
 		CreatureObject(pConversingNpc):setFaction(playerFaction)
 
-		if PlayerObject(pGhost):isOvert() then
+		if CreatureObject(pConversingPlayer):isOvert() then
 			CreatureObject(pConversingNpc):setPvpStatusBitmask(5)
-		elseif PlayerObject(pGhost):isCovert() then
+		elseif CreatureObject(pConversingPlayer):isCovert() then
 			CreatureObject(pConversingNpc):setPvpStatusBitmask(1)
 		end
 	end

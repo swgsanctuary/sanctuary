@@ -46,6 +46,9 @@ protected:
 
 	unsigned int faction;
 
+	int junkDealerNeeded;
+	int junkValue;
+
 	VectorMap<String, int> skillMods;
 
 	Vector<short>* numberExperimentalProperties;
@@ -99,7 +102,7 @@ public:
 		this->pvpStatusBitmask = pvpStatusBitmask;
 	}
 
-	inline Vector<String> getCertificationsRequired() const {
+	inline const Vector<String>& getCertificationsRequired() const {
 		return certificationsRequired;
 	}
 
@@ -125,6 +128,14 @@ public:
 
     inline unsigned int getFaction() const {
     	return faction;
+    }
+
+    inline int getJunkDealerNeeded() const {
+    	return junkDealerNeeded;
+    }
+
+    inline int getJunkValue() const {
+    	return junkValue;
     }
 
 	inline StructureFootprint* getStructureFootprint() const {

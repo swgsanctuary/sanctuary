@@ -14,6 +14,7 @@ namespace conf {
 		bool makePing;
 		bool makeStatus;
 		bool makeWeb;
+		bool dumpObjFiles;
 
 		String orbNamingDirectoryAddress;
 		uint16 orbNamingDirectoryPort;
@@ -62,6 +63,8 @@ namespace conf {
 
 		int pingAllowedConnections;
 
+		int maxNavMeshJobs;
+
 		String messageOfTheDay;
 
 		Vector<String> treFiles;
@@ -104,6 +107,10 @@ namespace conf {
 
 		inline bool getMakeWeb() {
 			return makeWeb;
+		}
+
+		inline bool getDumpObjFiles() {
+			return dumpObjFiles;
 		}
 
 		inline String& getORBNamingDirectoryAddress() {
@@ -260,6 +267,10 @@ namespace conf {
 
 		inline int getPurgeDeletedCharacters() {
 			return purgeDeletedCharacters;
+		}
+
+		inline int getMaxNavMeshJobs() {
+			return maxNavMeshJobs;
 		}
 
 		inline void setProgressMonitors(bool val) {

@@ -12,7 +12,6 @@
 #include "server/zone/managers/player/PlayerManager.h"
 #include "server/zone/objects/group/GroupObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
-#include "server/zone/objects/player/Races.h"
 #include "server/zone/objects/player/events/EntertainingSessionTask.h"
 #include "server/zone/objects/player/EntertainingObserver.h"
 #include "templates/params/creature/CreatureAttribute.h"
@@ -26,6 +25,7 @@
 #include "server/zone/objects/creature/buffs/PerformanceBuffType.h"
 #include "server/zone/objects/mission/MissionTypes.h"
 #include "server/zone/objects/building/BuildingObject.h"
+#include "server/chat/ChatManager.h"
 
 void EntertainingSessionImplementation::doEntertainerPatronEffects() {
 	ManagedReference<CreatureObject*> creo = entertainer.get();
@@ -79,9 +79,8 @@ void EntertainingSessionImplementation::doEntertainerPatronEffects() {
 	if (building != NULL && factionPerkSkill > 0 && building->isPlayerRegisteredWithin(creo->getObjectID())) {
 		unsigned int buildingFaction = building->getFaction();
 		unsigned int healerFaction = creo->getFaction();
-		PlayerObject* ghost = creo->getPlayerObject();
 
-		if (ghost != NULL && healerFaction != 0 && healerFaction == buildingFaction && ghost->getFactionStatus() == FactionStatus::OVERT) {
+		if (healerFaction != 0 && healerFaction == buildingFaction && creo->getFactionStatus() == FactionStatus::OVERT) {
 			woundHealingSkill += factionPerkSkill;
 			playerShockHealingSkill += factionPerkSkill;
 		}
@@ -662,9 +661,8 @@ void EntertainingSessionImplementation::addEntertainerBuffStrength(CreatureObjec
 	if (building != NULL && factionPerkStrength > 0 && building->isPlayerRegisteredWithin(entertainer->getObjectID())) {
 		unsigned int buildingFaction = building->getFaction();
 		unsigned int entFaction = entertainer->getFaction();
-		PlayerObject* ghost = entertainer->getPlayerObject();
 
-		if (ghost != NULL && entFaction != 0 && entFaction == buildingFaction && ghost->getFactionStatus() == FactionStatus::OVERT) {
+		if (entFaction != 0 && entFaction == buildingFaction && entertainer->getFactionStatus() == FactionStatus::OVERT) {
 			maxBuffStrength += factionPerkStrength;
 		}
 	}
@@ -845,10 +843,9 @@ void EntertainingSessionImplementation::sendEntertainmentUpdate(CreatureObject* 
 	/*if (updateEntValue)
 		creature->setTerrainNegotiation(0.8025000095f, true);*/
 
-	String str = Races::getMoodStr(mood);
+	String str = entertainer->getZoneServer()->getChatManager()->getMoodAnimation(mood);
 	creature->setMoodString(str, true);
 }
-
 
 void EntertainingSessionImplementation::sendEntertainingUpdate(CreatureObject* creature, float entval, const String& performance, uint32 perfcntr, int instrid) {
 	//creature->setTerrainNegotiation(entval, true);

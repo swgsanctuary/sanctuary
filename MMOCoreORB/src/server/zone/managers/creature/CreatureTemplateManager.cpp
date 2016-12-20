@@ -47,8 +47,8 @@ CreatureTemplateManager::CreatureTemplateManager() : Logger("CreatureTemplateMan
 	lua->setGlobalInt("TEF", CreatureFlag::TEF);
 	lua->setGlobalInt("PLAYER", CreatureFlag::PLAYER);
 	lua->setGlobalInt("ENEMY", CreatureFlag::ENEMY);
-	lua->setGlobalInt("CHANGEFACTIONSTATUS", CreatureFlag::CHANGEFACTIONSTATUS);
-	lua->setGlobalInt("BLINK_GREEN", CreatureFlag::BLINK_GREEN);
+	lua->setGlobalInt("WILLBEDECLARED", CreatureFlag::WILLBEDECLARED);
+	lua->setGlobalInt("WASDECLARED", CreatureFlag::WASDECLARED);
 
 	lua->setGlobalInt("CONVERSABLE", OptionBitmask::CONVERSE);
 	lua->setGlobalInt("AIENABLED", OptionBitmask::AIENABLED);
@@ -71,6 +71,10 @@ CreatureTemplateManager::CreatureTemplateManager() : Logger("CreatureTemplateMan
 	// NameManager Types
 	lua->setGlobalInt("NAME_TAG", NameManagerType::TAG);
 	lua->setGlobalInt("NAME_GENERIC", NameManagerType::GENERIC);
+	lua->setGlobalInt("NAME_R2", NameManagerType::R2);
+	lua->setGlobalInt("NAME_R3", NameManagerType::R3);
+	lua->setGlobalInt("NAME_R4", NameManagerType::R4);
+	lua->setGlobalInt("NAME_R5", NameManagerType::R5);
 	lua->setGlobalInt("NAME_STORMTROOPER", NameManagerType::STORMTROOPER);
 	lua->setGlobalInt("NAME_SCOUTTROOPER", NameManagerType::SCOUTTROOPER);
 	lua->setGlobalInt("NAME_DARKTROOPER", NameManagerType::DARKTROOPER);

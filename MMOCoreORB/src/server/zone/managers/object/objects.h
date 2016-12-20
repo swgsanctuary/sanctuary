@@ -29,7 +29,6 @@
 #include "server/zone/objects/tangible/consumable/Drink.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 #include "server/zone/objects/player/PlayerObject.h"
-#include "server/zone/objects/creature/junkdealer/JunkdealerCreature.h"
 #include "server/zone/objects/cell/CellObject.h"
 #include "server/zone/objects/staticobject/StaticObject.h"
 #include "server/zone/objects/group/GroupObject.h"
@@ -116,7 +115,8 @@
 #include "server/zone/objects/resource/ResourceContainer.h"
 #include "server/zone/objects/tangible/misc/CustomIngredient.h"
 #include "server/zone/objects/tangible/misc/FsCraftingComponentObject.h"
-
+#include "server/zone/objects/tangible/misc/FsCsObject.h"
+#include "server/zone/objects/pathfinding/NavMeshRegion.h"
 #include "server/zone/objects/area/ActiveArea.h"
 #include "server/zone/objects/area/CampSiteActiveArea.h"
 #include "server/zone/objects/area/SarlaccArea.h"

@@ -671,7 +671,7 @@ bool WeaponObjectImplementation::isCertifiedFor(CreatureObject* object) {
 	Vector<String>* certificationsRequired = weaponTemplate->getCertificationsRequired();
 
 	for (int i = 0; i < certificationsRequired->size(); ++i) {
-		String cert = certificationsRequired->get(i);
+		const String& cert = certificationsRequired->get(i);
 
 		if (!ghost->hasAbility(cert) && !object->hasSkill(cert)) {
 			return false;
@@ -740,6 +740,8 @@ void WeaponObjectImplementation::decay(CreatureObject* user) {
 		chance += 10;
 
 	if (roll < chance) {
+		Locker locker(_this.getReferenceUnsafeStaticCast());
+
 		if (isJediWeapon()) {
 			ManagedReference<SceneObject*> saberInv = getSlottedObject("saber_inv");
 

@@ -181,12 +181,15 @@ namespace server {
 		static int getControllingFaction(lua_State* L);
 		static int getImperialScore(lua_State* L);
 		static int getRebelScore(lua_State* L);
+		static int getWinningFactionDifficultyScaling(lua_State* L);
 		static int playClientEffectLoc(lua_State* L);
 		static int getQuestInfo(lua_State* L);
 		static int getPlayerQuestID(lua_State* L);
 		static int getQuestVectorMap(lua_State* L);
 		static int removeQuestVectorMap(lua_State* L);
 		static int createQuestVectorMap(lua_State* L);
+		static int createNavMesh(lua_State* L);
+		static int creatureTemplateExists(lua_State* L);
 
 	private:
 		void setupLuaPackagePath(Lua* luaEngine);

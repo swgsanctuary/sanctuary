@@ -49,6 +49,27 @@ function FsSad:getTasksSinceLastTimestamp(pPlayer)
 	return tonumber(count)
 end
 
+function FsSad:despawnCamp(pPlayer)
+	local curQuest = -1
+	for i = 1, 8, 1 do
+		local questID = getPlayerQuestID("fs_quests_sad_task" .. i)
+
+		if QuestManager.hasActiveQuest(pPlayer, questID) then
+			curQuest = i
+		end
+	end
+
+	if (curQuest == -1) then
+		return
+	end
+
+	local FsSadTheater = self.theaterTable[curQuest]
+
+	if (FsSadTheater:hasTaskStarted(pPlayer)) then
+		FsSadTheater:finish(pPlayer)
+	end
+end
+
 function FsSad:recreateCampIfDespawned(pPlayer)
 	local curQuest = -1
 	for i = 1, 8, 1 do
@@ -135,6 +156,7 @@ function FsSad:doPhaseChangeFail(pPlayer)
 		return
 	end
 
+	self:despawnCamp(pPlayer)
 	CreatureObject(pPlayer):sendSystemMessage("@quest/quest_journal/fs_quests_sad:wrong_phase")
 
 	if QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_QUESTS_SAD_TASKS) or QuestManager.hasActiveQuest(pPlayer, QuestManager.quests.FS_QUESTS_SAD_TASKS) then
@@ -144,6 +166,13 @@ function FsSad:doPhaseChangeFail(pPlayer)
 	for i = 1, 8, 1 do
 		local questName = "fs_quests_sad_task" .. i
 		local questID = getPlayerQuestID(questName)
+
+		if QuestManager.hasCompletedQuest(pPlayer, questID) or QuestManager.hasActiveQuest(pPlayer, questID) then
+			QuestManager.resetQuest(pPlayer, questID)
+		end
+
+		questName = "fs_quests_sad_return" .. i
+		questID = getPlayerQuestID(questName)
 
 		if QuestManager.hasCompletedQuest(pPlayer, questID) or QuestManager.hasActiveQuest(pPlayer, questID) then
 			QuestManager.resetQuest(pPlayer, questID)

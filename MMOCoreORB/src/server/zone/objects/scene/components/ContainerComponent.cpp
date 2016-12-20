@@ -116,7 +116,7 @@ bool ContainerComponent::checkContainerPermission(SceneObject* sceneObject, Crea
 
 	if (permission != ContainerPermissions::MOVECONTAINER && permissions->hasInheritPermissionsFromParent() && parent != NULL && parent != sceneObject) {
 		return parent->checkContainerPermission(creature, permission);
-	} else if (permission == ContainerPermissions::MOVECONTAINER && sceneObject->isStaticObject()) {
+	} else if (permission == ContainerPermissions::MOVECONTAINER && sceneObject->isClientObject()) {
 		return false;
 	}
 
@@ -125,7 +125,7 @@ bool ContainerComponent::checkContainerPermission(SceneObject* sceneObject, Crea
 	uint16 allowPermissions = 0, denyPermissions = 0;
 
 	for (int i = 0; i < groups->size(); ++i) {
-		String group = groups->get(i);
+		const String& group = groups->get(i);
 
 		uint16 allow = permissions->getAllowPermissions(group);
 
@@ -146,6 +146,7 @@ bool ContainerComponent::transferObject(SceneObject* sceneObject, SceneObject* o
 
 	ManagedReference<SceneObject*> objParent = object->getParent();
 	ManagedReference<Zone*> objZone = object->getLocalZone();
+	ManagedReference<Zone*> oldRootZone = object->getZone();
 
 	if (object->containsActiveSession(SessionFacadeType::SLICING)) {
 		ManagedReference<Facade*> facade = object->getActiveSession(SessionFacadeType::SLICING);
@@ -220,6 +221,11 @@ bool ContainerComponent::transferObject(SceneObject* sceneObject, SceneObject* o
 		object->setParent(sceneObject);
 		object->setContainmentType(containmentType);
 
+		ManagedReference<Zone*> newRootZone = object->getZone();
+
+		if (newRootZone != NULL && newRootZone != oldRootZone) {
+			newRootZone->registerObjectWithPlanetaryMap(object);
+		}
 	} else {
 		sceneObject->error("unknown containment type " + String::valueOf(containmentType));
 		StackTrace::printStackTrace();

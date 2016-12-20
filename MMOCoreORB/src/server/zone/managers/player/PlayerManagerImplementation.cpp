@@ -12,7 +12,6 @@
 #include "server/zone/packets/charcreation/ClientCreateCharacterCallback.h"
 #include "server/zone/packets/charcreation/ClientCreateCharacterSuccess.h"
 #include "server/zone/packets/charcreation/ClientCreateCharacterFailed.h"
-#include "server/zone/objects/player/Races.h"
 #include "server/zone/ZoneServer.h"
 #include "server/zone/ZoneProcessServer.h"
 #include "server/zone/managers/name/NameManager.h"
@@ -123,7 +122,6 @@
 
 #include "server/zone/objects/creature/events/BurstRunNotifyAvailableEvent.h"
 #include "server/zone/objects/creature/ai/DroidObject.h"
-#include "server/zone/objects/player/Races.h"
 #include "server/zone/objects/tangible/components/droid/DroidPlaybackModuleDataComponent.h"
 
 #include "server/zone/objects/player/badges/Badge.h"
@@ -952,8 +950,8 @@ void PlayerManagerImplementation::sendPlayerToCloner(CreatureObject* player, uin
 		player->addShockWounds(100, true);
 	}
 
-	if (ghost->getFactionStatus() != FactionStatus::ONLEAVE && cbot->getFaction() == 0)
-		ghost->setFactionStatus(FactionStatus::ONLEAVE);
+	if (player->getFactionStatus() != FactionStatus::ONLEAVE && cbot->getFaction() == 0)
+		player->setFactionStatus(FactionStatus::ONLEAVE);
 
 	if (ghost->hasPvpTef())
 		ghost->schedulePvpTefRemovalTask(true);
@@ -1322,7 +1320,6 @@ bool PlayerManagerImplementation::checkEncumbrancies(CreatureObject* player, Arm
 	else
 		return true;
 }
-
 
 void PlayerManagerImplementation::applyEncumbrancies(CreatureObject* player, ArmorObject* armor) {
 	int healthEncumb = MAX(0, armor->getHealthEncumbrance());
@@ -2452,7 +2449,7 @@ void PlayerManagerImplementation::startListen(CreatureObject* creature, uint64 e
 					creature->sendSystemMessage(stringID);
 
 					creature->setListenToID(entid, true);
-					String str = Races::getMoodStr("entertained");
+					String str = server->getChatManager()->getMoodAnimation("entertained");
 					creature->setMoodString(str, true);
 					creature->setListenToID(droid->getObjectID());
 					module->addListener(creature->getObjectID());
@@ -2658,7 +2655,7 @@ void PlayerManagerImplementation::updatePermissionLevel(CreatureObject* targetPl
 		Vector<String>* skillsToBeRemoved = permissionLevelList->getPermissionSkills(currentPermissionLevel);
 		if (skillsToBeRemoved != NULL) {
 			for (int i = 0; i < skillsToBeRemoved->size(); i++) {
-				String skill = skillsToBeRemoved->get(i);
+				const String& skill = skillsToBeRemoved->get(i);
 				targetPlayer->sendSystemMessage("Staff skill revoked: " + skill);
 				skillManager->surrenderSkill(skill, targetPlayer, true);
 			}
@@ -2671,7 +2668,7 @@ void PlayerManagerImplementation::updatePermissionLevel(CreatureObject* targetPl
 		Vector<String>* skillsToBeAdded = permissionLevelList->getPermissionSkills(permissionLevel);
 		if (skillsToBeAdded != NULL) {
 			for (int i = 0; i < skillsToBeAdded->size(); ++i) {
-				String skill = skillsToBeAdded->get(i);
+				const String& skill = skillsToBeAdded->get(i);
 				targetPlayer->sendSystemMessage("Staff skill granted: " + skill);
 				skillManager->awardSkill(skill, targetPlayer, false, true, true);
 			}
@@ -3288,11 +3285,11 @@ String PlayerManagerImplementation::unbanAccount(PlayerObject* admin, Account* a
 	} catch(Exception& e) {
 		return "Exception unbanning account: " + e.getMessage();
 	}
-	
+
 	Locker locker(account);
 	account->setBanExpires(System::getMiliTime());
 	account->setBanReason(reason);
-	
+
 	return "Account Successfully Unbanned";
 }
 
@@ -3315,26 +3312,26 @@ String PlayerManagerImplementation::banFromGalaxy(PlayerObject* admin, Account* 
 	} catch(Exception& e) {
 		return "Exception banning from galaxy: " + e.getMessage();
 	}
-	
+
 	Locker locker(account);
-	
+
 	Time current;
 	Time expires;
-	
+
 	expires.addMiliTime(seconds*10000);
-	
+
 	Reference<GalaxyBanEntry*> ban = new GalaxyBanEntry();
-	
+
 	ban->setAccountID(account->getAccountID());
 	ban->setBanAdmin(admin->getAccountID());
 	ban->setGalaxyID(galaxy);
-	
+
 	ban->setCreationDate(current);
-	
+
 	ban->setBanExpiration(expires);
-	
+
 	ban->setBanReason(reason);
-	
+
 	account->addGalaxyBan(ban, galaxy);
 
 	try {
@@ -3393,7 +3390,7 @@ String PlayerManagerImplementation::unbanFromGalaxy(PlayerObject* admin, Account
 
 	Locker locker(account);
 	account->removeGalaxyBan(galaxy);
-	
+
 	return "Successfully Unbanned from Galaxy";
 }
 
@@ -3411,7 +3408,6 @@ String PlayerManagerImplementation::banCharacter(PlayerObject* admin, Account* a
 	String escapedName = name;
 	Database::escapeString(escapedName);
 
-	
 	try {
 		StringBuffer query;
 		query << "INSERT INTO character_bans values (NULL, " << account->getAccountID() << ", " << admin->getAccountID() << ", " << galaxyID << ", '" << escapedName << "', " <<  "now(), UNIX_TIMESTAMP() + " << seconds << ", '" << escapedReason << "');";
@@ -3420,24 +3416,24 @@ String PlayerManagerImplementation::banCharacter(PlayerObject* admin, Account* a
 	} catch(Exception& e) {
 		return "Exception banning character: " + e.getMessage();
 	}
-	
+
 	Locker locker(account);
-	
+
 	Reference<CharacterList*> characters = account->getCharacterList();
-	
+
 	for (int i=0; i<characters->size(); i++) {
 		CharacterListEntry& entry = characters->get(i);
-		
+
 		if (entry.getFirstName() == name && entry.getGalaxyID() == galaxyID) {
 			Time expires;
 			expires.addMiliTime(seconds*1000);
-			
+
 			entry.setBanReason(reason);
 			entry.setBanAdmin(admin->getAccountID());
 			entry.setBanExpiration(expires);
 		}
 	}
-	
+
 	locker.release();
 
 	try {
@@ -3490,13 +3486,13 @@ String PlayerManagerImplementation::unbanCharacter(PlayerObject* admin, Account*
 
 	Locker locker(account);
 	CharacterListEntry *entry = account->getCharacterBan(galaxyID, name);
-	
+
 	if (entry != NULL) {
 		Time now;
 		entry->setBanExpiration(now);
 		entry->setBanReason(reason);
 	}
-	
+
 	return "Character Successfully Unbanned";
 }
 
@@ -3695,7 +3691,7 @@ bool PlayerManagerImplementation::promptTeachableSkills(CreatureObject* teacher,
 	listbox->setCancelButton(true, "@cancel");
 
 	for (int i = 0; i < skills.size(); ++i) {
-		String skill = skills.get(i);
+		const String& skill = skills.get(i);
 		listbox->addMenuItem("@skl_n:" + skill, skill.hashCode());
 	}
 
@@ -3903,8 +3899,10 @@ void PlayerManagerImplementation::proposeUnity( CreatureObject* askingPlayer, Cr
 		return;
 	}
 
-	// TODO: Check facing
-	// askingPlayer->sendSystemMessage("@unity:bad_facing");// "You must be facing your target to properly propose!"
+	if (!askingPlayer->isFacingObject(respondingPlayer)) {
+		askingPlayer->sendSystemMessage("@unity:bad_facing"); // "You must be facing your target to properly propose!"
+		return;
+	}
 
 	// Check if asking player has a proposal outstanding
 	if( askingPlayer->getActiveSession(SessionFacadeType::PROPOSEUNITY) != NULL ){

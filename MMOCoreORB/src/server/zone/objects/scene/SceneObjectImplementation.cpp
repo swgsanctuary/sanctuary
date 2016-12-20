@@ -300,7 +300,7 @@ void SceneObjectImplementation::sendWithoutParentTo(SceneObject* player) {
 }
 
 void SceneObjectImplementation::sendTo(SceneObject* player, bool doClose) {
-	if (isStaticObject() || !sendToClient || player->getClient() == NULL)
+	if (isClientObject() || !sendToClient || player == NULL || player->getClient() == NULL)
 		return;
 
 	/*StringBuffer msgInfo;
@@ -332,7 +332,7 @@ void SceneObjectImplementation::sendTo(SceneObject* player, bool doClose) {
 }
 
 void SceneObjectImplementation::sendWithoutContainerObjectsTo(SceneObject* player) {
-	if (isStaticObject() || !sendToClient)
+	if (isClientObject() || !sendToClient)
 		return;
 
 	BaseMessage* msg = new SceneObjectCreateMessage(asSceneObject());
@@ -1209,7 +1209,7 @@ void SceneObjectImplementation::createChildObjects() {
 		return;
 
 	ZoneServer* zoneServer = getZone()->getZoneServer();
-	bool client = isStaticObject();
+	bool client = isClientObject();
 
 	for (int i = 0; i < templateObject->getChildObjectsSize(); ++i) {
 		ChildObject* child = templateObject->getChildObject(i);
@@ -1415,10 +1415,15 @@ void SceneObjectImplementation::setZone(Zone* zone) {
 	this->zone = zone;
 }
 
-void SceneObjectImplementation::showFlyText(const String& file, const String& aux, uint8 red, uint8 green, uint8 blue) {
-	ShowFlyText* fly = new ShowFlyText(asSceneObject(), file, aux, red, green, blue);
+void SceneObjectImplementation::showFlyText(const String& file, const String& aux, uint8 red, uint8 green, uint8 blue, bool isPrivate) {
 
-	broadcastMessage(fly, true);
+	if (!isPrivate) {
+		ShowFlyText* fly = new ShowFlyText(asSceneObject(), file, aux, red, green, blue, 1.0f);
+		broadcastMessage(fly, true);
+	} else {
+		ShowFlyText* fly = new ShowFlyText(asSceneObject(), file, aux, red, green, blue, 0);
+		sendMessage(fly);
+	}
 }
 
 void SceneObjectImplementation::initializeChildObject(SceneObject* controllerObject) {
@@ -1688,5 +1693,29 @@ SceneObject* SceneObjectImplementation::asSceneObject() {
 
 SceneObject* SceneObject::asSceneObject() {
 	return this;
+}
+
+Vector<Reference<MeshData*> > SceneObjectImplementation::getTransformedMeshData(const Matrix4* parentTransform) {
+	const AppearanceTemplate *appearance = getObjectTemplate()->getAppearanceTemplate();
+	if(appearance == NULL) {
+		Vector<Reference<MeshData*> > emptyData;
+		return emptyData;
+	}
+
+	Matrix4 transform;
+	transform.setRotationMatrix(direction.toMatrix3());
+	transform.setTranslation(getPositionX(), getPositionZ(), -getPositionY());
+
+	return appearance->getTransformedMeshData(transform * *parentTransform );
+}
+
+const BaseBoundingVolume* SceneObjectImplementation::getBoundingVolume() {
+	if (templateObject != NULL) {
+		AppearanceTemplate *appr = templateObject->getAppearanceTemplate();
+		if (appr != NULL) {
+			return appr->getBoundingVolume();
+		}
+	}
+	return NULL;
 }
 

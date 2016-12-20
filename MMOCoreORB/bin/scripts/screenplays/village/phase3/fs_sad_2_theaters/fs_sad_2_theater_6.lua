@@ -32,12 +32,12 @@ FsSad2Theater6 = GoToTheater:new {
 	activeAreaRadius = 16,
 }
 
-function FsSad2Theater6:onSuccessfulSpawn(pCreatureObject, spawnedMobileList)
-	if (pCreatureObject == nil) then
+function FsSad2Theater6:onSuccessfulSpawn(pPlayer, spawnedMobileList)
+	if (pPlayer == nil) then
 		return
 	end
 
-	local playerID = SceneObject(pCreatureObject):getObjectID()
+	local playerID = SceneObject(pPlayer):getObjectID()
 	writeData(playerID .. self.taskName .. ":killableCount", #spawnedMobileList)
 
 	for i = 1, #spawnedMobileList, 1 do
@@ -51,7 +51,7 @@ function FsSad2Theater6:onSuccessfulSpawn(pCreatureObject, spawnedMobileList)
 	local pTheater = getSceneObject(theaterId)
 
 	if (pTheater ~= nil) then
-		SuiRadiationSensor:setLocation(pCreatureObject, SceneObject(pTheater):getWorldPositionX(), SceneObject(pTheater):getWorldPositionY(), SceneObject(pTheater):getZoneName())
+		SuiRadiationSensor:setLocation(pPlayer, SceneObject(pTheater):getWorldPositionX(), SceneObject(pTheater):getWorldPositionY(), SceneObject(pTheater):getZoneName())
 	end
 end
 
@@ -73,6 +73,12 @@ function FsSad2Theater6:notifyKilledMobile(pVictim, pAttacker)
 		QuestManager.completeQuest(pOwner, QuestManager.quests.FS_QUESTS_SAD2_TASK6)
 		QuestManager.activateQuest(pOwner, QuestManager.quests.FS_QUESTS_SAD2_RETURN6)
 		deleteData(ownerID .. self.taskName .. ":killableCount", numEnemies)
+
+		local pGhost = CreatureObject(pOwner):getPlayerObject()
+
+		if (pGhost ~= nil) then
+			PlayerObject(pGhost):addWaypoint("dathomir", "@quest/quest_journal/fs_quests_sad2:return6", "", 5238, -4189, WAYPOINTYELLOW, true, true, WAYPOINTQUESTTASK)
+		end
 	end
 
 	deleteData(mobileID .. self.taskName .. "ownerID")
