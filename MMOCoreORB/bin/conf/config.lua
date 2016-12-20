@@ -95,11 +95,8 @@ ZonesEnabled = {
 	--"creature_test",
 	"dantooine",
 	"dathomir",
-<<<<<<< HEAD
 	--"dungeon1",
-=======
 	"dungeon1",
->>>>>>> 21f8885b759688aec498c517c4e89bcaf1796823
 	"endor",
 	--"endor_asommers",
 	--"floratest",
