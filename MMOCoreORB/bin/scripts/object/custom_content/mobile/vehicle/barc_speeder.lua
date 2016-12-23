@@ -41,12 +41,8 @@
 --this exception also makes it possible to release a modified version 
 
 
+object_mobile_vehicle_barc_speeder = object_mobile_vehicle_shared_barc_speeder:new {
 
---Children folder includes
+}
 
--- Server Objects
-includeFile("weapon/melee/sword/base/crafted_lightsaber_base.lua")
-includeFile("weapon/melee/sword/base/crafted_sword_base.lua")
-includeFile("weapon/melee/sword/base/generic_lightsaber_base.lua")
-includeFile("weapon/melee/sword/base/lightsaber_base.lua")
-includeFile("weapon/melee/sword/base/sword_base.lua")
+ObjectTemplates:addTemplate(object_mobile_vehicle_barc_speeder, "object/mobile/vehicle/barc_speeder.iff")

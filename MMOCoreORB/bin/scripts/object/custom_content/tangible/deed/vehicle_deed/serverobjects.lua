@@ -44,9 +44,5 @@
 
 --Children folder includes
 
--- Server Objects
-includeFile("weapon/melee/sword/base/crafted_lightsaber_base.lua")
-includeFile("weapon/melee/sword/base/crafted_sword_base.lua")
-includeFile("weapon/melee/sword/base/generic_lightsaber_base.lua")
-includeFile("weapon/melee/sword/base/lightsaber_base.lua")
-includeFile("weapon/melee/sword/base/sword_base.lua")
+-- New Objects
+includeFile("custom_content/tangible/deed/vehicle_deed/barc_speeder_deed.lua")

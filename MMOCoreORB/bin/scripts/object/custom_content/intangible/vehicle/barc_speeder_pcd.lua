@@ -41,12 +41,9 @@
 --this exception also makes it possible to release a modified version 
 
 
+object_intangible_vehicle_barc_speeder_pcd = object_intangible_vehicle_shared_barc_speeder_pcd:new {
 
---Children folder includes
 
--- Server Objects
-includeFile("weapon/melee/sword/base/crafted_lightsaber_base.lua")
-includeFile("weapon/melee/sword/base/crafted_sword_base.lua")
-includeFile("weapon/melee/sword/base/generic_lightsaber_base.lua")
-includeFile("weapon/melee/sword/base/lightsaber_base.lua")
-includeFile("weapon/melee/sword/base/sword_base.lua")
+}
+
+ObjectTemplates:addTemplate(object_intangible_vehicle_barc_speeder_pcd, "object/intangible/vehicle/barc_speeder_pcd.iff")
