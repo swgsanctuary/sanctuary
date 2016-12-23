@@ -2,6 +2,8 @@
 
 This server is specifically for new post 14.1 content and server modifications compatible with Core3. They have been created and submitted by the SWG community. The new content is available for any server to use with just one restriction: We ask that you give full credit to the creator for their work on your server's website and not claim it as your own work. Thank you.
 
+Head to the Wiki for more detailed info.
+
 If you wish to submit work for inclusion in this repo, please do so via the MTG Server Content page [**here**](http://www.modthegalaxy.com/forums/forum-server-content). Full credit will be given for all work submitted.
 
 The complete set of consolidated tre files are [**here.**](https://mega.nz/#F!fw0EzZ4I!RfRwyqE859Ad3kGlQv7T4Q) These contain all the usual Pre-CU assets plus everything that has been added so far.
