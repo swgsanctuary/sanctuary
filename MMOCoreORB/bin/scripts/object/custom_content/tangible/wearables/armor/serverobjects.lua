@@ -43,5 +43,8 @@
 
 
 --Children folder includes
-includeFile("custom_content/tangible/deed/serverobjects.lua")
-includeFile("custom_content/tangible/wearables/serverobjects.lua")
+includeFile("custom_content/tangible/wearables/armor/assault_trooper/serverobjects.lua")
+includeFile("custom_content/tangible/wearables/armor/clone_trooper/serverobjects.lua")
+includeFile("custom_content/tangible/wearables/armor/rebel_assault/serverobjects.lua")
+includeFile("custom_content/tangible/wearables/armor/rebel_battle/serverobjects.lua")
+includeFile("custom_content/tangible/wearables/armor/scout_trooper/serverobjects.lua")
