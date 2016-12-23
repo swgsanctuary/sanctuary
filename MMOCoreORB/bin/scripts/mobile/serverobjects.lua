@@ -1,6 +1,9 @@
 -- Conversations
 includeFile("conversations.lua")
 
+--New Content
+includeFile("custom_content/serverobjects.lua")
+
 -- Creatures
 includeFile("corellia/serverobjects.lua")
 includeFile("dantooine/serverobjects.lua")
