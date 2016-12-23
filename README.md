@@ -23,3 +23,6 @@ This is now starting to be updated again, with the hope that a ZonamaDev image w
 It's purpose is to add all of the NGE assets and anything released by the kind contributors to the MTG website.
 
 The core3 files are a stock version of the SWGEmu unstable branch. Scripts will be added for all new content. Please test, and if you find any problems, please post to the above address
+
+**NOTE** 
+I wouldn't recommend using this repo as a base for a public server. It's meant to be an asset source not a working server, although it'll still work as one. No guarantee's as it's the unstable branch from SWGEmu. Definitely no support offered for public servers.
