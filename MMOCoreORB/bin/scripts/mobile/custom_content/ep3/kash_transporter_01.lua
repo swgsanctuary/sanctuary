@@ -29,7 +29,7 @@ kash_transporter_01 = Creature:new {
 	templates = {"object/mobile/ep3/ep3_forlorn_wookiee_01.iff"},
 	lootGroups = {},
 	weapons = {},
-	conversationTemplate = "treeTeleportGroundConvoTemplate",
+	conversationTemplate = "",
 	attacks = merge(brawlermaster,marksmanmaster)
 }
 

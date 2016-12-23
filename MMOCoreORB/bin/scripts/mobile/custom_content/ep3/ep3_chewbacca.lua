@@ -29,7 +29,7 @@ ep3_chewbacca = Creature:new {
 	templates = {"object/mobile/chewbacca.iff"},
 	lootGroups = {},
 	weapons = {},
-	conversationTemplate = "kachirhoChewbaccaConvoTemplate",
+	conversationTemplate = "",
 	--reactionStf = "@npc_reaction/slang",
 	attacks = merge(brawlermaster,marksmanmaster)
 }

@@ -29,7 +29,7 @@ ep3_vryyyr = Creature:new {
 	templates = {"object/mobile/ep3/ep3_carl_mosik.iff"},
 	lootGroups = {},
 	weapons = {},
-	conversationTemplate = "vryyyrConvoTemplate",
+	conversationTemplate = "",
 	--reactionStf = "@npc_reaction/slang",
 	attacks = merge(brawlermaster,marksmanmaster)
 }

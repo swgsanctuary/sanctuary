@@ -29,7 +29,7 @@ ep3_dr_price = Creature:new {
 	templates = {"object/mobile/ep3/ep3_dr_price.iff"},
 	lootGroups = {},
 	weapons = {},
-	conversationTemplate = "kachirhoDrPriceConvoTemplate",
+	conversationTemplate = "",
 	--reactionStf = "@npc_reaction/slang",
 	attacks = merge(brawlermaster,marksmanmaster)
 }
