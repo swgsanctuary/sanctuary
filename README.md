@@ -14,6 +14,7 @@ The complete set of consolidated tre files are [**here.**](https://mega.nz/#F!fw
 * Mustafar Mobs & NPC's
 * Kashyyyk Mobs and worldbuilding assets
 * Many NGE Mobs
+* NGE Houses
 * Chiss Backpack
 * BARC Speeder
 * NGE Housing
