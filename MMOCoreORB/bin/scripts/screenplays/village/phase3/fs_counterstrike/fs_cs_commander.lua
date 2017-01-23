@@ -203,7 +203,7 @@ function FsCsCommander:notifyEnteredCommanderTurninArea(pArea, pCreature)
 		return 1
 	end
 
-	if (shieldKillerID ~= escorterID) then
+	if (shieldKillerID ~= escorterID and FsCounterStrike:isOnQuest(pShieldKiller)) then
 		teamTurnin = true
 	end
 
@@ -276,7 +276,7 @@ function FsCsCommander:handleCommanderEscorterFailure(pPlayer, pCommander)
 		end
 
 		AiAgent(pCommander):setAiTemplate("manualescort")
-		self:doRun(pCommander)
+		createEvent(10, "FsCsCommander", "doRun", pCommander, "")
 		createEvent(self.runAwayTime * 1000, "FsCsCommander", "runAwaySuccessful", pCommander, "")
 		writeData(commanderID .. ":canBeRecaptured", 1)
 		CreatureObject(pShieldKiller):sendSystemMessage("@fs_quest_village:commander_is_free")
@@ -440,10 +440,11 @@ end
 
 function FsCsCommander:destroyCommanderWaypoint(pPlayer)
 	local waypointID = readData(SceneObject(pPlayer):getObjectID() .. ":village:csCommanderWaypoint")
-	local pWaypoint = getSceneObject(waypointID)
 
-	if (pWaypoint ~= nil) then
-		SceneObject(pWaypoint):destroyObjectFromWorld()
+	local pGhost = CreatureObject(pPlayer):getPlayerObject()
+
+	if (pGhost ~= nil) then
+		PlayerObject(pGhost):removeWaypoint(waypointID, true)
 	end
 
 	deleteData(SceneObject(pPlayer):getObjectID() .. ":village:csCommanderWaypoint")
@@ -545,7 +546,7 @@ function FsCsCommander:setupRescueMob(pMobile)
 	createEvent(getRandomNumber(20, 60) * 1000, "FsCsCommander", "doRescuerSpatial", pMobile, "")
 end
 
-function FsCsBaseControl:doRescuerSpatial(pMobile)
+function FsCsCommander:doRescuerSpatial(pMobile)
 	if (pMobile == nil or getRandomNumber(100) < 75) then
 		return
 	end
