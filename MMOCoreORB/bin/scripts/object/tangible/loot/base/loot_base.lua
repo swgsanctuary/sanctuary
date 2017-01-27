@@ -41,9 +41,8 @@
 --this exception also makes it possible to release a modified version 
 
 
+object_tangible_loot_base_loot_base = object_tangible_loot_base_shared_loot_base:new {
 
---Children folder includes
+}
 
--- Server Objects
-includeFile("tangible/terminal/base/base_portable_terminal.lua")
-includeFile("tangible/terminal/base/base_terminal.lua")
+ObjectTemplates:addTemplate(object_tangible_loot_base_loot_base, "object/tangible/loot/base/loot_base.iff")

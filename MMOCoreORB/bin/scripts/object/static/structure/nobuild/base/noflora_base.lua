@@ -41,9 +41,8 @@
 --this exception also makes it possible to release a modified version 
 
 
+object_static_structure_nobuild_base_noflora_base = object_static_structure_nobuild_base_shared_noflora_base:new {
 
---Children folder includes
+}
 
--- Server Objects
-includeFile("tangible/terminal/base/base_portable_terminal.lua")
-includeFile("tangible/terminal/base/base_terminal.lua")
+ObjectTemplates:addTemplate(object_static_structure_nobuild_base_noflora_base, "object/static/structure/nobuild/base/noflora_base.iff")
