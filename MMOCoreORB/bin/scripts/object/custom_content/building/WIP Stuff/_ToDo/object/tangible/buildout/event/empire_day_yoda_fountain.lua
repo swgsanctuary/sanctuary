@@ -1,0 +1,3 @@
+object_tangible_base_empire_day_yoda_fountain = object_tangible_base_shared_empire_day_yoda_fountain:new {
+}
+ObjectTemplates:addTemplate(object_tangible_base_empire_day_yoda_fountain, "object/tangible/base/empire_day_yoda_fountain.iff")

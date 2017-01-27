@@ -1,0 +1,1 @@
+object_tangible_loot_creature_loot_mustafar_jedi_relic_01 = object_tangible_loot_creature_loot_mustafar_shared_jedi_relic_01:new {}ObjectTemplates:addTemplate(object_tangible_loot_creature_loot_mustafar_jedi_relic_01, "object/tangible/loot/creature_loot/mustafar/jedi_relic_01.iff")

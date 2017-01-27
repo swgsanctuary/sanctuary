@@ -45,4 +45,4 @@
 --Children folder includes
 includeFile("custom_content/tangible/wearables/armor/serverobjects.lua")
 includeFile("custom_content/tangible/wearables/backpack/serverobjects.lua")
---includeFile("custom_content/tangible/wearables/cybernetic/serverobjects.lua")
+includeFile("custom_content/tangible/wearables/cybernetic/serverobjects.lua")

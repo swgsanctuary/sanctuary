@@ -1,0 +1,3 @@
+object_tangible_base_empire_day_emperor_statue = object_tangible_base_shared_empire_day_emperor_statue:new {
+}
+ObjectTemplates:addTemplate(object_tangible_base_empire_day_emperor_statue, "object/tangible/base/empire_day_emperor_statue.iff")

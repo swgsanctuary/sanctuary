@@ -71,8 +71,8 @@ object_weapon_melee_sword_ep3_sword_wookiee = object_weapon_melee_sword_ep3_shar
 	maxRange = 4,
 	maxRangeAccuracy = 10,
 
-	minDamage = 20,
-	maxDamage = 90,
+	minDamage = 60,
+	maxDamage = 250,
 
 	attackSpeed = 3.5,
 

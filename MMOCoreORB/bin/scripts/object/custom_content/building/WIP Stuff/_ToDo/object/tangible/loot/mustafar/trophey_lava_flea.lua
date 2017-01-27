@@ -1,0 +1,1 @@
+object_tangible_loot_creature_loot_mustafar_trophey_lava_flea = object_tangible_loot_creature_loot_mustafar_shared_trophey_lava_flea:new {}ObjectTemplates:addTemplate(object_tangible_loot_creature_loot_mustafar_trophey_lava_flea, "object/tangible/loot/creature_loot/mustafar/trophey_lava_flea.iff")
