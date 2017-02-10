@@ -80,7 +80,7 @@ function ExperienceConverter:getBranchLearnList(pPlayer)
 		if (VillageJediManagerCommon.hasUnlockedBranch(pPlayer, branchName)) then
 			local localizedBranch = getStringId("@quest/force_sensitive/utils:" .. branchName)
 			if (hasBranch) then
-				branchList = branchList + "\n" + localizedBranch
+				branchList = branchList .. "\n" .. localizedBranch
 			else
 				hasBranch = true
 				branchList = "\n" .. localizedBranch
@@ -107,7 +107,7 @@ function ExperienceConverter:sendConversionSUI(pPlayer, pNpc, experienceType)
 	local conversionList = self.xpConversion[experienceType]
 
 	if (conversionList == nil) then
-		printf("Error in ExperienceConverter:sendConversionSUI, could not grab xp conversion table for type " .. experienceType .. "\n")
+		printLuaError("ExperienceConverter:sendConversionSUI, could not grab xp conversion table for type " .. experienceType)
 		return
 	end
 

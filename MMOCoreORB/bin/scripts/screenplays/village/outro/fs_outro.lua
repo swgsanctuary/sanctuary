@@ -61,39 +61,16 @@ function FsOutro:onLoggedIn(pPlayer)
 			MellichaeOutroTheater:finish(pPlayer)
 		end
 
-		dropObserver(ZONESWITCHED, "FsOutro", "onZoneSwitched", pPlayer)
-		createObserver(ZONESWITCHED, "FsOutro", "onZoneSwitched", pPlayer)
-
 		QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_THEATER_CAMP)
 		local result = MellichaeOutroTheater:start(pPlayer)
 	end
-end
-
-function FsOutro:onZoneSwitched(pPlayer)
-	if (not self:isOnOutro(pPlayer)) then
-		return 1
-	end
-
-	local curStep = self:getCurrentStep(pPlayer)
-
-	if (curStep ~= self.MELLICHAETHEATER) then
-		return 1
-	end
-
-	if (MellichaeOutroTheater:hasTaskStarted(pPlayer)) then
-		MellichaeOutroTheater:finish(pPlayer)
-	end
-
-	MellichaeOutroTheater:start(pPlayer)
-
-	return 0
 end
 
 function FsOutro:startOldMan(pPlayer)
 	local stepData = self.stepDelay[self.OLDMANWAIT]
 
 	if (stepData == nil) then
-		printf("Error in FsOutro:startOldMan, invalid step data.\n")
+		printLuaError("FsOutro:startOldMan, invalid step data.")
 		return
 	end
 
