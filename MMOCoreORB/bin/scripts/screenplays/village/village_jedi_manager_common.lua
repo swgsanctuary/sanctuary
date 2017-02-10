@@ -157,7 +157,7 @@ function VillageJediManagerCommon.addToActiveQuestList(pPlayer)
 	if (not questMap:hasMapRow(playerID)) then
 		questMap:addMapRow(playerID, tostring(os.time()))
 	else
-		printf("Error in VillageJediManagerCommon.addToActiveQuestList, attempting to add existing player " .. SceneObject(pPlayer):getCustomObjectName() .. " to active quest list.\n")
+		printLuaError("VillageJediManagerCommon.addToActiveQuestList, attempting to add existing player " .. SceneObject(pPlayer):getCustomObjectName() .. " to active quest list.")
 	end
 end
 
@@ -186,7 +186,7 @@ function VillageJediManagerCommon.getLearnedForceSensitiveBranches(pPlayer)
 	local branchesLearned = 0
 
 	for i = 1, #VillageJediManagerCommon.forceSensitiveBranches, 1 do
-		if (CreatureObject(pPlayer):hasSkill(VillageJediManagerCommon.forceSensitiveBranches[i]) .. "_04") then
+		if (CreatureObject(pPlayer):hasSkill(VillageJediManagerCommon.forceSensitiveBranches[i] .. "_04")) then
 			branchesLearned = branchesLearned + 1
 		end
 	end
