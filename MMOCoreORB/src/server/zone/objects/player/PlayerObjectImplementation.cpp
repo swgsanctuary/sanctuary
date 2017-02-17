@@ -92,7 +92,7 @@ void PlayerObjectImplementation::initializeAccount() {
 		if (creature == NULL)
 			return;
 
-		ZoneClientSession* owner = creature->getClient();
+		auto owner = creature->getClient();
 
 		if (owner != NULL)
 			accountID = owner->getAccountID();
@@ -398,9 +398,12 @@ void PlayerObjectImplementation::sendFriendLists() {
 
 void PlayerObjectImplementation::sendMessage(BasePacket* msg) {
 	ManagedReference<SceneObject*> strongParent = getParent().get();
-	if (strongParent == NULL)
+	if (strongParent == NULL) {
+#ifdef LOCKFREE_BCLIENT_BUFFERS
+		if (!msg->getReferenceCount())
+#endif
 		delete msg;
-	else {
+	} else {
 		strongParent->sendMessage(msg);
 	}
 }
@@ -1516,8 +1519,9 @@ void PlayerObjectImplementation::doRecovery(int latency) {
 
 			setOffline();
 
-			if (creature->getClient() != NULL)
-				creature->getClient()->closeConnection(false, true);
+			auto session = creature->getClient();
+			if (session != NULL)
+				session->closeConnection(false, true);
 
 			return;
 		} else {
@@ -1761,7 +1765,7 @@ void PlayerObjectImplementation::reload(ZoneClientSession* client) {
 	if (isLoggingIn()) {
 		creature->unlock();
 
-		ZoneClientSession* owner = creature->getClient();
+		auto owner = creature->getClient();
 
 		if (owner != NULL && owner != client)
 			owner->disconnect();
@@ -1792,7 +1796,7 @@ void PlayerObjectImplementation::disconnect(bool closeClient, bool doLock) {
 		return;
 
 	if (!isOnline()) {
-		ZoneClientSession* owner = creature->getClient();
+		auto owner = creature->getClient();
 
 		if (closeClient && owner != NULL)
 			owner->closeConnection(false, true);
@@ -1817,7 +1821,7 @@ void PlayerObjectImplementation::disconnect(bool closeClient, bool doLock) {
 	if (disconnectEvent != NULL)
 		disconnectEvent = NULL;
 
-	ZoneClientSession* owner = creature->getClient();
+	auto owner = creature->getClient();
 
 	if (closeClient && owner != NULL)
 		owner->closeConnection(false, true);

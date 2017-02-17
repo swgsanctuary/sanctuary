@@ -9,6 +9,7 @@
 #include "server/zone/Zone.h"
 #include "server/zone/ZoneServer.h"
 #include "server/zone/ZoneProcessServer.h"
+#include "server/zone/ZoneClientSession.h"
 #include "server/zone/objects/cell/CellObject.h"
 #include "server/zone/objects/creature/CreatureObject.h"
 
@@ -357,7 +358,7 @@ bool BuildingObjectImplementation::isAllowedEntry(CreatureObject* player) {
 		return checkContainerPermission(player,ContainerPermissions::WALKIN);
 	}
 
-	if (getLotSize() > 0) {
+	if (!isClientObject()) {
 		PlayerObject* ghost = player->getPlayerObject().get();
 
 		if (ghost != NULL && ghost->hasPvpTef()) {
