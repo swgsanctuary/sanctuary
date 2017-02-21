@@ -1007,6 +1007,16 @@ bool SceneObjectImplementation::isASubChildOf(SceneObject* object) {
 	return false;
 }
 
+Zone* SceneObjectImplementation::getZone() {
+	auto root = static_cast<SceneObject*>(getRootParentUnsafe());
+
+	if (root != NULL) {
+		return root->getZone();
+	} else {
+		return zone;
+	}
+}
+
 bool SceneObjectImplementation::isInRange(SceneObject* object, float range) {
 	if (getZone() != object->getZone()) {
 		return false;
@@ -1016,6 +1026,20 @@ bool SceneObjectImplementation::isInRange(SceneObject* object, float range) {
 	worldPos.setZ(0);
 	Vector3 thisPos = getWorldPosition();
 	thisPos.setZ(0);
+
+	if (thisPos.squaredDistanceTo(worldPos) <= range * range)
+		return true;
+
+	return false;
+}
+
+bool SceneObjectImplementation::isInRange3d(SceneObject* object, float range) {
+	if (getZone() != object->getZone()) {
+		return false;
+	}
+
+	Vector3 worldPos = object->getWorldPosition();
+	Vector3 thisPos = getWorldPosition();
 
 	if (thisPos.squaredDistanceTo(worldPos) <= range * range)
 		return true;
@@ -1071,10 +1095,7 @@ void SceneObjectImplementation::setObjectName(StringId& stringID, bool notifyCli
 }
 
 Vector3 SceneObjectImplementation::getWorldPosition() {
-	if (parent.get() == NULL)
-		return getPosition();
-
-	ManagedReference<SceneObject*> root = getRootParent().castTo<SceneObject*>();
+	auto root = static_cast<SceneObject*>(getRootParentUnsafe());
 
 	if (root == NULL || !root->isBuildingObject())
 		return getPosition();
@@ -1120,10 +1141,7 @@ Vector3 SceneObjectImplementation::getWorldCoordinate(float distance, float angl
 }
 
 float SceneObjectImplementation::getWorldPositionX() {
-	if (parent.get() == NULL)
-		return getPositionX();
-
-	ManagedReference<SceneObject*> root = cast<SceneObject*>(getRootParentUnsafe());
+	auto root = static_cast<SceneObject*>(getRootParentUnsafe());
 
 	if (root == NULL || !root->isBuildingObject())
 		return getPositionX();
@@ -1135,10 +1153,7 @@ float SceneObjectImplementation::getWorldPositionX() {
 }
 
 float SceneObjectImplementation::getWorldPositionY() {
-	if (parent.get() == NULL)
-		return getPositionY();
-
-	ManagedReference<SceneObject*> root = cast<SceneObject*>(getRootParentUnsafe());
+	auto root = static_cast<SceneObject*>(getRootParentUnsafe());
 
 	if (root == NULL || !root->isBuildingObject())
 		return getPositionY();
@@ -1150,10 +1165,7 @@ float SceneObjectImplementation::getWorldPositionY() {
 }
 
 float SceneObjectImplementation::getWorldPositionZ() {
-	if (parent.get() == NULL)
-		return getPositionZ();
-
-	ManagedReference<SceneObject*> root = cast<SceneObject*>(getRootParentUnsafe());
+	auto root = static_cast<SceneObject*>(getRootParentUnsafe());
 
 	if (root == NULL || !root->isBuildingObject())
 		return getPositionZ();
