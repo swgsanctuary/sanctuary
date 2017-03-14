@@ -50,6 +50,11 @@ function SpawnMobiles.isPrefixFree(pSceneObject, prefix)
 	return inUse ~= PREFIX_IN_USE
 end
 
+function SpawnMobiles.isValidMobile(pMobile)
+	return pMobile ~= nil and pMobile ~= -1
+end
+
+
 -- Get the spawn point parameters for the specified spawn point generation.
 -- @param pSceneObject pointer to the scene object that the spawn is related to.
 -- @param mobileList a list with information about what mobiles to spawn.
@@ -98,7 +103,7 @@ function SpawnMobiles.generateSpawnPoints(pSceneObject, mobileList, forceSpawn)
 		if spawnPointParams ~= nil then
 			local spawnPoint = getSpawnPoint(zoneName, spawnPointParams["x"], spawnPointParams["y"], spawnPointParams["min"], spawnPointParams["max"], forceSpawn)
 			if spawnPoint ~= nil then
-				table.insert(spawnPoints, spawnPoint)
+				spawnPoints[spawnObjectNumber] = spawnPoint
 			else
 				return nil
 			end
@@ -125,12 +130,16 @@ function SpawnMobiles.spawnMobileObjects(pSceneObject, prefix, mobileList, spawn
 		if (readData(playerID .. prefix .. SPAWN_MOBILES_STRING .. spawnNumber .. ":noRespawn") ~= 1) then
 			spawnedObject = spawnMobile(SceneObject(pSceneObject):getZoneName(), mobileList[spawnNumber]["template"], 0, spawnPoints[spawnNumber][1], spawnPoints[spawnNumber][2], spawnPoints[spawnNumber][3], getRandomNumber(360) - 180, SceneObject(pSceneObject):getParentID())
 		end
-		
+
 		if (spawnedObject ~= nil) then
 			AiAgent(spawnedObject):setNoAiAggro()
 		end
-		
-		table.insert(spawnedObjects, spawnedObject)
+
+		if (spawnedObject ~= nil) then
+			spawnedObjects[spawnNumber] = spawnedObject
+		else
+			spawnedObjects[spawnNumber] = -1
+		end
 	end
 
 	return spawnedObjects
@@ -144,14 +153,14 @@ function SpawnMobiles.saveSpawnedMobileObjects(pSceneObject, prefix, spawnedObje
 	local objectID = SceneObject(pSceneObject):getObjectID()
 
 	writeData(objectID .. prefix .. SPAWN_MOBILES_STRING .. IN_USE_STRING, PREFIX_IN_USE)
-	Logger:log(objectID .. prefix .. SPAWN_MOBILES_STRING .. IN_USE_STRING .. " set to " .. PREFIX_IN_USE)
 	writeData(objectID .. prefix .. SPAWN_MOBILES_STRING .. NUMBER_OF_SPAWNS_STRING, #spawnedObjects)
-	Logger:log(objectID .. prefix .. SPAWN_MOBILES_STRING .. NUMBER_OF_SPAWNS_STRING .. " set to " .. #spawnedObjects)
 
 	for i = 1, #spawnedObjects, 1 do
-		local spawnedID = SceneObject(spawnedObjects[i]):getObjectID()
-		writeData(objectID .. prefix .. SPAWN_MOBILES_STRING .. i, spawnedID)
-		Logger:log(objectID .. prefix .. SPAWN_MOBILES_STRING .. i .. " set to " .. spawnedID)
+		if (spawnedObjects[i] ~= -1) then
+			writeData(objectID .. prefix .. SPAWN_MOBILES_STRING .. i, SceneObject(spawnedObjects[i]):getObjectID())
+		else
+			writeData(objectID .. prefix .. SPAWN_MOBILES_STRING .. i, 0)
+		end
 	end
 end
 
@@ -162,10 +171,7 @@ end
 -- @param spawnPoints a list with spawn points to use for the mobile objects.
 function SpawnMobiles.generateMobileObjects(pSceneObject, prefix, mobileList, spawnPoints)
 	local spawnedObjects = SpawnMobiles.spawnMobileObjects(pSceneObject, prefix, mobileList, spawnPoints)
-
-	if spawnedObjects ~= nil and #spawnedObjects > 0 then
-		SpawnMobiles.saveSpawnedMobileObjects(pSceneObject, prefix, spawnedObjects)
-	end
+	SpawnMobiles.saveSpawnedMobileObjects(pSceneObject, prefix, spawnedObjects)
 
 	return spawnedObjects
 end
@@ -198,7 +204,7 @@ function SpawnMobiles.spawnMobilesWithLocAndPrefix(pSceneObject, prefix, mobileL
 		local newY = baseY + mobileList[i].y
 		local newZ = getTerrainHeight(pSceneObject, newX, newY)
 
-		table.insert(spawnPoints, { newX, newZ, newY })
+		spawnPoints[i] = { newX, newZ, newY }
 	end
 
 	if spawnPoints ~= nil and #spawnPoints > 0 then
@@ -222,11 +228,15 @@ function SpawnMobiles.getSpawnedMobilePointersList(pSceneObject, prefix)
 	for i = 1, numberOfSpawns, 1 do
 		local mobileID = readData(playerID .. prefix .. SPAWN_MOBILES_STRING .. i)
 		Logger:log(playerID .. prefix .. SPAWN_MOBILES_STRING .. i .. " = " .. mobileID, LT_INFO)
-		local mobile = getSceneObject(mobileID)
+		local mobile
 
-		if mobile ~= nil then
-			table.insert(spawnedMobiles, mobile)
+		if (mobileID == 0) then
+			mobile = -1
+		else
+			mobile = getSceneObject(mobileID)
 		end
+
+		spawnedMobiles[i] = mobile
 	end
 
 	return spawnedMobiles
@@ -237,7 +247,6 @@ end
 -- @param prefix the prefix to read the spawned mobiles from.
 -- @return a list with pointers to the spawned mobiles or nil if none have been spawned.
 function SpawnMobiles.getSpawnedMobiles(pSceneObject, prefix)
-	Logger:log("Getting spawned mobiles for prefix '" .. prefix .. "'.", LT_INFO)
 	if not SpawnMobiles.isPrefixFree(pSceneObject, prefix) then
 		return SpawnMobiles.getSpawnedMobilePointersList(pSceneObject, prefix)
 	else
@@ -255,18 +264,20 @@ function SpawnMobiles.despawnMobilesInList(pSceneObject, spawnedMobilesList, pre
 		end
 
 		for i = 1, #spawnedMobilesList, 1 do
-			if (storeRespawn and (spawnedMobilesList[i] == nil or CreatureObject(spawnedMobilesList[i]):isDead())) then
+			if (storeRespawn and (spawnedMobilesList[i] == nil or spawnedMobilesList[i] == -1 or CreatureObject(spawnedMobilesList[i]):isDead())) then
 				writeData(playerID .. prefix .. SPAWN_MOBILES_STRING .. i .. ":noRespawn", 1)
 			end
 
-			if (CreatureObject(spawnedMobilesList[i]):isInCombat() or AiAgent(spawnedMobilesList[i]):getFollowObject() ~= nil) then
-				createEvent(10000, "HelperFuncs", "despawnMobileTask", spawnedMobilesList[i], "")
-				
-				if (storeRespawn) then
-					writeData(playerID .. prefix .. SPAWN_MOBILES_STRING .. i .. ":noRespawn", 1)
+			if (spawnedMobilesList[i] ~= nil and spawnedMobilesList[i] ~= -1) then
+				if (CreatureObject(spawnedMobilesList[i]):isInCombat() or AiAgent(spawnedMobilesList[i]):getFollowObject() ~= nil) then
+					createEvent(10000, "HelperFuncs", "despawnMobileTask", spawnedMobilesList[i], "")
+
+					if (storeRespawn) then
+						writeData(playerID .. prefix .. SPAWN_MOBILES_STRING .. i .. ":noRespawn", 1)
+					end
+				else
+					SceneObject(spawnedMobilesList[i]):destroyObjectFromWorld()
 				end
-			else
-				SceneObject(spawnedMobilesList[i]):destroyObjectFromWorld()
 			end
 		end
 	end

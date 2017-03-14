@@ -40,7 +40,7 @@ function padawan_bad_cat_01_conv_handler:runScreenHandlers(pConvTemplate, pPlaye
 	elseif (screenID == "last_location" or screenID == "uploaded_coordinates") then
 		writeData(playerID .. ":JediTrials:acceptedTask", 1)
 		writeData(SceneObject(pNpc):getObjectID() .. ":destroyNpcOnExit", 1)
-		PadawanTrials:createSecondLocation(pPlayer)
+		PadawanTrials:createTargetLocation(pPlayer)
 	end
 
 	return pConvScreen

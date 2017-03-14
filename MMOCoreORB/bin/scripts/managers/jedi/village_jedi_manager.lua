@@ -72,6 +72,8 @@ function VillageJediManager:onPlayerLoggedIn(pPlayer)
 		VillageCommunityCrafting:removeSchematics(pPlayer, 2)
 		VillageCommunityCrafting:removeSchematics(pPlayer, 3)
 	end
+	
+	JediTrials:onPlayerLoggedIn(pPlayer)
 end
 
 function VillageJediManager:onPlayerLoggedOut(pPlayer)
@@ -121,7 +123,7 @@ function VillageJediManager:canSurrenderSkill(pPlayer, skillName)
 		return false
 	end
 
-	if string.find(skillName, "force_sensitive_") and CreatureObject(pPlayer):hasSkill("force_title_jedi_rank_01") and CreatureObject(pPlayer):getForceSensitiveSkillCount(false) <= 24 then
+	if string.find(skillName, "force_sensitive_") and CreatureObject(pPlayer):hasSkill("force_title_jedi_rank_02") and CreatureObject(pPlayer):getForceSensitiveSkillCount(false) <= 24 then
 		return false
 	end
 

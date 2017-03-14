@@ -374,14 +374,15 @@ int ZoneImplementation::getInRangeActiveAreas(float x, float y, SortedVector<Man
 	return objects->size();
 }
 
-int ZoneImplementation::getInRangeNavMeshes(float x, float y, float range, SortedVector<ManagedReference<NavMeshRegion*> >* objects, bool readlock) {
+int ZoneImplementation::getInRangeNavMeshes(float x, float y, SortedVector<ManagedReference<NavArea*> >* objects, bool readlock) {
+
 	Zone* thisZone = _this.getReferenceUnsafeStaticCast();
 
 	SortedVector<ManagedReference<QuadTreeEntry*> > entryObjects;
 
 	try {
 		thisZone->rlock(readlock);
-		regionTree->inRange(x, y, range, entryObjects);
+		regionTree->inRange(x, y, entryObjects);
 		thisZone->runlock(readlock);
 	}catch (...) {
 		thisZone->runlock(readlock);
@@ -389,7 +390,7 @@ int ZoneImplementation::getInRangeNavMeshes(float x, float y, float range, Sorte
 	}
 
 	for (int i = 0; i < entryObjects.size(); ++i) {
-		NavMeshRegion* obj = dynamic_cast<NavMeshRegion*>(entryObjects.get(i).get());
+		NavArea* obj = dynamic_cast<NavArea*>(entryObjects.get(i).get());
 		if (obj)
 			objects->put(obj);
 	}

@@ -81,7 +81,7 @@
 #include "server/zone/objects/tangible/powerup/PowerupObject.h"
 #include "server/zone/objects/resource/ResourceSpawn.h"
 #include "server/zone/objects/tangible/component/Component.h"
-#include "server/zone/objects/pathfinding/NavMeshRegion.h"
+#include "server/zone/objects/pathfinding/NavArea.h"
 #include "server/zone/objects/player/sui/listbox/LuaSuiListBox.h"
 #include "server/zone/objects/tangible/component/lightsaber/LightsaberCrystalComponent.h"
 #include "server/zone/objects/creature/variables/LuaSkill.h"
@@ -421,6 +421,8 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	luaEngine->setGlobalInt("LOGGEDIN", ObserverEventType::LOGGEDIN);
 	luaEngine->setGlobalInt("LOGGEDOUT", ObserverEventType::LOGGEDOUT);
 	luaEngine->setGlobalInt("ZONESWITCHED", ObserverEventType::ZONESWITCHED);
+	luaEngine->setGlobalInt("TUNEDCRYSTAL", ObserverEventType::TUNEDCRYSTAL);
+	luaEngine->setGlobalInt("PROTOTYPECREATED", ObserverEventType::PROTOTYPECREATED);
 
 	luaEngine->setGlobalInt("UPRIGHT", CreaturePosture::UPRIGHT);
 	luaEngine->setGlobalInt("PRONE", CreaturePosture::PRONE);
@@ -2644,6 +2646,13 @@ Vector3 DirectorManager::generateSpawnPoint(String zoneName, float x, float y, f
 
 		float newX = x + (cos(newAngle) * distance); // client has x/y inverted
 		float newY = y + (sin(newAngle) * distance);
+
+		newX = (newX < -8150) ? -8150 : newX;
+		newX = (newX > 8150) ? 8150 : newX;
+
+		newY = (newY < -8150) ? -8150 : newY;
+		newY = (newY > 8150) ? 8150 : newY;
+
 		float newZ = zone->getHeight(newX, newY);
 
 		position = Vector3(newX, newY, newZ);
@@ -3262,22 +3271,22 @@ int DirectorManager::createNavMesh(lua_State *L) {
         return 0;
     }
 
-    ManagedReference<NavMeshRegion*> navmeshRegion = ServerCore::getZoneServer()->createObject(STRING_HASHCODE("object/region_navmesh.iff"), 0).castTo<NavMeshRegion*>();
+    ManagedReference<NavArea*> navArea = ServerCore::getZoneServer()->createObject(STRING_HASHCODE("object/region_navmesh.iff"), 0).castTo<NavArea*>();
     if (name.length() == 0) {
-        name = String::valueOf(navmeshRegion->getObjectID());
+        name = String::valueOf(navArea->getObjectID());
     }
 
     Core::getTaskManager()->scheduleTask([=]{
         String str = name;
         Vector3 position = Vector3(x, 0, z);
 
-		Locker locker(navmeshRegion);
+		Locker locker(navArea);
 
-        navmeshRegion->disableMeshUpdates(!dynamic);
-        navmeshRegion->initializeNavRegion(position, radius, zone, str);
-        zone->transferObject(navmeshRegion, -1, false);
+        navArea->disableMeshUpdates(!dynamic);
+        navArea->initializeNavArea(position, radius, zone, str);
+        zone->transferObject(navArea, -1, false);
     }, "create_lua_navmesh", 1000);
-    lua_pushlightuserdata(L, navmeshRegion);
+    lua_pushlightuserdata(L, navArea);
     return 1;
 }
 

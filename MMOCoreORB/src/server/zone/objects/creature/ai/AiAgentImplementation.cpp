@@ -1272,6 +1272,8 @@ void AiAgentImplementation::respawn(Zone* zone, int level) {
 	resetBehaviorList();
 	clearCombatState(true);
 
+	setPosture(CreaturePosture::UPRIGHT, false);
+
 	initializePosition(homeLocation.getPositionX(), homeLocation.getPositionZ(), homeLocation.getPositionY());
 
 	CellObject* cell = homeLocation.getCell();
@@ -1335,8 +1337,6 @@ void AiAgentImplementation::notifyDespawn(Zone* zone) {
 		setLevel(level);
 
 	stateBitmask = 0;
-
-	setPosture(CreaturePosture::UPRIGHT, false);
 
 	shockWounds = 0;
 
@@ -1934,45 +1934,57 @@ bool AiAgentImplementation::generatePatrol(int num, float dist) {
 	clearPatrolPoints();
 	clearSavedPatrolPoints();
 
-	SortedVector<QuadTreeEntry*> closeObjects;
-
 	Zone* zone = getZoneUnsafe();
 
 	if (zone == NULL)
 		return false;
 
-	if (closeobjects != NULL) {
-		closeobjects->safeCopyTo(closeObjects);
+	if (isInNavMesh()) {
+		Sphere sphere(getWorldPosition(), dist);
+		Vector3 result;
+
+		for (int i = 0; i < num; i++) {
+			if (PathFinderManager::instance()->getSpawnPointInArea(sphere, zone, result, false)) {
+				PatrolPoint point(result);
+				addPatrolPoint(point);
+			}
+		}
 	} else {
+		SortedVector<QuadTreeEntry*> closeObjects;
+
+		if (closeobjects != NULL) {
+			closeobjects->safeCopyTo(closeObjects);
+		} else {
 #ifdef COV_DEBUG
-		zone->info("Null closeobjects vector in AiAgentImplementation::generatePatrol", true);
+			zone->info("Null closeobjects vector in AiAgentImplementation::generatePatrol", true);
 #endif
 
-		Vector3 worldPosition = getWorldPosition();
-		zone->getInRangeObjects(worldPosition.getX(), worldPosition.getY(), 128, &closeObjects, true);
-	}
-
-	for (int i = 0; i < num; i++) {
-		PatrolPoint newPoint;
-		newPoint.setPositionX(homeLocation.getPositionX() + (-1 * dist + (float)System::random((unsigned int)dist * 2)));
-		newPoint.setPositionY(homeLocation.getPositionY() + (-1 * dist + (float)System::random((unsigned int)dist * 2)));
-		newPoint.setPositionZ(homeLocation.getPositionZ());
-
-		ManagedReference<SceneObject*> strongParent = getParent().get();
-		if (strongParent != NULL && strongParent->isCellObject()) {
-			newPoint.setCell(strongParent.castTo<CellObject*>());
+			Vector3 worldPosition = getWorldPosition();
+			zone->getInRangeObjects(worldPosition.getX(), worldPosition.getY(), 128, &closeObjects, true);
 		}
 
-		if (newPoint.getCell() == NULL && zone != NULL) {
-			PlanetManager* planetManager = zone->getPlanetManager();
-			IntersectionResults intersections;
+		for (int i = 0; i < num; i++) {
+			PatrolPoint newPoint;
+			newPoint.setPositionX(homeLocation.getPositionX() + (-1 * dist + (float)System::random((unsigned int)dist * 2)));
+			newPoint.setPositionY(homeLocation.getPositionY() + (-1 * dist + (float)System::random((unsigned int)dist * 2)));
+			newPoint.setPositionZ(homeLocation.getPositionZ());
 
-			CollisionManager::getWorldFloorCollisions(newPoint.getPositionX(), newPoint.getPositionY(), zone, &intersections, closeObjects);
+			ManagedReference<SceneObject*> strongParent = getParent().get();
+			if (strongParent != NULL && strongParent->isCellObject()) {
+				newPoint.setCell(strongParent.castTo<CellObject*>());
+			}
 
-			newPoint.setPositionZ(planetManager->findClosestWorldFloor(newPoint.getPositionX(), newPoint.getPositionY(), newPoint.getPositionZ(), this->getSwimHeight(), &intersections, (CloseObjectsVector*) this->getCloseObjects()));
+			if (newPoint.getCell() == NULL && zone != NULL) {
+				PlanetManager* planetManager = zone->getPlanetManager();
+				IntersectionResults intersections;
+
+				CollisionManager::getWorldFloorCollisions(newPoint.getPositionX(), newPoint.getPositionY(), zone, &intersections, closeObjects);
+
+				newPoint.setPositionZ(planetManager->findClosestWorldFloor(newPoint.getPositionX(), newPoint.getPositionY(), newPoint.getPositionZ(), this->getSwimHeight(), &intersections, (CloseObjectsVector*) this->getCloseObjects()));
+			}
+
+			addPatrolPoint(newPoint);
 		}
-
-		addPatrolPoint(newPoint);
 	}
 
 	if (getPatrolPointSize() > 0) {
@@ -2576,7 +2588,7 @@ bool AiAgentImplementation::sendConversationStartTo(SceneObject* player) {
 
 	ConversationTemplate* conversationTemplate = CreatureTemplateManager::instance()->getConversationTemplate(convoTemplateCRC);
 	if (conversationTemplate != NULL && conversationTemplate->getConversationTemplateType() == ConversationTemplate::ConversationTemplateTypeTrainer) {
-		ManagedReference<CityRegion*> city = player->getCityRegion();
+		ManagedReference<CityRegion*> city = player->getCityRegion().get();
 
 		if (city != NULL && !city->isClientRegion() && city->isBanned(player->getObjectID())) {
 			playerCreature->sendSystemMessage("@city/city:banned_services"); // You are banned from using this city's services.

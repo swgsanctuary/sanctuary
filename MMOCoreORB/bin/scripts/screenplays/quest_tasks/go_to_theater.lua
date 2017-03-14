@@ -136,7 +136,7 @@ function GoToTheater:spawnTheaterObjects(pPlayer)
 		local xLoc = spawnPoint[1] + objectData.xDiff
 		local yLoc = spawnPoint[3] + objectData.yDiff
 		local zLoc = getTerrainHeight(pPlayer, xLoc, yLoc) + objectData.zDiff
-		local pObject = spawnSceneObject(zoneName, objectData.template, xLoc, zLoc, yLoc, 0, objectData.heading)
+		local pObject = spawnSceneObject(zoneName, objectData.template, xLoc, zLoc, yLoc, 0, math.rad(objectData.heading))
 
 		if (pObject ~= nil) then
 			writeData(playerID .. self.taskName .. "theaterObject" .. i, SceneObject(pObject):getObjectID())
@@ -194,7 +194,7 @@ function GoToTheater:setupActiveArea(pPlayer, spawnPoint)
 
 	if (pActiveArea ~= nil) then
 		writeData(SceneObject(pPlayer):getObjectID() .. self.taskName .. "activeAreaId", SceneObject(pActiveArea):getObjectID())
-		createEvent(5000, self.taskName, "createAreaObserver", pActiveArea, "")
+		createEvent(2000, self.taskName, "createAreaObserver", pActiveArea, "")
 		return true
 	end
 
