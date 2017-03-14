@@ -41,6 +41,13 @@
 --Children folder includes
 
 -- Server Objects
+includeFile("custom_content/building/kashyyyk/frn_sordaan_armory_static.lua")
+includeFile("custom_content/building/kashyyyk/thm_kash_rodian_bannerpole_s01.lua")
+includeFile("custom_content/building/kashyyyk/thm_kash_rodian_flagpole_s01.lua")
+includeFile("custom_content/building/kashyyyk/uber_animal_hide_rack.lua")
+includeFile("custom_content/building/kashyyyk/uber_animal_hide_rack_s02.lua")
+includeFile("custom_content/building/kashyyyk/uber_animal_hide_rack_s03.lua")
+includeFile("custom_content/building/kashyyyk/uber_animal_hide_rack_s04.lua")
 includeFile("custom_content/building/kashyyyk/cave_dead_grass_s01.lua")
 includeFile("custom_content/building/kashyyyk/cave_driftwood.lua")
 includeFile("custom_content/building/kashyyyk/cave_leaf_mound.lua")

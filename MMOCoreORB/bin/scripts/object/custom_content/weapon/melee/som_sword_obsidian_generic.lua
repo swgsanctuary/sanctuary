@@ -71,8 +71,8 @@ object_weapon_melee_sword_som_sword_obsidian_generic = object_weapon_melee_sword
 	maxRange = 4,
 	maxRangeAccuracy = 10,
 
-	minDamage = 20,
-	maxDamage = 90,
+	minDamage = 60,
+	maxDamage = 250,
 
 	attackSpeed = 3.5,
 
