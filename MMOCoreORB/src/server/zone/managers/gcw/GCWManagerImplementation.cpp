@@ -1149,7 +1149,7 @@ void GCWManagerImplementation::repairTerminal(CreatureObject* creature, Tangible
 		return;
 	}
 
-	if (!isBaseVulnerable(building) || !isTerminalDamaged(building))
+	if (!isBaseVulnerable(building) || !isTerminalDamaged(securityTerminal))
 		return;
 
 	if (baseData->isTerminalBeingRepaired()) {
@@ -1573,7 +1573,7 @@ void GCWManagerImplementation::doBaseDestruction(BuildingObject* building) {
 
 	unregisterGCWBase(building);
 
-	StructureManager::instance()->destroyStructure(building);
+	StructureManager::instance()->destroyStructure(building, true);
 }
 
 void GCWManagerImplementation::broadcastBuilding(BuildingObject* building, StringIdChatParameter& params) {

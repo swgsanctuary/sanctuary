@@ -85,7 +85,7 @@ void TangibleObjectImplementation::notifyLoadFromDatabase() {
 		TangibleObject *tano = asTangibleObject();
 		for (int i = activeAreas.size() - 1; i >= 0; i--) {
 			auto& area = activeAreas.get(i);
-			if (!area->isNavRegion()) {
+			if (!area->isNavArea()) {
 				area->notifyExit(tano);
 				activeAreas.remove(i);
 			}
@@ -1110,6 +1110,16 @@ void TangibleObjectImplementation::setDisabled(bool disabled) {
 
 bool TangibleObjectImplementation::isDisabled() {
 	return getOptionsBitmask() & OptionBitmask::DISABLED;
+}
+
+bool TangibleObjectImplementation::isInNavMesh() {
+	for (int i = 0; i < activeAreas.size(); ++i) {
+		auto& area = activeAreas.get(i);
+		if (area->isNavArea())
+			return true;
+	}
+
+	return false;
 }
 
 TangibleObject* TangibleObject::asTangibleObject() {
