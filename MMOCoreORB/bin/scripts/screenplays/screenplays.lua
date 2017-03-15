@@ -611,3 +611,6 @@ includeFile("record_keepers/record_keepers.lua")
 --Tests
 includeFile("tests/tests.lua")
 
+--Custom Screenplays
+includeFile("custom_screenplays/screenplays.lua")
+
