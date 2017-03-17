@@ -71,8 +71,8 @@ object_weapon_melee_2h_sword_2h_sword_battleaxe_npe = object_weapon_melee_2h_swo
 	maxRange = 5,
 	maxRangeAccuracy = 5,
 
-	minDamage = 75,
-	maxDamage = 125,
+	minDamage = 60,
+	maxDamage = 250,
 
 	attackSpeed = 4.5,
 

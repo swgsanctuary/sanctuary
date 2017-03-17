@@ -71,8 +71,8 @@ object_weapon_melee_sword_sword_avatar_wke_spiritblade = object_weapon_melee_swo
 	maxRange = 4,
 	maxRangeAccuracy = 10,
 
-	minDamage = 20,
-	maxDamage = 90,
+	minDamage = 60,
+	maxDamage = 250,
 
 	attackSpeed = 3.5,
 

@@ -44,6 +44,10 @@
 object_tangible_wearables_armor_clone_trooper_armor_clone_trooper_neutral_s01_belt = object_tangible_wearables_armor_clone_trooper_shared_armor_clone_trooper_neutral_s01_belt:new {
 	templateType = ARMOROBJECT,
 
+	--objectMenuComponent = {"cpp", "ArmorObjectMenuComponent"},
+
+	--faction = "Imperial",
+
 	playerRaces = { "object/creature/player/bothan_male.iff",
 				"object/creature/player/bothan_female.iff",
 				"object/creature/player/human_male.iff",
