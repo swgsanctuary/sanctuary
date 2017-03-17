@@ -26,6 +26,9 @@
 #include "server/zone/managers/stringid/StringIdManager.h"
 #include "server/zone/managers/planet/PlanetManager.h"
 #include "server/zone/managers/vendor/VendorManager.h"
+#include "server/zone/managers/collision/CollisionManager.h"
+
+
 #include "server/zone/objects/player/sui/callbacks/StructurePayAccessFeeSuiCallback.h"
 #include "server/zone/objects/building/tasks/RevokePaidAccessTask.h"
 #include "server/zone/objects/region/CityRegion.h"
@@ -235,7 +238,13 @@ Vector3 BuildingObjectImplementation::getEjectionPoint() {
 
 		ejectionPoint.setX(worldPosition.getX() + templateEjectionPoint.getX());
 		ejectionPoint.setY(worldPosition.getY() + templateEjectionPoint.getY());
-		ejectionPoint.setZ(zone->getHeight(ejectionPoint.getX(), ejectionPoint.getY()));
+		auto zone = getZone();
+
+		if (zone != nullptr) {
+			ejectionPoint.setZ(CollisionManager::getWorldFloorCollision(ejectionPoint.getX(), ejectionPoint.getY(), zone, false));
+		} else {
+			ejectionPoint.setZ(worldPosition.getZ() + templateEjectionPoint.getZ());
+		}
 
 		return ejectionPoint;
 	} else {
@@ -682,7 +691,6 @@ void BuildingObjectImplementation::updateCellPermissionsTo(CreatureObject* creat
 		if (cell == NULL)
 			continue;
 
-		//cell->sendPermissionsTo(creature,false);
 		cell->sendPermissionsTo(creature, allowEntry);
 	}
 }
@@ -697,10 +705,7 @@ void BuildingObjectImplementation::ejectObject(CreatureObject* creature) {
 
 	float x = ejectionPoint.getX();
 	float y = ejectionPoint.getY();
-	float z = 0;
-
-	if (zone != NULL)
-		z = zone->getHeight(x, y);
+	float z = ejectionPoint.getZ();
 
 	Reference<Task*> task = new EjectObjectEvent(creature, x, z, y);
 	task->execute();
