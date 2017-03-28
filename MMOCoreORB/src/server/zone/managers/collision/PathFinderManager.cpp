@@ -450,7 +450,7 @@ Vector<WorldCoordinates>* PathFinderManager::findPathFromWorldToCell(const World
 }
 
 FloorMesh* PathFinderManager::getFloorMesh(CellObject* cell) {
-    ManagedReference<BuildingObject*> building1 = (cell->getParent().castTo<BuildingObject*>());
+    ManagedReference<BuildingObject*> building1 = (cell->getParent().get().castTo<BuildingObject*>());
 
     SharedObjectTemplate* templateObject = building1->getObjectTemplate();
 
@@ -1025,13 +1025,14 @@ bool PathFinderManager::getSpawnPointInArea(const Sphere& area, Zone *zone, Vect
 
 					Vector3 temp = point - center;
 					float len = temp.length();
-					float multiplier = radius / (MIN(len, 1.0f));
-					temp.setX(temp.getX() * multiplier);
-					temp.setY(temp.getY() * multiplier);
-					point = center + temp;
+					if (len > radius) {
+						float multiplier = (frand() * radius) / len;
+						temp.setX(temp.getX() * multiplier);
+						temp.setY(temp.getY() * multiplier);
+						point = center + temp;
 
-					point.setZ(zone->getHeightNoCache(point.getX(), point.getY()));
-
+						point.setZ(zone->getHeightNoCache(point.getX(), point.getY()));
+					}
 					return true;
 				}
 			} catch (Exception& exc) {

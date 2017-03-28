@@ -203,7 +203,7 @@ void PlayerObjectImplementation::unload() {
 	PlayerManager* playerManager = creature->getZoneServer()->getPlayerManager();
 	playerManager->ejectPlayerFromBuilding(creature);
 
-	ManagedReference<SceneObject*> creoParent = creature->getParent();
+	ManagedReference<SceneObject*> creoParent = creature->getParent().get();
 
 	if (creature->getZone() != NULL) {
 		savedTerrainName = creature->getZone()->getZoneName();
@@ -1139,7 +1139,7 @@ void PlayerObjectImplementation::addIgnore(const String& name, bool notifyClient
 
 void PlayerObjectImplementation::removeIgnore(const String& name, bool notifyClient) {
 	String nameLower = name.toLowerCase();
-	ManagedReference<SceneObject*> parent = getParent();
+	ManagedReference<SceneObject*> parent = getParent().get();
 
 	if (!ignoreList.contains(nameLower)) {
 		if (notifyClient) {
@@ -1594,7 +1594,7 @@ void PlayerObjectImplementation::checkForNewSpawns() {
 		return;
 	}
 
-	ManagedReference<SceneObject*> parent = creature->getParent();
+	ManagedReference<SceneObject*> parent = creature->getParent().get();
 
 	if (parent != NULL && parent->isCellObject()) {
 		return;
@@ -1779,7 +1779,7 @@ void PlayerObjectImplementation::reload(ZoneClientSession* client) {
 
 	//notifiedSentObjects.removeAll();
 
-	if (creature->isRidingMount() && creature->getParent() == NULL) {
+	if (creature->isRidingMount() && creature->getParent().get() == NULL) {
 		creature->clearState(CreatureState::RIDINGMOUNT);
 	}
 
@@ -2530,7 +2530,7 @@ void PlayerObjectImplementation::doFieldFactionChange(int newStatus) {
 	if (curStatus == FactionStatus::OVERT || curStatus == newStatus)
 		return;
 
-	if (parent->getFutureFactionStatus() != FactionStatus::ONLEAVE)
+	if (parent->getFutureFactionStatus() != -1)
 		return;
 
 	if (hasSuiBoxWindowType(SuiWindowType::FIELD_FACTION_CHANGE))
@@ -2543,11 +2543,6 @@ void PlayerObjectImplementation::doFieldFactionChange(int newStatus) {
 	inputbox->setCancelButton(true, "@cancel");
 
 	if (newStatus == FactionStatus::COVERT) {
-		/*if (curStatus == FactionStatus::OVERT) { //this can never happen, curStatus is checked for OVERT at the beginning of the method
-			parent->sendSystemMessage("@gcw:cannot_change_from_combatant_in_field"); // You cannot change you status to combatant in the field. Go talk to a faction recruiter.
-			return;
-		}*/
-
 		inputbox->setPromptText("@gcw:gcw_status_change_covert"); // You are changing your GCW Status to 'Combatant'. This transition will take 30 seconds. It will allow you to attack and be attacked by enemy NPC's. Type YES in this box to confirm the change.
 	} else if (newStatus == FactionStatus::OVERT) {
 		inputbox->setPromptText("@gcw:gcw_status_change_overt"); // You are changing your GCW Status to 'Special Forces'. This transition will take 5 minutes. It will allow you to attack and be attacked by hostile players and NPC's.Type YES in this box to confirm the change.

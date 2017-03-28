@@ -43,7 +43,7 @@ void ZoneComponent::insertChildObjectsToZone(SceneObject* sceneObject, Zone* zon
 		if (outdoorChild == NULL)
 			continue;
 
-		if (outdoorChild->getContainmentType() != 4 && outdoorChild->getParent() == NULL) {
+		if (outdoorChild->getContainmentType() != 4 && outdoorChild->getParent().get() == NULL) {
 			Locker clocker(outdoorChild, sceneObject);
 			zone->transferObject(outdoorChild, -1, true);
 		}
@@ -110,7 +110,7 @@ void ZoneComponent::updateInRangeObjectsOnMount(SceneObject* sceneObject) const 
 		for (int i = 0; i < closeObjects.size(); ++i) {
 			QuadTreeEntry* o = closeObjects.get(i);
 			QuadTreeEntry* objectToRemove = o;
-			ManagedReference<QuadTreeEntry*> rootParent = o->getRootParent();
+			ManagedReference<QuadTreeEntry*> rootParent = o->getRootParent().get();
 
 			if (rootParent != NULL)
 				o = rootParent;
@@ -245,7 +245,7 @@ void ZoneComponent::updateZone(SceneObject* sceneObject, bool lightUpdate, bool 
 
 void ZoneComponent::updateZoneWithParent(SceneObject* sceneObject, SceneObject* newParent, bool lightUpdate, bool sendPackets) const {
 	ManagedReference<Zone*> zone = sceneObject->getZone();
-	ManagedReference<SceneObject*> oldParent = sceneObject->getParent();
+	ManagedReference<SceneObject*> oldParent = sceneObject->getParent().get();
 
 	if (oldParent != NULL && !oldParent->isCellObject())
 		return;
@@ -392,7 +392,7 @@ void ZoneComponent::switchZone(SceneObject* sceneObject, const String& newTerrai
 				sceneObject->sendToOwner(true);
 
 				if (newParent->isCellObject()) {
-					ManagedReference<SceneObject*> rootParent = sceneObject->getRootParent();
+					ManagedReference<SceneObject*> rootParent = sceneObject->getRootParent().get();
 
 					if (rootParent != NULL)
 						rootParent->notifyObjectInsertedToChild(sceneObject, newParent, NULL);
@@ -412,7 +412,7 @@ void ZoneComponent::notifyRemoveFromZone(SceneObject* sceneObject) const {
 }
 
 void ZoneComponent::destroyObjectFromWorld(SceneObject* sceneObject, bool sendSelfDestroy) const {
-	ManagedReference<SceneObject*> par = sceneObject->getParent();
+	ManagedReference<SceneObject*> par = sceneObject->getParent().get();
 
 	if (!sceneObject->isActiveArea()) {
 		sceneObject->broadcastDestroy(sceneObject, sendSelfDestroy);

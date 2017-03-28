@@ -469,6 +469,21 @@ void AiAgentImplementation::initializeTransientMembers() {
 	rescheduleTrackingTask();
 }
 
+void AiAgentImplementation::notifyLoadFromDatabase() {
+	CreatureObjectImplementation::notifyLoadFromDatabase();
+
+	if (npcTemplate != NULL && convoTemplateCRC != 0) {
+		ConversationTemplate* conversationTemplate = CreatureTemplateManager::instance()->getConversationTemplate(convoTemplateCRC);
+
+		if (conversationTemplate == NULL) {
+			uint64 tempCRC = npcTemplate->getConversationTemplate();
+
+			if (convoTemplateCRC != tempCRC)
+				convoTemplateCRC = tempCRC;
+		}
+	}
+}
+
 void AiAgentImplementation::notifyPositionUpdate(QuadTreeEntry* entry) {
 	CreatureObjectImplementation::notifyPositionUpdate(entry);
 
@@ -488,16 +503,11 @@ bool AiAgentImplementation::runAwarenessLogicCheck(SceneObject* pObject) {
 	if (asAiAgent() == pObject)
 		return false;
 
-	if (getPvpStatusBitmask() == 0 || isDead() || isIncapacitated()) {
-		if (isDead())
-			return false;
+	if (isDead() || isIncapacitated())
+		return false;
 
-		if (isIncapacitated())
-			return false;
-
-		if (getPvpStatusBitmask() == 0 && !(isDroidObject() && isPet()))
-			return false;
-	}
+	if (getPvpStatusBitmask() == 0 && !(isDroidObject() && isPet()))
+		return false;
 
 	if (getNumberOfPlayersInRange() <= 0 || isRetreating() || isFleeing() || isInCombat())
 		return false;
@@ -507,16 +517,13 @@ bool AiAgentImplementation::runAwarenessLogicCheck(SceneObject* pObject) {
 	if (!creoObject || creoObject->isInvisible())
 		return false;
 
-//	then return false end
-//	--if SceneObject(pObject):isAiAgent() then AiAgent(pAgent):info("Passed target invisible check") end
-
 	checkForReactionChat(pObject);
 
 	if (getCreatureBitmask() & CreatureFlag::SCANNING_FOR_CONTRABAND) {
 		getZoneUnsafe()->getGCWManager()->runCrackdownScan(asAiAgent(), creoObject);
 	}
 
-	Reference<SceneObject*> follow = getFollowObject().get();
+	ManagedReference<SceneObject*> follow = getFollowObject().get();
 
 	if (follow != NULL && follow != pObject)
 		return false;
@@ -556,7 +563,7 @@ bool AiAgentImplementation::runAwarenessLogicCheck(SceneObject* pObject) {
 	if (agentParentID != targetParentID)
 		return false;
 
-	if (isCamouflaged(creoObject) || !isAttackableBy(creoObject) || !creoObject->isAttackableBy(asAiAgent()))
+	if (isCamouflaged(creoObject) || !isAttackableBy(creoObject))
 		return false;
 
 	if (pObject->isAiAgent()) {
@@ -571,6 +578,9 @@ bool AiAgentImplementation::runAwarenessLogicCheck(SceneObject* pObject) {
 		if (((creatureFaction != 0) && (creatureTargetFaction == 0))
 				|| ((creatureFaction == 0) && (creatureTargetFaction != 0)))
 			return false;
+
+	} else if (!creoObject->isAttackableBy(asAiAgent())) {
+		return false;
 	}
 
 	return true;
@@ -591,9 +601,9 @@ int AiAgentImplementation::checkForReactionChat(SceneObject* pObject) {
 	if (getParentUnsafe() != pObject->getParentUnsafe())
 		return 4;
 
-	float dist = getDistanceTo(pObject);
+	float sqrDist = getWorldPosition().squaredDistanceTo(pObject->getWorldPosition());
 
-	if (dist > 35 || dist < 30)
+	if (sqrDist > 1225 || sqrDist < 900) // between 30 and 35m
 		return 5;
 
 	if (!checkCooldownRecovery("reaction_chat"))
@@ -1600,7 +1610,7 @@ bool AiAgentImplementation::findNextPosition(float maxDistance, bool walk) {
 
 #ifdef SHOW_WALK_PATH
 	CreateClientPathMessage* pathMessage = new CreateClientPathMessage();
-	if (getParent() == NULL) {
+	if (getParent().get() == NULL) {
 		pathMessage->addCoordinate(getPositionX(), getZone()->getHeight(getPositionX(), getPositionY()), getPositionY());
 	} else {
 		pathMessage->addCoordinate(getPositionX(), getPositionZ(), getPositionY());
@@ -2587,7 +2597,7 @@ bool AiAgentImplementation::sendConversationStartTo(SceneObject* player) {
 	CreatureObject* playerCreature = cast<CreatureObject*>( player);
 
 	ConversationTemplate* conversationTemplate = CreatureTemplateManager::instance()->getConversationTemplate(convoTemplateCRC);
-	if (conversationTemplate != NULL && conversationTemplate->getConversationTemplateType() == ConversationTemplate::ConversationTemplateTypeTrainer) {
+	if (conversationTemplate != NULL && conversationTemplate->getConversationTemplateType() == ConversationTemplate::ConversationTemplateTypeLua && conversationTemplate->getLuaClassHandler() == "trainerConvHandler") {
 		ManagedReference<CityRegion*> city = player->getCityRegion().get();
 
 		if (city != NULL && !city->isClientRegion() && city->isBanned(player->getObjectID())) {
@@ -2628,7 +2638,7 @@ bool AiAgentImplementation::isAggressiveTo(CreatureObject* target) {
 		return false;
 
 	if (getParentID() != 0 && getParentID() != target->getParentID()) {
-		Reference<CellObject*> curCell = getParent().castTo<CellObject*>();
+		Reference<CellObject*> curCell = getParent().get().castTo<CellObject*>();
 
 		if (curCell != NULL) {
 			ContainerPermissions* perms = curCell->getContainerPermissions();

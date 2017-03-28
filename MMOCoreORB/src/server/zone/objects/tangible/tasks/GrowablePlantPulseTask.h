@@ -43,8 +43,8 @@ public:
 		else if (cycles > 10)
 			cycles = 10;
 
-		ManagedReference<SceneObject*> rootParent = strongRef->getRootParent();
-		ManagedReference<SceneObject*> parent = strongRef->getParent();
+		ManagedReference<SceneObject*> rootParent = strongRef->getRootParent().get();
+		ManagedReference<SceneObject*> parent = strongRef->getParent().get();
 
 		strongRef->updateLastPulse();
 

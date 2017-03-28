@@ -162,6 +162,8 @@ function PadawanTrials:resetAllPadawanTrials(pPlayer)
 		end
 	end
 
+	self:removeAllAreas(pPlayer)
+
 	local pGhost = CreatureObject(pPlayer):getPlayerObject()
 
 	if (pGhost == nil) then
@@ -176,10 +178,16 @@ function PadawanTrials:resetAllPadawanTrials(pPlayer)
 	PlayerObject(pGhost):removeWaypointBySpecialType(WAYPOINTQUESTTASK)
 end
 
-function PadawanTrials:startTrial(pPlayer, trialNum)
+function PadawanTrials:startTrial(pPlayer, trialNum, skipNotification)
+	if (skipNotification == nil) then
+		skipNotification = false
+	end
+
 	dropObserver(KILLEDCREATURE, "PadawanTrials", "notifyKilledHuntTarget", pPlayer)
 	dropObserver(PROTOTYPECREATED, "PadawanTrials", "notifyCraftedTrainingSaber", pPlayer)
 	dropObserver(TUNEDCRYSTAL, "PadawanTrials", "notifyTunedLightsaberCrystal", pPlayer)
+
+	self:removeAllAreas(pPlayer)
 
 	JediTrials:setCurrentTrial(pPlayer, trialNum)
 	local trialData = padawanTrialQuests[trialNum]
@@ -266,7 +274,7 @@ function PadawanTrials:startTrial(pPlayer, trialNum)
 			local pointAttempts = readData(playerID .. ":JediTrials:spawnPointAttempts")
 
 			if (pointAttempts <= 5) then
-				self:startTrial(pPlayer, trialNum)
+				self:startTrial(pPlayer, trialNum, skipNotification)
 				writeData(playerID .. ":JediTrials:spawnPointAttempts", pointAttempts + 1)
 			else
 				printLuaError("PadawanTrials:startTrial, unable to find start point for player " .. CreatureObject(pPlayer):getCustomObjectName() .. " on trial number " .. trialNum .. " after 5 attempts.")
@@ -283,7 +291,10 @@ function PadawanTrials:startTrial(pPlayer, trialNum)
 
 	JediTrials:setTrialLocation(pPlayer, spawnPoint[1], spawnPoint[2], spawnPoint[3], planetName)
 
-	self:sendSuiNotification(pPlayer)
+	if (not skipNotification) then
+		self:sendSuiNotification(pPlayer)
+	end
+
 	self:createMainLocation(pPlayer)
 end
 
@@ -532,6 +543,12 @@ function PadawanTrials:notifyEnteredMainLocSpawnArea(pArea, pPlayer)
 
 	local spawnLoc = JediTrials:getTrialLocation(pPlayer)
 	local planetData = JediTrials:getTrialPlanetAndCity(pPlayer)
+
+	if (trialData.trialNpc == nil) then
+		printLuaError("PadawanTrials:notifyEnteredMainLocSpawnArea, nil trialNpc for player " .. SceneObject(pPlayer):getCustomObjectName() .. " on trial number " .. trialNumber .. "\n.")
+		self:failTrial(pPlayer)
+		return 1
+	end
 
 	local pNpc = spawnMobile(planetData[1], trialData.trialNpc, 0, spawnLoc[1], spawnLoc[2], spawnLoc[3], getRandomNumber(180) - 180, 0)
 
@@ -991,8 +1008,17 @@ function PadawanTrials:showCurrentTrial(pShrine, pPlayer)
 		if (trialData.trialType == TRIAL_HUNT) then
 			local targetCount = tonumber(readScreenPlayData(pPlayer, "JediTrials", "huntTargetCount"))
 
-			if (targetCount ~= nil) then
+			if (targetCount ~= nil and targetCount > 0) then
 				suiPrompt = suiPrompt .. " " .. targetCount
+			else
+				local planetData = JediTrials:getTrialPlanetAndCity(pPlayer)
+				local cityName = planetData[2]
+				cityName = string.gsub(cityName, "_", " ")
+				cityName = string.gsub(" "..cityName, "%W%l", string.upper):sub(2)
+
+				local msgPrefix =  "@jedi_trials:" .. trialData.trialName .. "_01 " .. "@jedi_trials:" .. planetData[1]
+				local msgPostfix =  "@jedi_trials:" .. trialData.trialName .. "_02 " .. cityName .. "."
+				suiPrompt = msgPrefix .. " " .. msgPostfix
 			end
 		end
 
@@ -1022,6 +1048,7 @@ end
 
 function PadawanTrials:onPlayerLoggedIn(pPlayer)
 	local trialNumber = JediTrials:getCurrentTrial(pPlayer)
+	local playerID = SceneObject(pPlayer):getObjectID()
 
 	if (trialNumber >= 1) then
 		local trialData = padawanTrialQuests[trialNumber]
@@ -1037,6 +1064,13 @@ function PadawanTrials:onPlayerLoggedIn(pPlayer)
 			else
 				dropObserver(PROTOTYPECREATED, "PadawanTrials", "notifyCraftedTrainingSaber", pPlayer)
 				createObserver(PROTOTYPECREATED, "PadawanTrials", "notifyCraftedTrainingSaber", pPlayer)
+			end
+		elseif (trialData.trialType ~= TRIAL_HUNT and trialData.trialType ~= TRIAL_LIGHTSABER and not JediTrials:hasTrialArea(pPlayer) and trialData.trialName ~= "pannaqa" and readData(playerID .. ":JediTrials:acceptedTask") == 0) then
+			-- Restarts trial if player does not have a properly stored spawn location
+			if (JediTrials:getTrialLocation(pPlayer) == nil) then
+				self:startTrial(pPlayer, trialNumber, true)
+			else
+				self:createMainLocation(pPlayer)
 			end
 		end
 	end

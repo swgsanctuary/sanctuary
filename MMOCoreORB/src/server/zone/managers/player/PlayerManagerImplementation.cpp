@@ -1054,7 +1054,7 @@ void PlayerManagerImplementation::ejectPlayerFromBuilding(CreatureObject* player
 	if (zone == NULL)
 		return;
 
-	ManagedReference<SceneObject*> parent = player->getParent();
+	ManagedReference<SceneObject*> parent = player->getParent().get();
 
 	if (parent == NULL || !parent->isCellObject())
 		return;
@@ -1064,7 +1064,7 @@ void PlayerManagerImplementation::ejectPlayerFromBuilding(CreatureObject* player
 	if (cell == NULL)
 		return;
 
-	ManagedReference<BuildingObject*> building = cell->getParent().castTo<BuildingObject*>();
+	ManagedReference<BuildingObject*> building = cell->getParent().get().castTo<BuildingObject*>();
 
 	if (building == NULL)
 		return;
@@ -1219,17 +1219,17 @@ void PlayerManagerImplementation::disseminateExperience(TangibleObject* destruct
 				if (winningFaction == attacker->getFaction())
 					xpAmount *= gcwBonus;
 
-				//Jedi experience doesn't count towards combat experience supposedly.
+				//Jedi experience doesn't count towards combat experience, and is earned at 20% the rate of normal experience
 				if (xpType != "jedi_general")
 					combatXp += xpAmount;
+				else
+					xpAmount *= 0.2f;
 
 				//Award individual expType
 				awardExperience(attacker, xpType, xpAmount);
 			}
 
-			combatXp /= 10.f;
-
-			awardExperience(attacker, "combat_general", combatXp);
+			combatXp = awardExperience(attacker, "combat_general", combatXp, true, 0.1f);
 
 			//Check if the group leader is a squad leader
 			if (group == NULL)
@@ -1495,13 +1495,13 @@ void PlayerManagerImplementation::setExperienceMultiplier(float globalMultiplier
 	playerManager->awardExperience(playerCreature, "resource_harvesting_inorganic", 500);
  *
  */
-void PlayerManagerImplementation::awardExperience(CreatureObject* player, const String& xpType,
+int PlayerManagerImplementation::awardExperience(CreatureObject* player, const String& xpType,
 		int amount, bool sendSystemMessage, float localMultiplier) {
 
 	PlayerObject* playerObject = player->getPlayerObject();
 
 	if (playerObject == NULL)
-		return;
+		return 0;
 
 	float speciesModifier = 1.f;
 
@@ -1526,7 +1526,7 @@ void PlayerManagerImplementation::awardExperience(CreatureObject* player, const 
 		}
 	}
 
-
+	return xp;
 }
 
 void PlayerManagerImplementation::sendLoginMessage(CreatureObject* creature) {
@@ -2584,7 +2584,7 @@ SceneObject* PlayerManagerImplementation::getInRangeStructureWithAdminRights(Cre
 	}
 
 
-	ManagedReference<SceneObject*> rootParent = creature->getRootParent();
+	ManagedReference<SceneObject*> rootParent = creature->getRootParent().get();
 
 	if (rootParent != NULL && rootParent->isStructureObject() && (cast<StructureObject*>(rootParent.get()))->isOnAdminList(creature)) {
 		return rootParent;
@@ -2729,7 +2729,7 @@ void PlayerManagerImplementation::updatePermissionName(CreatureObject* player, i
 
 void PlayerManagerImplementation::updateSwimmingState(CreatureObject* player, float newZ, IntersectionResults* intersections, CloseObjectsVector* closeObjectsVector) {
 	player->notifySelfPositionUpdate();
-	if (player->getParent() != NULL) {
+	if (player->getParent().get() != NULL) {
 		return;
 	}
 
@@ -2790,7 +2790,7 @@ void PlayerManagerImplementation::updateSwimmingState(CreatureObject* player, fl
 int PlayerManagerImplementation::checkSpeedHackFirstTest(CreatureObject* player, float parsedSpeed, ValidatedPosition& teleportPosition, float errorMultiplier) {
 	float allowedSpeedMod = player->getSpeedMultiplierMod();
 	float allowedSpeedBase = player->getRunSpeed();
-	ManagedReference<SceneObject*> parent = player->getParent();
+	ManagedReference<SceneObject*> parent = player->getParent().get();
 	SpeedMultiplierModChanges* changeBuffer = player->getSpeedMultiplierModChanges();
 	Vector3 teleportPoint = teleportPosition.getPosition();
 	uint64 teleportParentID = teleportPosition.getParent();
@@ -2897,7 +2897,7 @@ int PlayerManagerImplementation::checkSpeedHackSecondTest(CreatureObject* player
 	player->info(newWorldPosMsg.toString(), true);*/
 
 	if (newParent != NULL) {
-		ManagedReference<SceneObject*> root = newParent->getRootParent();
+		ManagedReference<SceneObject*> root = newParent->getRootParent().get();
 
 		if (!root->isBuildingObject())
 			return 1;
@@ -3208,7 +3208,7 @@ CraftingStation* PlayerManagerImplementation::getNearbyCraftingStation(CreatureO
 				continue;
 			}
 			// only the player can benefit from their own droid
-			if( droid->getLinkedCreature() != player ) {
+			if( droid->getLinkedCreature().get() != player ) {
 				continue;
 			}
 			// check the droid

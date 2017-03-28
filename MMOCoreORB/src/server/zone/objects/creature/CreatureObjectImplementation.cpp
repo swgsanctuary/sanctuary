@@ -266,7 +266,7 @@ void CreatureObjectImplementation::sendToOwner(bool doClose) {
 			server->getZoneServer()->getGuildManager();
 	guildManager->sendBaselinesTo(asCreatureObject());
 
-	ManagedReference<SceneObject*> grandParent = getRootParent();
+	ManagedReference<SceneObject*> grandParent = getRootParent().get();
 
 	if (grandParent != NULL) {
 		grandParent->sendTo(asCreatureObject(), true);
@@ -2118,7 +2118,7 @@ int CreatureObjectImplementation::notifyObjectRemoved(SceneObject* object) {
 
 void CreatureObjectImplementation::setCreatureLink(CreatureObject* object,
 		bool notifyClient) {
-	if (linkedCreature == object)
+	if (linkedCreature.get() == object)
 		return;
 
 	linkedCreature = object;
@@ -2636,7 +2636,7 @@ void CreatureObjectImplementation::notifySelfPositionUpdate() {
 				
 				Reference<CreatureObject*> creature = _this.getReferenceUnsafeStaticCast();
 				
-				if (creature->getParent() == NULL && terrainManager->getWaterHeight(creature->getPositionX(), creature->getPositionY(), waterHeight)) {
+				if (creature->getParent().get() == NULL && terrainManager->getWaterHeight(creature->getPositionX(), creature->getPositionY(), waterHeight)) {
 					
 					if (creature->getPositionZ() + creature->getSwimHeight() - waterHeight < 0.2) {
 						
