@@ -546,8 +546,8 @@ bool AiAgentImplementation::runAwarenessLogicCheck(SceneObject* pObject) {
 		return false;
 
 	//-- if not in combat, ignore creatures in different cells
-	auto root = static_cast<SceneObject*>(getRootParentUnsafe());
-	auto rootObject = static_cast<SceneObject*>(pObject->getRootParentUnsafe());
+	auto root = getRootParentUnsafe();
+	auto rootObject = pObject->getRootParentUnsafe();
 
 	uint64 agentParentID = 0;
 	uint64 targetParentID = 0;
@@ -1610,7 +1610,7 @@ bool AiAgentImplementation::findNextPosition(float maxDistance, bool walk) {
 
 #ifdef SHOW_WALK_PATH
 	CreateClientPathMessage* pathMessage = new CreateClientPathMessage();
-	if (getParent().get() == NULL) {
+	if (getParent() == NULL) {
 		pathMessage->addCoordinate(getPositionX(), getZone()->getHeight(getPositionX(), getPositionY()), getPositionY());
 	} else {
 		pathMessage->addCoordinate(getPositionX(), getPositionZ(), getPositionY());

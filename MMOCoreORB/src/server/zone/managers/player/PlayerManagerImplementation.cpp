@@ -2584,7 +2584,7 @@ SceneObject* PlayerManagerImplementation::getInRangeStructureWithAdminRights(Cre
 	}
 
 
-	ManagedReference<SceneObject*> rootParent = creature->getRootParent().get();
+	ManagedReference<SceneObject*> rootParent = creature->getRootParent();
 
 	if (rootParent != NULL && rootParent->isStructureObject() && (cast<StructureObject*>(rootParent.get()))->isOnAdminList(creature)) {
 		return rootParent;
@@ -2729,7 +2729,7 @@ void PlayerManagerImplementation::updatePermissionName(CreatureObject* player, i
 
 void PlayerManagerImplementation::updateSwimmingState(CreatureObject* player, float newZ, IntersectionResults* intersections, CloseObjectsVector* closeObjectsVector) {
 	player->notifySelfPositionUpdate();
-	if (player->getParent().get() != NULL) {
+	if (player->getParent() != NULL) {
 		return;
 	}
 
@@ -2897,7 +2897,7 @@ int PlayerManagerImplementation::checkSpeedHackSecondTest(CreatureObject* player
 	player->info(newWorldPosMsg.toString(), true);*/
 
 	if (newParent != NULL) {
-		ManagedReference<SceneObject*> root = newParent->getRootParent().get();
+		ManagedReference<SceneObject*> root = newParent->getRootParent();
 
 		if (!root->isBuildingObject())
 			return 1;
@@ -3208,7 +3208,7 @@ CraftingStation* PlayerManagerImplementation::getNearbyCraftingStation(CreatureO
 				continue;
 			}
 			// only the player can benefit from their own droid
-			if( droid->getLinkedCreature().get() != player ) {
+			if( droid->getLinkedCreature() != player ) {
 				continue;
 			}
 			// check the droid

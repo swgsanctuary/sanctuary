@@ -397,7 +397,7 @@ void BuildingObjectImplementation::notifyObjectInsertedToZone(SceneObject* objec
 
 		if ((obj->isCreatureObject() && isPublicStructure()) || isStaticBuilding()) {
 
-			if (obj->getRootParent().get() != _this.getReferenceUnsafe()) {
+			if (obj->getRootParent() != _this.getReferenceUnsafe()) {
 
 				if (object->getCloseObjects() != NULL)
 					object->addInRangeObject(obj, false);
@@ -443,7 +443,7 @@ void BuildingObjectImplementation::notifyInsert(QuadTreeEntry* obj) {
 	if (scno == NULL)
 		return;
 
-	bool objectInThisBuilding = scno->getRootParent().get() == asBuildingObject();
+	bool objectInThisBuilding = scno->getRootParent() == asBuildingObject();
 
 	for (int i = 0; i < cells.size(); ++i) {
 		CellObject* cell = cells.get(i);
@@ -470,7 +470,7 @@ void BuildingObjectImplementation::notifyInsert(QuadTreeEntry* obj) {
 						else
 							scno->notifyInsert(child);
 
-						if (scno->getParent().get() != NULL)
+						if (scno->getParent() != NULL)
 							scno->sendTo(child, true);
 					} else if (!scno->isCreatureObject() && !child->isCreatureObject()) {
 						child->notifyInsert(obj);
@@ -650,7 +650,7 @@ void BuildingObjectImplementation::broadcastCellPermissions() {
 void BuildingObjectImplementation::broadcastCellPermissions(uint64 objectid) {
 	ManagedReference<SceneObject*> obj = getZoneServer()->getObject(objectid);
 
-	if (obj == NULL || !obj->isCellObject() || obj->getParent().get() != asBuildingObject())
+	if (obj == NULL || !obj->isCellObject() || obj->getParent() != asBuildingObject())
 		return;
 
 	CellObject* cell = obj.castTo<CellObject*>();
@@ -681,7 +681,7 @@ void BuildingObjectImplementation::updateCellPermissionsTo(CreatureObject* creat
 	bool allowEntry = isAllowedEntry(creature);
 
 	//If they are inside, and aren't allowed to be, then kick them out!
-	if (!allowEntry && creature->getRootParent().get() == asBuildingObject()) {
+	if (!allowEntry && creature->getRootParent() == asBuildingObject()) {
 		ejectObject(creature);
 	}
 
@@ -1160,7 +1160,7 @@ void BuildingObjectImplementation::updatePaidAccessList() {
 	for (int i = 0; i < ejectList.size(); ++i) {
 		paidAccessList.drop(ejectList.get(i));
 		ManagedReference<CreatureObject*> creature = server->getZoneServer()->getObject(ejectList.get(i)).castTo<CreatureObject*>();
-		if (creature != NULL && creature->getRootParent().get() == asBuildingObject()) {
+		if (creature != NULL && creature->getRootParent() == asBuildingObject()) {
 			creature->sendSystemMessage("@player_structure:turnstile_expire"); // You have been ejected because your access expired
 			ejectObject(creature);
 		}

@@ -111,6 +111,8 @@ class SceneObject extends QuadTreeEntry implements Logger {
 	@weakReference
 	protected transient CityRegion cityRegion;
 
+	protected transient SceneObject savedRootParent;
+
 	@dereferenced
 	protected SortedVector<SceneObject> childObjects;
 
@@ -1190,8 +1192,12 @@ class SceneObject extends QuadTreeEntry implements Logger {
 	 * @return returns the parent of all children in the object tree
 	 */
 	@dirty
-	@weakReference
 	public native SceneObject getRootParent();
+
+	@dirty
+	public native SceneObject getRootParentUnsafe();
+
+	public native void updateSavedRootParentRecursive(SceneObject newRoot);
 
 	/**
 	 * Returns the parent of object type in the tree
@@ -1200,7 +1206,7 @@ class SceneObject extends QuadTreeEntry implements Logger {
 	 * @return Returns the parent of object type in the tree
 	 */
 	@dirty
-	@weakReference
+	@reference
 	public native SceneObject getParentRecursively(unsigned int gameObjectType);
 
 	/**
@@ -1741,7 +1747,7 @@ class SceneObject extends QuadTreeEntry implements Logger {
 		return server;
 	}
 
-	public native void setZone(Zone zone);
+	public abstract native void setZone(Zone zone);
 
 	@local
 	public abstract native void setObjectName(@dereferenced StringId stringID, boolean notifyClient);
