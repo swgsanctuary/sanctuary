@@ -782,7 +782,7 @@ void StructureManager::moveFirstItemTo(CreatureObject* creature,
 				continue;
 
 			//if (!building->containsChildObject(childObject) && !childObject->isCreatureObject()) {
-			if (creature->getParent().get() != NULL
+			if (creature->getParent() != NULL
 					&& !building->containsChildObject(childObject)
 					&& !childObject->isCreatureObject()) {
 				if (creature->getParent().get()->getParent().get()
@@ -1227,7 +1227,7 @@ void StructureManager::payMaintenance(StructureObject* structure,
 	}
 
 	if (!creature->isInRange(structure, 16.f)
-			&& creature->getRootParent().get() != structure) {
+			&& creature->getRootParent() != structure) {
 		creature->sendSystemMessage("@player_structure:pay_out_of_range"); //You have moved out of range of your original /payMaintenance target. Aborting...
 		return;
 	}

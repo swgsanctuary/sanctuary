@@ -37,8 +37,8 @@ void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 		return;
 	}
 
-	if (player->getParent().get() != NULL) {
-		ManagedReference<SceneObject*> strongRef = player->getRootParent().get();
+	if (player->getParent() != NULL) {
+		ManagedReference<SceneObject*> strongRef = player->getRootParent();
 		ManagedReference<BuildingObject*> building = NULL;
 
 		if (strongRef != NULL)
@@ -215,7 +215,7 @@ void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 		server->getZoneServer()->getPlayerManager()->handleAbortTradeMessage(player);
 	}
 
-	if (player->getCurrentCamp() == NULL && player->getCityRegion().get() == NULL) {
+	if (player->getCurrentCamp() == NULL && player->getCityRegion() == NULL) {
 
 		Reference<CallPetTask*> callPet = new CallPetTask(_this.getReferenceUnsafeStaticCast(), player, "call_pet");
 
@@ -427,7 +427,7 @@ void PetControlDeviceImplementation::storeObject(CreatureObject* player, bool fo
 	if (!force && (pet->isInCombat() || player->isInCombat()))
 		return;
 
-	if (player->isRidingMount() && player->getParent().get() == pet) {
+	if (player->isRidingMount() && player->getParent() == pet) {
 
 		if (!force && !player->checkCooldownRecovery("mount_dismount"))
 			return;
@@ -652,7 +652,7 @@ void PetControlDeviceImplementation::destroyObjectFromDatabase(bool destroyConta
 
 void PetControlDeviceImplementation::destroyObjectFromWorld(bool sendSelfDestroy) {
 	if (petType == PetManager::CREATUREPET) {
-		ManagedReference<CreatureObject*> player = cast<CreatureObject*>(getParentRecursively(SceneObjectType::PLAYERCREATURE).get().get());
+		ManagedReference<CreatureObject*> player = getParentRecursively(SceneObjectType::PLAYERCREATURE).castTo<CreatureObject*>();
 
 		if (player != NULL) {
 			player->sendSystemMessage("@pet/pet_menu:pet_released"); // You release your pet back into the wild

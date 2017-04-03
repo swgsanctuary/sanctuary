@@ -863,7 +863,7 @@ void PlayerObjectImplementation::removeSchematics(Vector<ManagedReference<DraftS
 	 */
 	ZoneServer* zoneServer = server->getZoneServer();
 	SkillManager* skillManager = zoneServer->getSkillManager();
-	ManagedReference<CreatureObject*> player = cast<CreatureObject*>( getParentRecursively(SceneObjectType::PLAYERCREATURE).get().get());
+	ManagedReference<CreatureObject*> player = getParentRecursively(SceneObjectType::PLAYERCREATURE).castTo<CreatureObject*>();
 
 	if(player == NULL)
 		return;
@@ -1600,7 +1600,7 @@ void PlayerObjectImplementation::checkForNewSpawns() {
 		return;
 	}
 
-	if (creature->getCityRegion().get() != NULL) {
+	if (creature->getCityRegion() != NULL) {
 		return;
 	}
 
@@ -1779,7 +1779,7 @@ void PlayerObjectImplementation::reload(ZoneClientSession* client) {
 
 	//notifiedSentObjects.removeAll();
 
-	if (creature->isRidingMount() && creature->getParent().get() == NULL) {
+	if (creature->isRidingMount() && creature->getParent() == NULL) {
 		creature->clearState(CreatureState::RIDINGMOUNT);
 	}
 
@@ -2308,7 +2308,7 @@ int PlayerObjectImplementation::getSpentJediSkillPoints() {
 	if (jediState < 2)
 		return 0;
 
-	ManagedReference<CreatureObject*> player = cast<CreatureObject*>( getParentRecursively(SceneObjectType::PLAYERCREATURE).get().get());
+	ManagedReference<CreatureObject*> player = getParentRecursively(SceneObjectType::PLAYERCREATURE).castTo<CreatureObject*>();
 
 	if(player == NULL)
 		return 0;
