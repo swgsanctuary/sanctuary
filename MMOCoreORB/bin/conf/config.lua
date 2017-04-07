@@ -143,6 +143,7 @@ TrePath = "/home/swgemu/Desktop/SWGEmu"
 
 TreFiles = {
 	"mtg_planets.tre",
+	"mtg_patch_020.tre",
 	"mtg_patch_019.tre",
 	"mtg_patch_018.tre",
 	"mtg_patch_017.tre",

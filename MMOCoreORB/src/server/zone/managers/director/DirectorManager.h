@@ -92,6 +92,9 @@ namespace server {
 		String getQuestStatus(const String& keyString);
 		void removeQuestStatus(const String& key);
 
+		String readStringSharedMemory(const String& key);
+		uint64 readSharedMemory(const String& key);
+
 		QuestVectorMap* getQuestVectorMap(const String& keyString);
 		QuestVectorMap* createQuestVectorMap(const String& keyString);
 		void removeQuestVectorMap(const String& keyString);
@@ -191,6 +194,8 @@ namespace server {
 		static int creatureTemplateExists(lua_State* L);
 		static int printLuaError(lua_State* L);
 		static int getSpawnPointInArea(lua_State* L);
+		static int getPlayerByName(lua_State* L);
+		static int sendMail(lua_State* L);
 
 	private:
 		void setupLuaPackagePath(Lua* luaEngine);

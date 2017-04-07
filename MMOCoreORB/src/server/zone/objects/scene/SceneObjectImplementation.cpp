@@ -75,6 +75,10 @@ void SceneObjectImplementation::initializeTransientMembers() {
 	setLoggingName("SceneObject");
 
 	savedRootParent = getRootParent();
+
+	if (containerObjects.getContainer() != asSceneObject()) {
+		containerObjects.setContainer(asSceneObject());
+	}
 }
 
 void SceneObjectImplementation::initializePrivateData() {
@@ -123,6 +127,8 @@ void SceneObjectImplementation::initializePrivateData() {
 	setLoggingName("SceneObject");
 
 	childObjects.setNoDuplicateInsertPlan();
+
+	containerObjects.setContainer(asSceneObject());
 }
 
 void SceneObjectImplementation::loadTemplateData(SharedObjectTemplate* templateData) {
@@ -1026,7 +1032,7 @@ bool SceneObjectImplementation::isASubChildOf(SceneObject* object) {
 }
 
 Zone* SceneObjectImplementation::getZone() {
-	Reference<SceneObject*> root = getRootParent();
+	auto root = getRootParent();
 
 	if (root != NULL) {
 		return root->getZone();
@@ -1046,7 +1052,7 @@ Zone* SceneObjectImplementation::getZoneUnsafe() {
 }
 
 bool SceneObjectImplementation::isInRange(SceneObject* object, float range) {
-	if (getZoneUnsafe() != object->getZoneUnsafe()) {
+	if (getZone() != object->getZone()) {
 		return false;
 	}
 
