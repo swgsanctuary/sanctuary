@@ -104,7 +104,7 @@ ZonesEnabled = {
 	--"kashyyyk_hunting",
 	--"kashyyyk_main",
 	"lok",
-	"mustafar",
+	--"mustafar",
 	"naboo",
 	--"otoh_gunga",
 	--"rivertest",
@@ -143,7 +143,8 @@ TrePath = "/home/swgemu/workspace/tre"
 
 TreFiles = {
 	"mtg_planets.tre",
-	"mtg_patch_020.tre",
+	"mtg_patch_021.tre",
+	--"mtg_patch_020.tre",
 	"mtg_patch_019.tre",
 	"mtg_patch_018.tre",
 	"mtg_patch_017.tre",
