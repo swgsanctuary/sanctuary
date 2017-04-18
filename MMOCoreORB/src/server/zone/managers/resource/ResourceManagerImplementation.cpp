@@ -177,9 +177,19 @@ void ResourceManagerImplementation::startResourceSpawner() {
 }
 
 void ResourceManagerImplementation::shiftResources() {
+	Timer timer(Time::MONOTONIC_TIME);
+
+	info("starting resource shift");
+
+	timer.start();
+
 	Locker _locker(_this.getReferenceUnsafeStaticCast());
 
 	resourceSpawner->shiftResources();
+
+	auto elapsed = timer.stop();
+
+	info("resource shift ended in " + String::valueOf(elapsed) + "ns");
 
 	Reference<ResourceShiftTask*> resourceShift = new ResourceShiftTask(_this.getReferenceUnsafeStaticCast());
 	resourceShift->schedule(shiftInterval);
@@ -300,7 +310,7 @@ uint32 ResourceManagerImplementation::getAvailablePowerFromPlayer(CreatureObject
 		int quantity = rcno->getQuantity();
 		int pe = spawn->getValueOf(CraftingManager::PE); // potential energy
 
-		float modifier = MAX(1.0f, pe / 500.0f);
+		float modifier = Math::max(1.0f, pe / 500.0f);
 
 		power += (uint32) (modifier * quantity);
 	}
@@ -334,7 +344,7 @@ void ResourceManagerImplementation::removePowerFromPlayer(CreatureObject* player
 		int quantity = rcno->getQuantity();
 		int pe = spawn->getValueOf(CraftingManager::PE); // potential energy
 
-		float modifier = MAX(1.0f, pe / 500.0f);
+		float modifier = Math::max(1.0f, pe / 500.0f);
 
 		containerPower = modifier * quantity;
 

@@ -8,8 +8,8 @@ FsReflex1Theater = GoToTheater:new {
 	-- Task properties
 	taskName = "FsReflex1Theater",
 	-- GoToTheater properties
-	minimumDistance = 90,
-	maximumDistance = 140,
+	minimumDistance = 70,
+	maximumDistance = 150,
 	theater = {
 		{ template = "object/static/structure/military/military_wall_med_imperial_style_01.iff", xDiff = 0.5, zDiff = -0.11, yDiff = 2.12, heading = -14.32 },
 		{ template = "object/static/structure/military/military_column_med_imperial_style_01.iff", xDiff = -3.84, zDiff = -0.11, yDiff = 1.098, heading = -14.32 },
@@ -56,6 +56,14 @@ function FsReflex1Theater:onTheaterCreated(pPlayer)
 	end
 
 	createObserver(OBJECTDESTRUCTION, self.taskName, "onPlayerKilled", pPlayer)
+end
+
+function FsReflex1Theater:onTheaterFinished(pPlayer)
+	if (pPlayer == nil) then
+		return
+	end
+
+	dropObserver(OBJECTDESTRUCTION, self.taskName, "onPlayerKilled", pPlayer)
 end
 
 function FsReflex1Theater:onPlayerKilled(pPlayer, pKiller, nothing)

@@ -32,6 +32,8 @@ function FsReflex1:resetTasks(pPlayer)
 	if (FsReflex1Theater:hasTaskStarted(pPlayer)) then
 		FsReflex1Theater:finish(pPlayer)
 	end
+
+	dropObserver(OBJECTDESTRUCTION, "FsReflex1Theater", "onPlayerKilled", pPlayer)
 end
 
 function FsReflex1:hasActiveRescue(pPlayer)
@@ -49,6 +51,8 @@ function FsReflex1:failQuest(pPlayer, failMsg)
 	QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_02)
 	QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_03)
 	QuestManager.resetQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_04)
+
+	dropObserver(OBJECTDESTRUCTION, "FsReflex1Theater", "onPlayerKilled", pPlayer)
 end
 
 function FsReflex1:resetEscortStatus(pPlayer)
@@ -89,6 +93,8 @@ function FsReflex1:completeVillagerEscort(pPlayer)
 
 	QuestManager.completeQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_03)
 	QuestManager.completeQuest(pPlayer, QuestManager.quests.FS_REFLEX_RESCUE_QUEST_04)
+	
+	self:resetTasks(pPlayer)
 
 	if (count == 5) then
 		CreatureObject(pPlayer):sendSystemMessage("@quest/force_sensitive/fs_reflex:msg_phase_01_quest_finished")
