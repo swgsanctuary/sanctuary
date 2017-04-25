@@ -101,10 +101,19 @@ ZonesEnabled = {
 	--"endor_asommers",
 	--"floratest",
 	--"godclient_test",
-	--"kashyyyk_hunting",
-	--"kashyyyk_main",
+	--"hoth",
+	--"kaas",
+	"kashyyyk",
+	"kashyyyk_hunting",
+	"kashyyyk_rryatt_trail",
+	"kashyyyk_main",
+	"kashyyyk_south_dungeons",
+	"kashyyyk_north_dungeons",
+	"kashyyyk_pob_dungeons",
+	"kashyyyk_dead_forest",
 	"lok",
-	"mustafar",
+	--"mandalore",
+	--"mustafar",
 	"naboo",
 	--"otoh_gunga",
 	--"rivertest",
@@ -139,11 +148,12 @@ ZonesEnabled = {
 
 
 -- directory of tres with live.cfg
-TrePath = "/home/swgemu/Desktop/SWGEmu"
+TrePath = "/home/swgemu/workspace/tre"
 
 TreFiles = {
 	"mtg_planets.tre",
-	"mtg_patch_020.tre",
+	"mtg_patch_021.tre",
+	--"mtg_patch_020.tre",
 	"mtg_patch_019.tre",
 	"mtg_patch_018.tre",
 	"mtg_patch_017.tre",

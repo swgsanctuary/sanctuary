@@ -42,6 +42,21 @@
 
 -- STOT = SharedTangibleObjectTemplate
 --
+
+object_building_kashyyyk_shared_decd_wroshyr_stump_dry_01 = SharedStaticObjectTemplate:new {
+	clientTemplateFileName = "object/building/kashyyyk/shared_decd_wroshyr_stump_dry_01.iff"
+}
+ObjectTemplates:addClientTemplate(object_building_kashyyyk_shared_decd_wroshyr_stump_dry_01, "object/building/kashyyyk/shared_decd_wroshyr_stump_dry_01.iff")
+
+--*************************************************************
+
+object_building_kashyyyk_shared_decd_wroshyr_stump_dry_02 = SharedStaticObjectTemplate:new {
+	clientTemplateFileName = "object/building/kashyyyk/shared_decd_wroshyr_stump_dry_02.iff"
+}
+ObjectTemplates:addClientTemplate(object_building_kashyyyk_shared_decd_wroshyr_stump_dry_02, "object/building/kashyyyk/shared_decd_wroshyr_stump_dry_02.iff")
+
+--*************************************************************
+
 object_building_kashyyyk_shared_frn_sordaan_armory_static = SharedStaticObjectTemplate:new {
 	clientTemplateFileName = "object/building/kashyyyk/shared_frn_sordaan_armory_static.iff"
 }
