@@ -184,8 +184,6 @@ public:
 		if(!checkDistance(creature, creatureTarget, range))
 			return TOOFAR;
 
-		uint8 attribute = findAttribute(creatureTarget);
-
 		if (!creatureTarget->isHealableBy(creature)) {
 			creature->sendSystemMessage("@healing:pvp_no_help");  //It would be unwise to help such a patient.
 			return GENERALERROR;
@@ -198,7 +196,7 @@ public:
 			return GENERALERROR;
 		}
 
-		float bfScale = 1 - creatureTarget->calculateBFRatio();
+		float bfScale = creatureTarget->calculateBFRatio();
 
 		if (tendDamage) {
 			if (!creatureTarget->hasDamage(CreatureAttribute::HEALTH) && !creatureTarget->hasDamage(CreatureAttribute::ACTION)) {
@@ -223,6 +221,19 @@ public:
 
 			sendHealMessage(creature, creatureTarget, healedHealth, healedAction);
 		} else if (tendWound) {
+			uint8 attribute = CreatureAttribute::UNKNOWN;
+
+			StringTokenizer args(arguments.toString());
+
+			if(args.hasMoreTokens()) {
+				String specifiedAttribute;
+				args.getStringToken(specifiedAttribute);
+
+				attribute = CreatureAttribute::getAttribute(specifiedAttribute);
+			} else {
+				attribute = findAttribute(creatureTarget);
+			}
+
 			if (attribute >= CreatureAttribute::MIND)
 				attribute = CreatureAttribute::UNKNOWN;
 

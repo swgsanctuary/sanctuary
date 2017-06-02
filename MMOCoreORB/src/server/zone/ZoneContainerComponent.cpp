@@ -15,6 +15,7 @@
 #include "terrain/manager/TerrainManager.h"
 #include "templates/building/SharedBuildingObjectTemplate.h"
 #include "server/zone/objects/pathfinding/NavArea.h"
+#include "server/zone/objects/intangible/TheaterObject.h"
 
 bool ZoneContainerComponent::insertActiveArea(Zone* newZone, ActiveArea* activeArea) const {
 	if (newZone == NULL)
@@ -157,7 +158,7 @@ bool ZoneContainerComponent::transferObject(SceneObject* sceneObject, SceneObjec
 		if (object->getParent() != NULL && parent->containsChildObject(object))
 			return false;
 		else
-			object->setParent(NULL);
+			object->setParent(NULL, false);
 
 		if (parent->isCellObject()) {
 			ManagedReference<BuildingObject*> build = cast<BuildingObject*>(parent->getParent().get().get());
@@ -170,7 +171,7 @@ bool ZoneContainerComponent::transferObject(SceneObject* sceneObject, SceneObjec
 			}
 		}
 	} else {
-		object->setParent(NULL);
+		object->setParent(NULL, false);
 	}
 
 	object->setZone(newZone);
@@ -211,6 +212,12 @@ bool ZoneContainerComponent::transferObject(SceneObject* sceneObject, SceneObjec
 				}
 			}
 		}
+	} else if (object->isTheaterObject()) {
+		TheaterObject* theater = static_cast<TheaterObject*>(object);
+
+		if (theater != NULL && theater->shouldFlattenTheater()) {
+			zone->getPlanetManager()->getTerrainManager()->addTerrainModification(object->getWorldPositionX(), object->getWorldPositionY(), "terrain/poi_small.lay", object->getObjectID());
+		}
 	}
 
 	SharedBuildingObjectTemplate* objtemplate = dynamic_cast<SharedBuildingObjectTemplate*>(object->getObjectTemplate());
@@ -222,6 +229,8 @@ bool ZoneContainerComponent::transferObject(SceneObject* sceneObject, SceneObjec
 			newZone->getPlanetManager()->getTerrainManager()->addTerrainModification(object->getWorldPositionX(), object->getWorldPositionY(), modFile, object->getObjectID());
 		}
 	}
+
+	zoneLocker.release();
 
 	object->notifyInsertToZone(zone);
 

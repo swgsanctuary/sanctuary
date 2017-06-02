@@ -314,7 +314,7 @@ class PlayerManager extends Observer implements Logger {
 	public native int healEnhance(CreatureObject enhancer, CreatureObject patient, byte attribute, int buffvalue, float duration, int absorption = 0);
 
 	@local
-	public native void disseminateExperience(TangibleObject destructedObject, ThreatMap threatMap, SynchronizedVector<CreatureObject> lairSpawnedCreatures = null);
+	public native void disseminateExperience(TangibleObject destructedObject, ThreatMap threatMap, SynchronizedVector<CreatureObject> lairSpawnedCreatures = null,Zone lairZone=null);
 
 	public native int calculatePlayerLevel(CreatureObject player);
 	public native int calculatePlayerLevel(CreatureObject player, string xpType);
@@ -323,6 +323,7 @@ class PlayerManager extends Observer implements Logger {
 	public native void resendLoginMessageToAll();
 
 	public native void sendActivateCloneRequest(CreatureObject player, int typeofdeath = 0);
+	public native boolean isValidClosestCloner(CreatureObject player, SceneObject cloner);
 	public native void sendPlayerToCloner(CreatureObject player, unsigned long clonerID, int typeofdeath = 0);
 
 	public native void ejectPlayerFromBuilding(CreatureObject player);

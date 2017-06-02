@@ -107,8 +107,23 @@ includeFile("conversations/themepark/logic/mission_target_conv.lua")
 -- ** DUNGEONS **
 
 -- Corellian Corvette
-includeFile("conversations/dungeon/corellian_corvette/bronell_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_imperial_darkstone_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_imperial_sabol_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_imperial_velso_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_rebel_adar_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_neutral_bronell_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_neutral_bruce_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_rebel_crowley_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_neutral_yondalla_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_rebel_pashna_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_prisoner_imperial_rescue_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_prisoner_neutral_rescue_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_prisoner_rebel_rescue_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_bledsoe_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_ian_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/corvette_vledmo_conv.lua")
 includeFile("conversations/dungeon/corellian_corvette/ds_297_conv.lua")
+includeFile("conversations/dungeon/corellian_corvette/h6p0_conv.lua")
 includeFile("conversations/dungeon/corellian_corvette/klaatu_conv.lua")
 includeFile("conversations/dungeon/corellian_corvette/lt_lance_conv.lua")
 
@@ -170,6 +185,7 @@ includeFile("conversations/tasks/heralds/herald_tatooine2_conv.lua")
 
 -- Tasks
 includeFile("conversations/tasks/audience_member_conv.lua")
+includeFile("conversations/tasks/crafting_contractor_conv.lua")
 includeFile("conversations/tasks/kidnapped_noble_conv.lua")
 includeFile("conversations/tasks/ris_armor_quest_conv.lua")
 includeFile("conversations/tasks/librarian_conv.lua")

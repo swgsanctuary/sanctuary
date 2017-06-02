@@ -48,8 +48,6 @@ void PlanetManagerImplementation::initialize() {
 
 	planetTravelPointList->setZoneName(zone->getZoneName());
 
-	loadClientRegions();
-	loadClientPoiData();
 	loadLuaConfig();
 	loadTravelFares();
 
@@ -142,6 +140,11 @@ void PlanetManagerImplementation::loadLuaConfig() {
 			gcwManager = new GCWManager(zone);
 			gcwManager->initialize();
 		}
+
+		LuaObject outposts = luaObject.getObjectField("outpostRegionNames");
+		loadClientRegions(&outposts);
+
+		loadClientPoiData();
 
 		LuaObject planetTravelPointsTable = luaObject.getObjectField("planetTravelPoints");
 		planetTravelPointList->readLuaObject(&planetTravelPointsTable);
@@ -282,8 +285,9 @@ void PlanetManagerImplementation::loadBadgeAreas(LuaObject* badges) {
 		String badgeName = badge.getStringAt(1);
 		float x = badge.getFloatAt(2);
 		float y = badge.getFloatAt(3);
-		float radius = badge.getFloatAt(4);
-		int badgeID = badge.getIntAt(5);
+		int cellID = badge.getIntAt(4);
+		float radius = badge.getFloatAt(5);
+		int badgeID = badge.getIntAt(6);
 
 		ManagedReference<BadgeActiveArea*> obj = server->getZoneServer()->createObject(hashCode, 0).castTo<BadgeActiveArea*>();
 
@@ -292,6 +296,9 @@ void PlanetManagerImplementation::loadBadgeAreas(LuaObject* badges) {
 		obj->setRadius(radius);
 		obj->setBadge(badgeID);
 		obj->initializePosition(x, 0, y);
+
+		if (cellID != 0)
+			obj->setCellObjectID(cellID);
 
 		zone->transferObject(obj, -1, false);
 		objLocker.release();
@@ -564,6 +571,19 @@ PlanetTravelPoint* PlanetManagerImplementation::getNearestPlanetTravelPoint(cons
 	return planetTravelPoint;
 }
 
+PlanetTravelPoint* PlanetManagerImplementation::getRandomStarport() {
+	Vector<Reference<PlanetTravelPoint*> > planetStarports;
+
+	for (int i = 0; i < planetTravelPointList->size(); ++i) {
+		Reference<PlanetTravelPoint*> ptp = planetTravelPointList->get(i);
+
+		if (ptp->isInterplanetary() && ptp->isIncomingAllowed())
+			planetStarports.add(ptp);
+	}
+
+	return planetStarports.get(System::random(planetStarports.size() - 1));
+}
+
 void PlanetManagerImplementation::loadClientPoiData() {
 
 	Locker locker(&poiMutex);
@@ -588,7 +608,30 @@ void PlanetManagerImplementation::loadClientPoiData() {
 	delete iffStream;
 }
 
-void PlanetManagerImplementation::loadClientRegions() {
+void PlanetManagerImplementation::loadClientRegions(LuaObject* outposts) {
+	VectorMap<String, Vector<float> > outpostData;
+
+	if (outposts->isValidTable()) {
+		for (int i = 1; i <= outposts->getTableSize(); ++i) {
+			lua_State* L = outposts->getLuaState();
+			lua_rawgeti(L, -1, i);
+
+			LuaObject outpost(L);
+
+			if (outpost.isValidTable()) {
+				String name = outpost.getStringField("name");
+				Vector<float> coords;
+				coords.add(outpost.getFloatField("x"));
+				coords.add(outpost.getFloatField("y"));
+				outpostData.put(name, coords);
+			}
+
+			outpost.pop();
+		}
+	}
+
+	outposts->pop();
+
 	TemplateManager* templateManager = TemplateManager::instance();
 
 	IffStream* iffStream = templateManager->openIffFile("datatables/clientregion/" + zone->getZoneName() + ".iff");
@@ -614,23 +657,22 @@ void PlanetManagerImplementation::loadClientRegions() {
 		row->getValue(2, y);
 		row->getValue(3, radius);
 
-		bool isAnOutpost = regionName.contains("an_outpost");
+		for (int i = 0; i < outpostData.size(); i++) {
+			if (x == outpostData.get(i).get(0) && y == outpostData.get(i).get(1)) {
+				regionName = outpostData.elementAt(i).getKey();
+			}
+		}
 
 		ManagedReference<CityRegion*> cityRegion = regionMap.getRegion(regionName);
 
-		if (cityRegion == NULL || isAnOutpost) {
+		if (cityRegion == NULL) {
 			cityRegion = new CityRegion();
 
 			Locker locker(cityRegion);
 			cityRegion->deploy();
 			cityRegion->setRegionName(regionName);
 			cityRegion->setZone(zone);
-
-			if (isAnOutpost) {
-				String tmp = regionName + String::valueOf(i);
-				cityRegion->setNavMeshName(tmp);
-			} else
-				cityRegion->setNavMeshName(regionName);
+			cityRegion->setNavMeshName(regionName);
 
 			regionMap.addRegion(cityRegion);
 		}
@@ -797,7 +839,7 @@ bool PlanetManagerImplementation::isInObjectsNoBuildZone(float x, float y, float
 
 	Vector3 targetPos(x, y, zone->getHeight(x, y));
 
-	zone->getInRangeObjects(x, y, 512, &closeObjects, true);
+	zone->getInRangeObjects(x, y, 512, &closeObjects, true, false);
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
 		SceneObject* obj = static_cast<SceneObject*>(closeObjects.get(i));
@@ -937,7 +979,7 @@ Reference<SceneObject*> PlanetManagerImplementation::findObjectTooCloseToDecorat
 
 	Vector3 targetPos(x, y,0);
 
-	zone->getInRangeObjects(x, y, 256, &closeObjects, true);
+	zone->getInRangeObjects(x, y, 256, &closeObjects, true, false);
 
 	for (int i = 0; i < closeObjects.size(); ++i) {
 

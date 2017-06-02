@@ -35,17 +35,17 @@ function FsIntro:setCurrentStep(pPlayer, step)
 end
 
 function FsIntro:isOnIntro(pPlayer)
-	return VillageJediManagerCommon.hasJediProgressionScreenPlayState(pPlayer, VILLAGE_JEDI_PROGRESSION_GLOWING) and not VillageJediManagerCommon.hasJediProgressionScreenPlayState(pPlayer, VILLAGE_JEDI_PROGRESSION_HAS_VILLAGE_ACCESS)
+	return VillageJediManagerCommon.hasJediProgressionScreenPlayState(pPlayer, VILLAGE_JEDI_PROGRESSION_GLOWING) and not QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_VILLAGE_ELDER)
 end
 
 function FsIntro:hasDelayPassed(pPlayer)
-	local stepDelay = readScreenPlayData(pPlayer, "VillageJediProgression", "FsIntroDelay")
+	local stepDelay = tonumber(readScreenPlayData(pPlayer, "VillageJediProgression", "FsIntroDelay"))
 
-	if (stepDelay == "") then
+	if (stepDelay == nil or stepDelay == 0) then
 		return true
 	end
 
-	return tonumber(stepDelay) >= os.time()
+	return os.time() >= stepDelay
 end
 
 function FsIntro:startStepDelay(pPlayer, step)
@@ -57,28 +57,28 @@ function FsIntro:startStepDelay(pPlayer, step)
 	end
 
 	self:setCurrentStep(pPlayer, step)
-	local stepDelay = getRandomNumber(stepData[1], stepData[2]) * 1000
+	local stepDelay = getRandomNumber(stepData[1], stepData[2])
 
 	if (step == 1) then
 		local oldManVisits = tonumber(readScreenPlayData(pPlayer, "VillageJediProgression", "FsIntroOldManVisits"))
 
 		if oldManVisits ~= nil then
 			if (oldManVisits == 2) then
-				stepDelay = stepDelay + (2 * 24 * 60 * 60 * 1000)
+				stepDelay = stepDelay + (2 * 24 * 60 * 60)
 			elseif (oldManVisits == 3) then
-				stepDelay = stepDelay + (7 * 24 * 60 * 60 * 1000)
+				stepDelay = stepDelay + (7 * 24 * 60 * 60)
 			elseif (oldManVisits == 4) then
-				stepDelay = stepDelay + (14 * 24 * 60 * 60 * 1000)
+				stepDelay = stepDelay + (14 * 24 * 60 * 60)
 			elseif (oldManVisits == 5) then
-				stepDelay = stepDelay + (30 * 24 * 60 * 60 * 1000)
+				stepDelay = stepDelay + (30 * 24 * 60 * 60)
 			elseif (oldManVisits >= 6) then
-				stepDelay = stepDelay + (60 * 24 * 60 * 60 * 1000)
+				stepDelay = stepDelay + (60 * 24 * 60 * 60)
 			end
 		end
 	end
 
 	writeScreenPlayData(pPlayer, "VillageJediProgression", "FsIntroDelay", stepDelay + os.time())
-	createEvent(stepDelay, "FsIntro", "doDelayedStep", pPlayer, "")
+	createEvent(stepDelay * 1000, "FsIntro", "doDelayedStep", pPlayer, "")
 end
 
 function FsIntro:doDelayedStep(pPlayer)
@@ -149,7 +149,7 @@ function FsIntro:onLoggedIn(pPlayer)
 	end
 
 	local curStep = self:getCurrentStep(pPlayer)
-	
+
 	-- Extra check in case the player's current step gets messed up
 	if ((curStep == self.OLDMANWAIT or curStep == self.OLDMANMEET) and OldManIntroEncounter:hasForceCrystal(pPlayer)) then
 		self:setCurrentStep(pPlayer, self.SITHWAIT)
@@ -230,6 +230,9 @@ function FsIntro:onLoggedIn(pPlayer)
 			self:setCurrentStep(pPlayer, curStep - 1)
 			SithShadowIntroTheater:start(pPlayer)
 		end
+	elseif (curStep == self.VILLAGE and not QuestManager.hasCompletedQuest(pPlayer, QuestManager.quests.FS_VILLAGE_ELDER)) then
+		GoToDathomir:finish(pPlayer)
+		GoToDathomir:start(pPlayer)
 	end
 end
 

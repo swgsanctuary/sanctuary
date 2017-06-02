@@ -234,7 +234,7 @@ int StructureManager::placeStructureFromDeed(CreatureObject* creature, Structure
 	}
 
 	SortedVector<ManagedReference<QuadTreeEntry*> > inRangeObjects;
-	zone->getInRangeObjects(x, y, 128, &inRangeObjects, true);
+	zone->getInRangeObjects(x, y, 128, &inRangeObjects, true, false);
 
 	float placingFootprintLength0 = 0, placingFootprintWidth0 = 0, placingFootprintLength1 = 0, placingFootprintWidth1 = 0;
 
@@ -617,7 +617,7 @@ Reference<SceneObject*> StructureManager::getInRangeParkingGarage(SceneObject* o
 	CloseObjectsVector* closeObjectsVector = (CloseObjectsVector*) obj->getCloseObjects();
 
 	if (closeObjectsVector == NULL) {
-		zone->getInRangeObjects(obj->getPositionX(), obj->getPositionY(), 128, &closeSceneObjects, true);
+		zone->getInRangeObjects(obj->getPositionX(), obj->getPositionY(), 128, &closeSceneObjects, true, false);
 	} else {
 		closeObjectsVector->safeCopyTo(closeSceneObjects);
 	}
@@ -768,15 +768,9 @@ void StructureManager::moveFirstItemTo(CreatureObject* creature,
 	for (uint32 i = 1; i <= building->getTotalCellNumber(); ++i) {
 		ManagedReference<CellObject*> cell = building->getCell(i);
 
-		int size = cell->getContainerObjectsSize();
-
 		for (int j = 0; j < cell->getContainerObjectsSize(); ++j) {
-			ReadLocker rlocker(cell->getContainerLock());
-
 			ManagedReference<SceneObject*> childObject =
 					cell->getContainerObject(j);
-
-			rlocker.release();
 
 			if (childObject->isVendor())
 				continue;
@@ -953,6 +947,7 @@ void StructureManager::promptNameStructure(CreatureObject* creature,
 	ghost->addSuiBox(inputBox);
 	creature->sendMessage(inputBox->generateMessage());
 }
+
 void StructureManager::promptMaintenanceDroid(StructureObject* structure, CreatureObject* creature) {
 	ManagedReference<PlayerObject*> ghost = creature->getPlayerObject();
 
@@ -1000,8 +995,8 @@ void StructureManager::promptMaintenanceDroid(StructureObject* structure, Creatu
 	creature->sendMessage(box->generateMessage());
 
 }
-void StructureManager::promptPayUncondemnMaintenance(CreatureObject* creature,
-		StructureObject* structure) {
+
+void StructureManager::promptPayUncondemnMaintenance(CreatureObject* creature, StructureObject* structure) {
 	ManagedReference<PlayerObject*> ghost = creature->getPlayerObject();
 
 	if (ghost == NULL) {
@@ -1013,13 +1008,12 @@ void StructureManager::promptPayUncondemnMaintenance(CreatureObject* creature,
 	ManagedReference<SuiMessageBox*> sui = NULL;
 	String text;
 
-	if (creature->getCashCredits() + creature->getBankCredits()
-			>= uncondemnCost) {
+	if (creature->getBankCredits() >= uncondemnCost) {
 		//Owner can un-condemn the structure.
 		sui = new SuiMessageBox(creature, SuiWindowType::STRUCTURE_UNCONDEMN_CONFIRM);
 		if (sui == NULL) {
 			return;
-                }
+		}
 
 		//TODO: investigate sui packets to see if it is possible to send StringIdChatParameter directly.
 		String textStringId =
@@ -1037,7 +1031,7 @@ void StructureManager::promptPayUncondemnMaintenance(CreatureObject* creature,
 		sui = new SuiMessageBox(creature, SuiWindowType::NONE);
 		if (sui == NULL) {
 			return;
-                }
+		}
 
 		//TODO: investigate sui packets to see if it is possible to send StringIdChatParameter directly.
 		String textStringId =
@@ -1059,8 +1053,7 @@ void StructureManager::promptPayUncondemnMaintenance(CreatureObject* creature,
 	creature->sendMessage(sui->generateMessage());
 }
 
-void StructureManager::promptPayMaintenance(StructureObject* structure,
-		CreatureObject* creature, SceneObject* terminal) {
+void StructureManager::promptPayMaintenance(StructureObject* structure, CreatureObject* creature, SceneObject* terminal) {
 	int availableCredits = creature->getCashCredits();
 
 	if (availableCredits <= 0) {

@@ -139,6 +139,7 @@ void ObjectManager::registerObjectTypes() {
 	objectFactory.registerObject<PlantObject>(SceneObjectType::GROWABLEPLANT);
 	objectFactory.registerObject<FsCsObject>(SceneObjectType::FSCSOBJECT);
 	objectFactory.registerObject<FsBuffItem>(SceneObjectType::FSBUFFITEM);
+	objectFactory.registerObject<ContractCrate>(SceneObjectType::CONTRACTCRATE);
 
 	objectFactory.registerObject<SlicingTool>(SceneObjectType::SLICINGTOOL);
 	objectFactory.registerObject<SlicingTool>(SceneObjectType::FLOWANALYZER);
@@ -494,6 +495,7 @@ SceneObject* ObjectManager::loadObjectFromTemplate(uint32 objectCRC) {
 		databaseManager->addTemporaryObject(object);
 
 		object->setServerObjectCRC(objectCRC);
+		object->initializeContainerObjectsMap();
 		object->loadTemplateData(templateData);
 
 	} catch (Exception& e) {

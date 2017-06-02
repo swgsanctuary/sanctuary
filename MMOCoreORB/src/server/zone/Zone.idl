@@ -19,6 +19,7 @@ import server.zone.managers.planet.PlanetManager;
 import server.zone.managers.creature.CreatureManager;
 import server.zone.managers.gcw.GCWManager;
 import system.util.SortedVector;
+import system.util.SynchronizedSortedVector;
 include server.zone.managers.object.ObjectMap;
 include server.zone.managers.planet.MapLocationTable;
 include engine.util.u3d.Vector3;
@@ -46,7 +47,7 @@ class Zone extends SceneObject {
 	private transient ChatRoom planetChatRoom;
 
 	@dereferenced
-	private transient SortedVector<CityRegion> cityRegionUpdateVector;
+	private transient SynchronizedSortedVector<CityRegion> cityRegionUpdateVector;
 
 	private transient ZoneServer server;
 
@@ -86,10 +87,10 @@ class Zone extends SceneObject {
 	public native int getInRangeSolidObjects(float x, float y, float range, SortedVector<QuadTreeEntry> objects, boolean readLockZone);
 
 	@local
-	public native int getInRangeObjects(float x, float y, float range, SortedVector<QuadTreeEntry> objects, boolean readLockZone);
+	public native int getInRangeObjects(float x, float y, float range, SortedVector<QuadTreeEntry> objects, boolean readLockZone, boolean includeBuildingObjects = true);
 
 	@local
-	public native int getInRangeObjects(float x, float y, float range, InRangeObjectsVector objects, boolean readLockZone);
+	public native int getInRangeObjects(float x, float y, float range, InRangeObjectsVector objects, boolean readLockZone, boolean includeBuildingObjects = true);
 
 	public native void createContainerComponent();
 
@@ -143,7 +144,7 @@ class Zone extends SceneObject {
 	@preLocked
 	public native void addSceneObject(SceneObject object);
 
-	public synchronized void addCityRegionToUpdate(CityRegion city) {
+	public void addCityRegionToUpdate(CityRegion city) {
 		cityRegionUpdateVector.put(city);
 	}
 

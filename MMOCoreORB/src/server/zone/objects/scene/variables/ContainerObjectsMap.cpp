@@ -8,7 +8,9 @@
 #include "ContainerObjectsMap.h"
 #include "server/zone/objects/scene/SceneObject.h"
 #include "server/zone/objects/scene/UnloadContainerTask.h"
-
+#include "server/zone/ZoneServer.h"
+#include "server/zone/objects/creature/CreatureObject.h"
+#include "server/zone/objects/player/PlayerObject.h"
 
 ContainerObjectsMap::ContainerObjectsMap() {
 	operationMode = NORMAL_LOAD;
@@ -17,9 +19,10 @@ ContainerObjectsMap::ContainerObjectsMap() {
 	oids = NULL;
 	unloadTask = NULL;
 	container = NULL;
+	containerLock = NULL;
 }
 
-ContainerObjectsMap::ContainerObjectsMap(const ContainerObjectsMap& c) : loadMutex() {
+ContainerObjectsMap::ContainerObjectsMap(const ContainerObjectsMap& c) {
 	operationMode = NORMAL_LOAD;
 	containerObjects.setNoDuplicateInsertPlan();
 
@@ -58,6 +61,7 @@ void ContainerObjectsMap::copyData(const ContainerObjectsMap& c) {
 
 	unloadTask = NULL;
 	container = NULL;
+	containerLock = NULL;
 }
 
 ContainerObjectsMap& ContainerObjectsMap::operator=(const ContainerObjectsMap& c) {
@@ -65,8 +69,6 @@ ContainerObjectsMap& ContainerObjectsMap::operator=(const ContainerObjectsMap& c
 		return *this;
 
 	copyData(c);
-
-	loadMutex = c.loadMutex;
 
 	return *this;
 }
@@ -77,7 +79,7 @@ void ContainerObjectsMap::loadObjects() {
 	if (oids == NULL)
 		return;
 
-	Locker locker(&loadMutex);
+	Locker locker(containerLock);
 
 	WMB();
 
@@ -97,6 +99,17 @@ void ContainerObjectsMap::loadObjects() {
 	oids = NULL;
 
 	scheduleContainerUnload();
+
+	ManagedReference<SceneObject*> sceno = container.get();
+
+	if (sceno != NULL) {
+		Core::getTaskManager()->executeTask([sceno] () {
+			if (sceno->getZoneServer()->isServerShuttingDown())
+				return;
+
+			sceno->onContainerLoaded();
+		}, "OnContainerLoadedLambda");
+	}
 }
 
 void ContainerObjectsMap::scheduleContainerUnload() {
@@ -115,9 +128,14 @@ void ContainerObjectsMap::scheduleContainerUnload() {
 }
 
 void ContainerObjectsMap::unloadObjects() {
-	Locker locker(&loadMutex);
+	Locker locker(containerLock);
 
 	auto vector = new VectorMap<uint64, uint64>();
+
+	auto parent = container.get();
+	auto zone = parent->getZone();
+
+	Vector<ManagedReference<SceneObject*> > containerCopy;
 
 	for (int i = 0; i < containerObjects.size(); i++) {
 		SceneObject* obj = containerObjects.get(i);
@@ -125,6 +143,7 @@ void ContainerObjectsMap::unloadObjects() {
 		if (obj != NULL) {
 			uint64 oid = obj->getObjectID();
 			vector->put(oid, oid);
+			containerCopy.add(obj);
 		}
 	}
 
@@ -135,6 +154,21 @@ void ContainerObjectsMap::unloadObjects() {
 	containerObjects.removeAll();
 
 	unloadTask = NULL;
+
+	locker.release();
+
+	if (!parent->isCellObject())
+		return;
+
+	for (int i = 0; i < containerCopy.size(); i++) {
+		SceneObject* obj = containerCopy.get(i);
+
+		if (obj != NULL) {
+			Locker olocker(obj);
+			parent->broadcastDestroy(obj, true);
+			obj->removeObjectFromZone(zone, parent);
+		}
+	}
 }
 
 void ContainerObjectsMap::notifyLoadFromDatabase() {
@@ -142,7 +176,7 @@ void ContainerObjectsMap::notifyLoadFromDatabase() {
 }
 
 bool ContainerObjectsMap::toBinaryStream(ObjectOutputStream* stream) {
-	Locker locker(&loadMutex);
+	Locker locker(containerLock);
 
 	if (oids != NULL)
 		return oids->toBinaryStream(stream);
@@ -172,6 +206,15 @@ bool ContainerObjectsMap::parseFromBinaryStream(ObjectInputStream* stream) {
 	return false;
 }
 
+void ContainerObjectsMap::setContainer(SceneObject* obj) {
+	container = obj;
+	containerLock = obj->getContainerLock();
+
+	if (operationMode == DELAYED_LOAD && oids == NULL) {
+		scheduleContainerUnload();
+	}
+}
+
 VectorMap<uint64, ManagedReference<SceneObject*> >* ContainerObjectsMap::getContainerObjects() {
 	loadObjects();
 
@@ -181,11 +224,15 @@ VectorMap<uint64, ManagedReference<SceneObject*> >* ContainerObjectsMap::getCont
 ManagedReference<SceneObject*> ContainerObjectsMap::get(int index) {
 	loadObjects();
 
+	ReadLocker locker(containerLock);
+
 	return containerObjects.get(index);
 }
 
 ManagedReference<SceneObject*> ContainerObjectsMap::get(uint64 oid) {
 	loadObjects();
+
+	ReadLocker locker(containerLock);
 
 	return containerObjects.get(oid);
 }
@@ -193,11 +240,13 @@ ManagedReference<SceneObject*> ContainerObjectsMap::get(uint64 oid) {
 void ContainerObjectsMap::put(uint64 oid, SceneObject* object) {
 	loadObjects();
 
+	Locker locker(containerLock);
+
 	containerObjects.put(oid, object);
 }
 
 void ContainerObjectsMap::removeElementAt(int index) {
-	Locker locker(&loadMutex);
+	Locker locker(containerLock);
 
 	if (oids != NULL)
 		oids->removeElementAt(index);
@@ -208,21 +257,13 @@ void ContainerObjectsMap::removeElementAt(int index) {
 int ContainerObjectsMap::size() {
 	loadObjects();
 
+	ReadLocker locker(containerLock);
+
 	return containerObjects.size();
-
-	/*
-	Locker locker(&loadMutex);
-
-	if (oids != NULL)
-		return oids->size();
-	else
-		return containerObjects.size();
-
-		*/
 }
 
 bool ContainerObjectsMap::contains(uint64 oid) {
-	Locker locker(&loadMutex);
+	ReadLocker locker(containerLock);
 
 	if (oids != NULL)
 		return oids->contains(oid);
@@ -231,7 +272,7 @@ bool ContainerObjectsMap::contains(uint64 oid) {
 }
 
 void ContainerObjectsMap::removeAll() {
-	Locker locker(&loadMutex);
+	Locker locker(containerLock);
 
 	if (oids != NULL)
 		oids->removeAll();
@@ -240,7 +281,7 @@ void ContainerObjectsMap::removeAll() {
 }
 
 void ContainerObjectsMap::drop(uint64 oid) {
-	Locker locker(&loadMutex);
+	Locker locker(containerLock);
 
 	if (oids != NULL)
 		oids->drop(oid);

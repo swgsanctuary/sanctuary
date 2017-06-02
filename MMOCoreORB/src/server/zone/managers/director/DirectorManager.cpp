@@ -85,6 +85,9 @@
 #include "server/zone/objects/player/sui/listbox/LuaSuiListBox.h"
 #include "server/zone/objects/tangible/component/lightsaber/LightsaberCrystalComponent.h"
 #include "server/zone/objects/creature/variables/LuaSkill.h"
+#include "server/zone/objects/intangible/TheaterObject.h"
+#include "server/zone/objects/tangible/misc/ContractCrate.h"
+#include "server/zone/managers/crafting/schematicmap/SchematicMap.h"
 
 int DirectorManager::DEBUG_MODE = 0;
 int DirectorManager::ERROR_CODE = NO_ERROR;
@@ -405,6 +408,9 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	lua_register(luaEngine->getLuaState(), "printLuaError", printLuaError);
 	lua_register(luaEngine->getLuaState(), "getPlayerByName", getPlayerByName);
 	lua_register(luaEngine->getLuaState(), "sendMail", sendMail);
+	lua_register(luaEngine->getLuaState(), "spawnTheaterObject", spawnTheaterObject);
+	lua_register(luaEngine->getLuaState(), "getSchematicItemName", getSchematicItemName);
+	lua_register(luaEngine->getLuaState(), "getBadgeListByType", getBadgeListByType);
 
 	//Navigation Mesh Management
 	lua_register(luaEngine->getLuaState(), "createNavMesh", createNavMesh);
@@ -596,6 +602,7 @@ void DirectorManager::initializeLuaEngine(Lua* luaEngine) {
 	Luna<LuaLightsaberCrystalComponent>::Register(luaEngine->getLuaState());
 	Luna<LuaSkill>::Register(luaEngine->getLuaState());
 	Luna<LuaSkillManager>::Register(luaEngine->getLuaState());
+	Luna<LuaContractCrate>::Register(luaEngine->getLuaState());
 }
 
 int DirectorManager::loadScreenPlays(Lua* luaEngine) {
@@ -3435,4 +3442,105 @@ int DirectorManager::sendMail(lua_State* L) {
 		chatManager->sendMail(senderName, subject, body, recipient);
 
 	return 0;
+}
+
+int DirectorManager::spawnTheaterObject(lua_State* L) {
+	int numberOfArguments = lua_gettop(L);
+	if (numberOfArguments != 5) {
+		instance()->error("incorrect number of arguments passed to DirectorManager::spawnTheaterObject");
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	bool flatten = lua_toboolean(L, -1);
+	float y = lua_tonumber(L, -2);
+	float z = lua_tonumber(L, -3);
+	float x = lua_tonumber(L, -4);
+	String zoneID = lua_tostring(L, -5);
+
+	ZoneServer* zoneServer = ServerCore::getZoneServer();
+	Zone* zone = zoneServer->getZone(zoneID);
+
+	if (zone == NULL) {
+		lua_pushnil(L);
+		return 1;
+	}
+
+	ManagedReference<SceneObject*> object = zoneServer->createObject(STRING_HASHCODE("object/intangible/theater/base_theater.iff"), 0);
+
+	if (object != NULL && object->isTheaterObject()) {
+		TheaterObject* theater = object.castTo<TheaterObject*>();
+
+		if (theater == NULL) {
+			lua_pushnil(L);
+			return 1;
+		}
+
+		Locker locker(theater);
+
+		theater->initializePosition(x, z, y);
+
+		if (flatten)
+			theater->setShouldFlatten(true);
+
+		Locker zoneLocker(zone);
+
+		zone->transferObject(theater, -1, true);
+
+		theater->_setUpdated(true); //mark updated so the GC doesnt delete it while in LUA
+
+		lua_pushlightuserdata(L, theater);
+	} else {
+		lua_pushnil(L);
+	}
+
+	return 1;
+}
+
+int DirectorManager::getSchematicItemName(lua_State* L) {
+	if (checkArgumentCount(L, 1) == 1) {
+		instance()->error("incorrect number of arguments passed to DirectorManager::getSchematicItemName");
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	String itemName = "";
+	String templatePath = Lua::getStringParameter(L);
+
+	DraftSchematic* schematicTemplate = SchematicMap::instance()->get(templatePath.hashCode());
+
+	if (schematicTemplate != NULL)
+		itemName = schematicTemplate->getCustomName();
+
+	lua_pushstring(L, itemName.toCharArray());
+
+	return 1;
+}
+
+int DirectorManager::getBadgeListByType(lua_State* L) {
+	if (checkArgumentCount(L, 1) == 1) {
+		instance()->error("incorrect number of arguments passed to DirectorManager::getBadgeListByType");
+		ERROR_CODE = INCORRECT_ARGUMENTS;
+		return 0;
+	}
+
+	String type = Lua::getStringParameter(L);
+
+	lua_newtable(L);
+
+	int count = 0;
+
+	VectorMap<unsigned int, const Badge*>* badgeList = BadgeList::instance()->getMap();
+
+	for (int i = 0; i < badgeList->size(); i++) {
+		const Badge* badge = badgeList->get(i);
+
+		if (badge->getTypeString() == type) {
+			count++;
+			lua_pushinteger(L, badge->getIndex());
+			lua_rawseti(L, -2, count);
+		}
+	}
+
+	return 1;
 }

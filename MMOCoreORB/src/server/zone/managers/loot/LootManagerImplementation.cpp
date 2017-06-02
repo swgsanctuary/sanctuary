@@ -530,30 +530,23 @@ void LootManagerImplementation::setSkillMods(TangibleObject* object, LootItemTem
 		}
 	}
 
-	if (yellow)
-		object->addMagicBit(false);
+	if (object->isWearableObject() || object->isWeaponObject()) {
+		ManagedReference<TangibleObject*> item = cast<TangibleObject*>(object);
 
-	if (object->isWearableObject()) {
-		ManagedReference<WearableObject*> wearableObject = cast<WearableObject*>(object);
+		if(additionalMods.size() > 0 || skillMods->size() > 0)
+			yellow = true;
 
 		for (int i = 0; i < additionalMods.size(); i++) {
-			wearableObject->addSkillMod(SkillModManager::WEARABLE, additionalMods.elementAt(i).getKey(), additionalMods.elementAt(i).getValue());
+			item->addSkillMod(SkillModManager::WEARABLE, additionalMods.elementAt(i).getKey(), additionalMods.elementAt(i).getValue());
 		}
 
 		for (int i = 0; i < skillMods->size(); i++) {
-			wearableObject->addSkillMod(SkillModManager::WEARABLE, skillMods->elementAt(i).getKey(), skillMods->elementAt(i).getValue());
-		}
-	} else if (object->isWeaponObject()) {
-		ManagedReference<WeaponObject*> weaponObject = cast<WeaponObject*>(object);
-
-		for (int i = 0; i < additionalMods.size(); i++) {
-			weaponObject->addSkillMod(SkillModManager::WEARABLE, additionalMods.elementAt(i).getKey(), additionalMods.elementAt(i).getValue());
-		}
-
-		for (int i = 0; i < skillMods->size(); i++) {
-			weaponObject->addSkillMod(SkillModManager::WEARABLE, skillMods->elementAt(i).getKey(), skillMods->elementAt(i).getValue());
+			item->addSkillMod(SkillModManager::WEARABLE, skillMods->elementAt(i).getKey(), skillMods->elementAt(i).getValue());
 		}
 	}
+
+	if (yellow)
+		object->addMagicBit(false);
 }
 
 String LootManagerImplementation::getRandomLootableMod( unsigned int sceneObjectType ) {
@@ -819,6 +812,8 @@ void LootManagerImplementation::addStaticDots(TangibleObject* object, LootItemTe
 					weapon->addDotUses(value);
 				}
 			}
+
+			weapon->addMagicBit(false);
 		}
 	}
 }
@@ -854,8 +849,6 @@ void LootManagerImplementation::addRandomDots(TangibleObject* object, LootItemTe
 		if (System::random(250 / modSqr) == 0)
 			number = 2;
 
-		bool yellow = false;
-
 		for (int i = 0; i < number; i++) {
 			int dotType = System::random(2) + 1;
 
@@ -887,7 +880,6 @@ void LootManagerImplementation::addRandomDots(TangibleObject* object, LootItemTe
 
 			if (excMod == 1.0 && (yellowChance == 0 || System::random(yellowChance) == 0)) {
 				str *= yellowModifier;
-				yellow = true;
 			}
 
 			if (dotType == 1)
@@ -908,7 +900,6 @@ void LootManagerImplementation::addRandomDots(TangibleObject* object, LootItemTe
 
 			if (excMod == 1.0 && (yellowChance == 0 || System::random(yellowChance) == 0)) {
 				dur *= yellowModifier;
-				yellow = true;
 			}
 
 			if (dotType == 2)
@@ -929,7 +920,6 @@ void LootManagerImplementation::addRandomDots(TangibleObject* object, LootItemTe
 
 			if (excMod == 1.0 && (yellowChance == 0 || System::random(yellowChance) == 0)) {
 				pot *= yellowModifier;
-				yellow = true;
 			}
 
 			weapon->addDotPotency(pot * excMod);
@@ -945,14 +935,12 @@ void LootManagerImplementation::addRandomDots(TangibleObject* object, LootItemTe
 
 			if (excMod == 1.0 && (yellowChance == 0 || System::random(yellowChance) == 0)) {
 				use *= yellowModifier;
-				yellow = true;
 			}
 
 			weapon->addDotUses(use * excMod);
 		}
 
-		if (yellow)
-			weapon->addMagicBit(false);
+		weapon->addMagicBit(false);
 	}
 }
 

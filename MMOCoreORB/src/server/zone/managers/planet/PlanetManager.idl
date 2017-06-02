@@ -134,7 +134,10 @@ class PlanetManager extends ManagedService implements Logger {
 	public native void finalize();
 
 	public native abstract void initialize();
-	public native void loadClientRegions();
+
+	@local
+	public native void loadClientRegions(LuaObject outposts);
+
 	public native void loadClientPoiData();
 	public native void start();
 
@@ -146,6 +149,9 @@ class PlanetManager extends ManagedService implements Logger {
 	 */
 	@local
 	public native PlanetTravelPoint getNearestPlanetTravelPoint(SceneObject object, float range = 16000.0);
+	
+	@local
+	public native PlanetTravelPoint getRandomStarport();
 
 	/**
 	 * Returns the closest PlanetTravelPoint within the given range.

@@ -9,9 +9,11 @@ function VillageGmSui:showMainPage(pPlayer)
 
 	local curPhase = VillageJediManagerTownship:getCurrentPhase()
 	local phaseID = VillageJediManagerTownship:getCurrentPhaseID()
+	local nextPhaseChange = VillageJediManagerTownship.getNextPhaseChangeTime()
 	local phaseTimeLeft = self:getPhaseDuration()
 
-	local suiPrompt = " \\#pcontrast1 " .. "Current Phase:" .. " \\#pcontrast2 " .. curPhase .. " (id " .. phaseID .. ")\n" .. " \\#pcontrast1 " .. "Time Left: " .. " \\#pcontrast2 " .. phaseTimeLeft
+	local suiPrompt = " \\#pcontrast1 " .. "Current Phase:" .. " \\#pcontrast2 " .. curPhase .. " (id " .. phaseID .. ")\n" .. " \\#pcontrast1 " .. "Current Server Time:" .. " \\#pcontrast2 " .. os.date("%c") .. "\n"
+	local suiPrompt = suiPrompt .. " \\#pcontrast1 " .. "Next Phase Change: " .. " \\#pcontrast2 " .. os.date("%c", nextPhaseChange)  .. "\n \\#pcontrast1 " .. "Phase Time Left: " .. " \\#pcontrast2 " .. phaseTimeLeft
 
 	local pMaster = VillageJediManagerTownship:getMasterObject()
 
@@ -80,7 +82,7 @@ function VillageGmSui.getOSTime(pPlayer)
 	if (pPlayer == nil) then
 		return
 	end
-	
+
 	CreatureObject(pPlayer):sendSystemMessage("Current OS time is: " .. os.time())
 end
 
@@ -115,7 +117,7 @@ function VillageGmSui:changePhaseCallback(pPlayer, pSui, eventIndex, args)
 	end
 
 	CreatureObject(pPlayer):sendSystemMessage("Changing the Village from phase " .. curPhase .. " to phase " .. nextPhase .. ".")
-	VillageJediManagerTownship:switchToNextPhase()
+	VillageJediManagerTownship:switchToNextPhase(true)
 end
 
 function VillageGmSui.playerLookupByTarget(pPlayer)
@@ -270,8 +272,13 @@ function VillageGmSui.playerInfo(pPlayer, targetID)
 	elseif (FsOutro:isOnOutro(pTarget)) then
 		local curStep = FsOutro:getCurrentStep(pTarget)
 
-		if (curStep == OLDMANWAIT) then
+		if (curStep == FsOutro.OLDMANWAIT) then
 			promptBuf = promptBuf .. "Outro (Waiting for Old Man)\n"
+			if (FsOutro:hasDelayPassed(pPlayer)) then
+				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Has Delay Passed: \\#pcontrast2 YES \n"
+			else
+				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Has Delay Passed: \\#pcontrast2 NO \n"
+			end
 
 			local timeTilVisit = readScreenPlayData(pTarget, "VillageJediProgression", "FsOutroDelay") - os.time()
 
@@ -282,7 +289,7 @@ function VillageGmSui.playerInfo(pPlayer, targetID)
 			else
 				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Time until visit:" .. " \\#pcontrast2 Soon\n"
 			end
-		elseif (curStep == OLDMANMEET) then
+		elseif (curStep == FsOutro.OLDMANMEET) then
 			promptBuf = promptBuf .. "Outro (Old Man Visit)\n"
 		end
 	elseif (VillageJediManagerCommon.hasJediProgressionScreenPlayState(pTarget, VILLAGE_JEDI_PROGRESSION_HAS_VILLAGE_ACCESS)) then
@@ -292,6 +299,11 @@ function VillageGmSui.playerInfo(pPlayer, targetID)
 
 		if (curStep == FsIntro.OLDMANWAIT) then
 			promptBuf = promptBuf .. "Intro (Waiting for Old Man)\n"
+			if (FsIntro:hasDelayPassed(pPlayer)) then
+				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Has Delay Passed: \\#pcontrast2 YES \n"
+			else
+				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Has Delay Passed: \\#pcontrast2 NO \n"
+			end
 			local timeTilVisit = readScreenPlayData(pTarget, "VillageJediProgression", "FsIntroDelay") - os.time()
 
 			if (not PlayerObject(pGhost):isOnline()) then
@@ -309,14 +321,19 @@ function VillageGmSui.playerInfo(pPlayer, targetID)
 			promptBuf = promptBuf .. "Intro (Old Man Visit)\n"
 		elseif (curStep == FsIntro.SITHWAIT) then
 			promptBuf = promptBuf .. "Intro (Waiting for Sith Attack)\n"
+			if (FsIntro:hasDelayPassed(pPlayer)) then
+				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Has Delay Passed: \\#pcontrast2 YES \n"
+			else
+				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Has Delay Passed: \\#pcontrast2 NO \n"
+			end
 			local timeTilAttack = readScreenPlayData(pTarget, "VillageJediProgression", "FsIntroDelay") - os.time()
 
 			if (not PlayerObject(pGhost):isOnline()) then
-				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Time until attack:" .. " \\#pcontrast2 Player Offline\n"
+				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Time Until Attack:" .. " \\#pcontrast2 Player Offline\n"
 			elseif (timeTilAttack > 0) then
-				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Time until attack:" .. " \\#pcontrast2 " .. VillageGmSui:getTimeString(timeTilAttack) .. "\n"
+				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Time Until Attack:" .. " \\#pcontrast2 " .. VillageGmSui:getTimeString(timeTilAttack) .. "\n"
 			else
-				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Time until attack:" .. " \\#pcontrast2 Soon\n"
+				promptBuf = promptBuf .. " \\#pcontrast1 " .. "Time Until Attack:" .. " \\#pcontrast2 Soon\n"
 			end
 		elseif (curStep == FsIntro.SITHATTACK) then
 			promptBuf = promptBuf .. "Intro (Sith Attack)\n"
@@ -365,7 +382,81 @@ function VillageGmSui.playerInfo(pPlayer, targetID)
 		sui.add("Reset Completed Quest This Phase", "resetCompletedQuest" .. targetID)
 	end
 
+	if (FsIntro:isOnIntro(pTarget)) then
+		local curStep = FsIntro:getCurrentStep(pTarget)
+
+		if (curStep == FsIntro.SITHWAIT or curStep == FsIntro.SITHATTACK) then
+			sui.add("Force Start Sith Attack Intro Encounter", "forceIntroSithAttackEvent" .. targetID)
+		elseif (curStep == FsIntro.OLDMANWAIT or curStep == FsIntro.OLDMANMEET) then
+			sui.add("Force Start Old Man Intro Encounter", "forceIntroOldManEvent" .. targetID)
+		end
+	elseif (FsOutro:isOnOutro(pTarget)) then
+		local curStep = FsOutro:getCurrentStep(pTarget)
+
+		if (curStep == FsOutro.OLDMANWAIT or curStep == FsIntro.OLDMANMEET) then
+			sui.add("Force Start Old Man Outro Encounter", "forceOutroOldManEvent" .. targetID)
+		end
+	end
+
+	if (PlayerObject(pGhost):getVisibility() > 0 or CreatureObject(pTarget):hasSkill("force_title_jedi_rank_02")) then
+		sui.add("Manage Visibility", "manageVisibility" .. targetID)
+	end
+
 	sui.sendTo(pPlayer)
+end
+
+function VillageGmSui.forceIntroSithAttackEvent(pPlayer, targetID)
+	local pTarget = getSceneObject(targetID)
+
+	if (pTarget == nil) then
+		return
+	end
+	
+	local curStep = FsIntro:getCurrentStep(pTarget)
+	
+	if (not FsIntro:isOnIntro(pTarget) or (curStep ~= FsIntro.SITHWAIT and curStep ~= FsIntro.SITHATTACK)) then
+		CreatureObject(pPlayer):sendSystemMessage("Unable to force the sith attack intro event for " .. CreatureObject(pTarget):getFirstName() .. ", they are not on the correct step.")
+		return
+	end
+	
+	CreatureObject(pPlayer):sendSystemMessage("Now forcing the sith attack intro event to start for " .. CreatureObject(pTarget):getFirstName() .. ".")
+	FsIntro:startSithAttack(pPlayer)
+end
+
+function VillageGmSui.forceIntroOldManEvent(pPlayer, targetID)
+	local pTarget = getSceneObject(targetID)
+
+	if (pTarget == nil) then
+		return
+	end
+	
+	local curStep = FsIntro:getCurrentStep(pTarget)
+	
+	if (not FsIntro:isOnIntro(pTarget) or (curStep ~= FsIntro.OLDMANWAIT and curStep ~= FsIntro.OLDMANMEET)) then
+		CreatureObject(pPlayer):sendSystemMessage("Unable to force the old man intro event for " .. CreatureObject(pTarget):getFirstName() .. ", they are not on the correct step.")
+		return
+	end
+	
+	CreatureObject(pPlayer):sendSystemMessage("Now forcing the old man event intro to start for " .. CreatureObject(pTarget):getFirstName() .. ".")
+	FsIntro:startOldMan(pPlayer)
+end
+
+function VillageGmSui.forceOutroOldManEvent(pPlayer, targetID)
+	local pTarget = getSceneObject(targetID)
+
+	if (pTarget == nil) then
+		return
+	end
+	
+	local curStep = FsOutro:getCurrentStep(pTarget)
+	
+	if (not FsOutro:isOnOutro(pTarget) or (curStep ~= FsOutro.OLDMANWAIT and curStep ~= FsOutro.OLDMANMEET)) then
+		CreatureObject(pPlayer):sendSystemMessage("Unable to force the old man outro event for " .. CreatureObject(pTarget):getFirstName() .. ", they are not on the correct step.")
+		return
+	end
+	
+	CreatureObject(pPlayer):sendSystemMessage("Now forcing the old man event outro to start for " .. CreatureObject(pTarget):getFirstName() .. ".")
+	FsOutro:startOldMan(pPlayer)
 end
 
 function VillageGmSui.resetActiveQuest(pPlayer, targetID)
@@ -469,6 +560,43 @@ function VillageGmSui:resetCompletedQuestCallback(pPlayer, pSui, eventIndex, arg
 	VillageGmSui.playerInfo(pPlayer, targetID)
 end
 
+function VillageGmSui.manageVisibility(pPlayer, targetID)
+	local pTarget = getSceneObject(targetID)
+
+	if (pTarget == nil) then
+		return
+	end
+
+	local pGhost = CreatureObject(pTarget):getPlayerObject()
+
+	if (pGhost == nil) then
+		return
+	end
+
+	includeFile("../managers/jedi/visibility_manager.lua")
+
+	local sui = SuiListBox.new("VillageGmSui", "manageVisibilityCallback")
+	sui.setTitle("Visibility Management")
+
+	local promptBuf = " \\#pcontrast1 " .. "Player:" .. " \\#pcontrast2 " .. SceneObject(pTarget):getCustomObjectName() .. " (" .. targetID .. ")\n"
+	promptBuf = promptBuf .. " \\#pcontrast1 " .. "Current Visibility: " .. " \\#pcontrast2 " .. PlayerObject(pGhost):getVisibility() .. "\n"
+	promptBuf = promptBuf .. " \\#pcontrast1 (Cap: " .. maxVisibility .. ") \n"
+
+	sui.setPrompt(promptBuf)
+
+	--sui.add("Set Visibility Value", "setVisibility" .. targetID)
+
+	sui.sendTo(pPlayer)
+end
+
+function VillageGmSui:manageVisibilityCallback(pPlayer, pSui, eventIndex, args)
+	local cancelPressed = (eventIndex == 1)
+
+	if (cancelPressed) then
+		return
+	end
+end
+
 function VillageGmSui.branchManagement(pPlayer, targetID)
 	local pTarget = getSceneObject(targetID)
 
@@ -477,7 +605,7 @@ function VillageGmSui.branchManagement(pPlayer, targetID)
 	end
 
 	local sui = SuiListBox.new("VillageGmSui", "branchManagementCallback")
-	sui.setTitle("Village GM Panel")
+	sui.setTitle("Village Branch Management")
 	sui.setPrompt("The statuses of " .. SceneObject(pTarget):getCustomObjectName() .. "'s force sensitive branches are listed below. Branches can be locked and unlocked from this window.")
 
 	for i = 1, #VillageJediManagerCommon.forceSensitiveBranches, 1 do

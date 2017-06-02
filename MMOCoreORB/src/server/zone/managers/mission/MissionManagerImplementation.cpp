@@ -8,6 +8,7 @@
 #include "server/zone/managers/mission/MissionManager.h"
 #include "server/zone/objects/tangible/terminal/mission/MissionTerminal.h"
 #include "server/zone/objects/creature/CreatureObject.h"
+#include "server/zone/objects/creature/ai/AiAgent.h"
 #include "server/zone/objects/group/GroupObject.h"
 #include "server/zone/objects/mission/MissionObject.h"
 #include "server/zone/objects/mission/SurveyMissionObjective.h"
@@ -32,6 +33,7 @@
 #include "server/zone/Zone.h"
 #include "server/zone/managers/stringid/StringIdManager.h"
 #include "server/zone/objects/player/FactionStatus.h"
+#include "server/zone/managers/visibility/VisibilityManager.h"
 
 void MissionManagerImplementation::loadLuaSettings() {
 	try {
@@ -861,8 +863,7 @@ void MissionManagerImplementation::randomizeGenericBountyMission(CreatureObject*
 
 		String planet = playerZone->getZoneName();
 		if (level == 3 && bhTargetZones.size() > 0) {
-			int randomNumber = System::random(bhTargetZones.size() - 1);
-			planet = bhTargetZones.get(randomNumber);
+			planet = getRandomBountyPlanet();
 		}
 
 		Vector3 endPos = getRandomBountyTargetPosition(player, planet);
@@ -1096,8 +1097,6 @@ bool MissionManagerImplementation::randomGenericDeliverMission(CreatureObject* p
 
 	//Setup mission object.
 	mission->setMissionNumber(randomTexts);
-	mission->setMissionTarget(startNpc);
-	mission->setMissionTargetDest(endNpc);
 
 	NameManager* nm = processor->getNameManager();
 	mission->setCreatorName(nm->makeCreatureName());
@@ -1857,15 +1856,29 @@ void MissionManagerImplementation::removeBountyHunterFromPlayerBounty(uint64 tar
 BountyTargetListElement* MissionManagerImplementation::getRandomPlayerBounty(CreatureObject* player) {
 	Locker listLocker(&playerBountyListMutex);
 
-	if (playerBountyList.size() <= 0) {
+	VectorMap<unsigned long long, BountyTargetListElement*> visiblePlayers;
+
+	float terminalVisibilityThreshold = VisibilityManager::instance()->getTerminalVisThreshold();
+
+	for(int i = 0; i < playerBountyList.size(); i++) {
+		auto targetId = playerBountyList.get(i)->getTargetId();
+		ManagedReference<CreatureObject*> creature = server->getObject(targetId).castTo<CreatureObject*>();
+		PlayerObject* ghost = creature->getPlayerObject();
+
+		if(ghost != NULL && ghost->getVisibility() >= terminalVisibilityThreshold) {
+			visiblePlayers.put(i, playerBountyList.get(i));
+		}
+	}
+
+	if (visiblePlayers.size() <= 0) {
 		return NULL;
 	}
 
 	int retries = 20;
 
 	while (retries-- > 0) {
-		int index = System::random(playerBountyList.size() - 1);
-		BountyTargetListElement* randomTarget = playerBountyList.get(index);
+		int index = System::random(visiblePlayers.size() - 1);
+		BountyTargetListElement* randomTarget = visiblePlayers.get(index);
 
 		if (enableSameAccountBountyMissions != true) {
 			ManagedReference<CreatureObject*> creo = server->getObject(randomTarget->getTargetId()).castTo<CreatureObject*>();
@@ -1888,8 +1901,8 @@ BountyTargetListElement* MissionManagerImplementation::getRandomPlayerBounty(Cre
 		}
 	}
 
-	for (int i = 0; i < playerBountyList.size(); i++) {
-		BountyTargetListElement* randomTarget = playerBountyList.get(i);
+	for (int i = 0; i < visiblePlayers.size(); i++) {
+		BountyTargetListElement* randomTarget = visiblePlayers.get(i);
 
 
 		if (enableSameAccountBountyMissions != true) {
@@ -1919,15 +1932,28 @@ BountyTargetListElement* MissionManagerImplementation::getRandomPlayerBounty(Cre
 void MissionManagerImplementation::completePlayerBounty(uint64 targetId, uint64 bountyHunter) {
 	Locker listLocker(&playerBountyListMutex);
 
+	info("Bounty completed for targetId: " + String::valueOf(targetId), true);
+
 	if (playerBountyList.contains(targetId)) {
 		BountyTargetListElement* target = playerBountyList.get(targetId);
-		Vector<uint64>* activeBountyHunters = target->getActiveBountyHunters();
 
-		for (int i = 0; i < activeBountyHunters->size(); i++) {
-			if (activeBountyHunters->get(i) != bountyHunter) {
+		Vector<uint64> activeBountyHunters;
+
+		for(int i = 0; i < target->getActiveBountyHunters()->size(); i++)
+			activeBountyHunters.add(target->getActiveBountyHunters()->get(i));
+
+		auto bhSize = activeBountyHunters.size();
+
+		for (int i = 0; i < bhSize; i++) {
+			if (activeBountyHunters.get(i) != bountyHunter) {
 				//Fail mission.
-				failPlayerBountyMission(activeBountyHunters->get(i));
+				failPlayerBountyMission(activeBountyHunters.get(i));
 			}
+
+			ManagedReference<CreatureObject*> creo = server->getObject(activeBountyHunters.get(i)).castTo<CreatureObject*>();
+			auto ghost = creo->getPlayerObject();
+			if(ghost != NULL)
+				ghost->schedulePvpTefRemovalTask(false, true);
 		}
 
 		playerBountyList.remove(playerBountyList.find(targetId));
@@ -1976,10 +2002,15 @@ void MissionManagerImplementation::allocateMissionNpcs(NpcSpawnPoint* target, Np
 	destination->allocateNpc(terrainManager, creatureManager);
 }
 
-void MissionManagerImplementation::freeMissionNpc(NpcSpawnPoint* npc) {
+void MissionManagerImplementation::freeMissionNpc(AiAgent* npc) {
 	//Lock mission spawn points.
 	Locker missionSpawnLocker(&missionNpcSpawnMap);
-	npc->freeNpc(_this.getReferenceUnsafeStaticCast());
+	Vector3 pos = npc->getPosition();
+	pos.setZ(0);
+	NpcSpawnPoint* point = missionNpcSpawnMap.findSpawnAt(npc->getPlanetCRC(), &pos);
+
+	if (point != NULL)
+		point->freeNpc(_this.getReferenceUnsafeStaticCast());
 }
 
 void MissionManagerImplementation::despawnMissionNpc(NpcSpawnPoint* npc) {
@@ -2018,4 +2049,9 @@ void MissionManagerImplementation::deactivateMissions(CreatureObject* player) {
 			}
 		}
 	}
+}
+
+String MissionManagerImplementation::getRandomBountyPlanet() {
+	int randomNumber = System::random(bhTargetZones.size() - 1);
+	return bhTargetZones.get(randomNumber);
 }
