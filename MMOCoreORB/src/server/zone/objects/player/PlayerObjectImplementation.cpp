@@ -12,6 +12,7 @@
 #include "server/zone/managers/combat/CombatManager.h"
 #include "server/zone/managers/structure/StructureManager.h"
 #include "server/zone/managers/vendor/VendorManager.h"
+#include "server/zone/managers/frs/FrsManager.h"
 #include "server/chat/ChatManager.h"
 #include "server/chat/room/ChatRoom.h"
 #include "server/chat/PersistentMessage.h"
@@ -1252,11 +1253,19 @@ void PlayerObjectImplementation::notifyOnline() {
 		parent->sendMessage(sui->generateMessage());
 	}
 
-	//Login to visibility manager
-	VisibilityManager::instance()->login(playerCreature);
+	//Add player to visibility list
+	VisibilityManager::instance()->addToVisibilityList(playerCreature);
 
 	//Login to jedi manager
 	JediManager::instance()->onPlayerLoggedIn(playerCreature);
+
+	if (getFrsData()->getRank() > 0) {
+		FrsManager* frsManager = zoneServer->getFrsManager();
+
+		if (frsManager != NULL) {
+			frsManager->deductDebtExperience(playerCreature);
+		}
+	}
 
 	playerCreature->notifyObservers(ObserverEventType::LOGGEDIN);
 
@@ -1288,8 +1297,8 @@ void PlayerObjectImplementation::notifyOffline() {
 		}
 	}
 
-	//Logout from visibility manager
-	VisibilityManager::instance()->logout(playerCreature);
+	//Remove player from visibility list
+	VisibilityManager::instance()->removeFromVisibilityList(playerCreature);
 
 	playerCreature->notifyObservers(ObserverEventType::LOGGEDOUT);
 
@@ -2000,7 +2009,7 @@ void PlayerObjectImplementation::addToBountyLockList(uint64 playerId) {
 }
 
 void PlayerObjectImplementation::removeFromBountyLockList(uint64 playerId, bool immediately) {
-	int tefTime = 15 * 60 * 1000;
+	int tefTime = FactionManager::TEFTIMER;
 	if (immediately) {
 		//Schedule tef removal to happen soon but delay it enough for any bh mission to be dropped correctly.
 		tefTime = 100;
@@ -2077,12 +2086,12 @@ void PlayerObjectImplementation::updateLastPvpCombatActionTimestamp(bool updateG
 
 	if(updateBhAction) {
 		lastBhPvpCombatActionTimestamp.updateToCurrentTime();
-		lastBhPvpCombatActionTimestamp.addMiliTime(300000); // 5 minutes
+		lastBhPvpCombatActionTimestamp.addMiliTime(FactionManager::TEFTIMER);
 	}
 
 	if(updateGcwAction) {
 		lastGcwPvpCombatActionTimestamp.updateToCurrentTime();
-		lastGcwPvpCombatActionTimestamp.addMiliTime(300000); // 5 minutes
+		lastGcwPvpCombatActionTimestamp.addMiliTime(FactionManager::TEFTIMER);
 	}
 
 	schedulePvpTefRemovalTask();
