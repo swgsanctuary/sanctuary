@@ -233,7 +233,10 @@ Vector3 BuildingObjectImplementation::getEjectionPoint() {
 
 						Vector3 center = box.center();
 						Matrix4 transform;
-						transform.setRotationMatrix(direction.toMatrix3());
+
+						Quaternion directionRecast(direction.getW(), direction.getX(), direction.getY(), -direction.getZ());
+
+						transform.setRotationMatrix(directionRecast.toMatrix3());
 						transform.setTranslation(getPositionX(), getPositionZ(), -getPositionY());
 
 						Vector3 dPos = (Vector3(center.getX(), center.getY(), -center.getZ()) * transform);
@@ -1617,8 +1620,10 @@ BuildingObject* BuildingObjectImplementation::asBuildingObject() {
 Vector<Reference<MeshData*> > BuildingObjectImplementation::getTransformedMeshData(const Matrix4* parentTransform) {
 	Vector<Reference<MeshData*> > data;
 
+	Quaternion directionRecast(direction.getW(), direction.getX(), direction.getY(), -direction.getZ());
+
 	Matrix4 transform;
-	transform.setRotationMatrix(direction.toMatrix3());
+	transform.setRotationMatrix(directionRecast.toMatrix3());
 	transform.setTranslation(getPositionX(), getPositionZ(), -getPositionY());
 
 	const auto fullTransform = transform * *parentTransform;
@@ -1642,16 +1647,11 @@ Vector<Reference<MeshData*> > BuildingObjectImplementation::getTransformedMeshDa
 #endif
 			const CellProperty* tmpl = pl->getCellProperty(0);
 
-			for (int i=0; i<tmpl->getNumberOfPortals(); i++) {
+			for (int i = 0; i < tmpl->getNumberOfPortals(); i++) {
 				const CellPortal* portal = tmpl->getPortal(i);
 				const MeshData* mesh = pl->getPortalGeometry(portal->getGeometryIndex());
 
-				if(portal->hasDoorTransform()) {
-					Matrix4 doorTransform = portal->getDoorTransform();
-					doorTransform.swapLtoR();
-					data.emplace(std::move(MeshData::makeCopyNegateZ(mesh, (doorTransform * transform) * *parentTransform)));
-				} else
-					data.emplace(std::move(MeshData::makeCopyNegateZ(mesh, fullTransform)));
+				data.emplace(std::move(MeshData::makeCopyNegateZ(mesh, fullTransform)));
 			}
 
 #ifdef RENDER_EXTERNAL_FLOOR_MESHES_ONLY

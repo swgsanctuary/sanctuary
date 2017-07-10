@@ -278,7 +278,7 @@ int ZoneImplementation::getInRangeObjects(float x, float y, float range, SortedV
 						}
 					}
 				}
-			} else if (sceneObject != NULL && (sceneObject->isVehicleObject() || sceneObject->isMount())) {
+			} else if (sceneObject->isVehicleObject() || sceneObject->isMount()) {
 				Reference<SceneObject*> rider = sceneObject->getSlottedObject("rider");
 
 				if (rider != NULL)
@@ -337,7 +337,7 @@ int ZoneImplementation::getInRangeObjects(float x, float y, float range, InRange
 						}
 					}
 				}
-			} else if (sceneObject != NULL && (sceneObject->isVehicleObject() || sceneObject->isMount())) {
+			} else if (sceneObject->isVehicleObject() || sceneObject->isMount()) {
 				Reference<SceneObject*> rider = sceneObject->getSlottedObject("rider");
 
 				if (rider != NULL)
@@ -403,15 +403,16 @@ int ZoneImplementation::getInRangeNavMeshes(float x, float y, SortedVector<Manag
 	SortedVector<QuadTreeEntry*> entryObjects2;
 
 	try {
-		thisZone->rlock(readlock);
+		//thisZone->rlock(readlock);
+		ReadLocker rlocker(thisZone);
 
 		regionTree->inRange(x, y, entryObjects);
 
 		regionTree->inRange(x, y, 1024, entryObjects2);
 
-		thisZone->runlock(readlock);
+		//thisZone->runlock(readlock);
 	}catch (...) {
-		thisZone->runlock(readlock);
+		//thisZone->runlock(readlock);
 		throw;
 	}
 
@@ -778,7 +779,7 @@ void ZoneImplementation::dropSceneObject(SceneObject* object)  {
 	}
 }
 
-void ZoneImplementation::sendMapLocationsTo(SceneObject* player) {
+void ZoneImplementation::sendMapLocationsTo(CreatureObject* player) {
 	GetMapLocationsResponseMessage* gmlr = new GetMapLocationsResponseMessage(zoneName, mapLocations, player);
 	player->sendMessage(gmlr);
 }

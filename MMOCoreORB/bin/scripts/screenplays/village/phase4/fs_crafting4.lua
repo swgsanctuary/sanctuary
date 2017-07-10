@@ -33,7 +33,7 @@ function FsCrafting4:activateQuest(pPlayer)
 		QuestManager.activateQuest(pPlayer, QuestManager.quests.FS_CRAFTING4_QUEST_01)
 	end
 
-	VillageJediManagerCommon.setActiveQuestThisPhase(pPlayer, "FsCrafting4")
+	VillageJediManagerCommon.setActiveQuestThisPhase(pPlayer, VILLAGE_PHASE4_ENGINEER)
 end
 
 function FsCrafting4:removeCore(pPlayer)
@@ -510,7 +510,7 @@ function FsCrafting4ComputerCoreMenuComponent:attemptConfigure(pCore, pPlayer)
 
 		sui.setProperty("", "Size", "500,250")
 		sui.setTitle("@quest/force_sensitive/fs_crafting:crafting4_core_menu_status")
-		sui.setPrompt("@quest/force_sensitive/fs_crafting:crafting4_core_completed_status")
+		sui.setPrompt("@quest/force_sensitive/fs_crafting:crafting4_core_completed")
 		sui.hideCancelButton()
 
 		sui.sendTo(pPlayer)

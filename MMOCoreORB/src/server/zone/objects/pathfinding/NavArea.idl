@@ -33,10 +33,14 @@ class NavArea extends ActiveArea {
 	@dereferenced
 	protected transient ReadWriteLock containedLock;
 
+	protected transient float terrainHeight;
+
 	public NavArea() {
 		super();
 		disableUpdates = false;
 		meshName = "navmesh";
+
+		terrainHeight = 0;
 	}
 
 	@local
@@ -89,9 +93,7 @@ class NavArea extends ActiveArea {
 	public native NavArea asNavArea();
 
 	@dirty
-	public boolean objectInMesh(SceneObject obj) {
-		return containedObjects.contains(obj.getObjectID());
-	}
+	public native boolean objectInMesh(SceneObject obj);
 
 	@dirty
 	public string getMeshName() {
@@ -128,8 +130,24 @@ class NavArea extends ActiveArea {
 	@dirty
 	public abstract native boolean containsPoint(float x, float y);
 
+	@read
 	public boolean isNavMeshLoaded() {
 		return recastNavMesh.isLoaded();
+	}
+
+	@dirty
+	public int getContainedObjectsCount() {
+		return containedObjects.size();
+	}
+
+	@read
+	public float getAreaTerrainHeight() {
+		return terrainHeight;
+	}
+
+	@dirty
+	public void setAreaTerrainHeight(float value) {
+		terrainHeight = value;
 	}
 }
 
