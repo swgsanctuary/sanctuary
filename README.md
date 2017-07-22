@@ -19,8 +19,6 @@ The complete set of consolidated tre files are [**here.**](https://mega.nz/#F!fw
 * BARC Speeder
 * NGE Housing
 
-This is now starting to be updated again, with the hope that a ZonamaDev image will be available in the not too distant future.
-
 It's purpose is to add all of the NGE assets and anything released by the kind contributors to the MTG website.
 
 The core3 files are a stock version of the SWGEmu unstable branch. Scripts will be added for all new content. Please test, and if you find any problems, please post to the above address
