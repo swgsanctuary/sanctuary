@@ -155,10 +155,8 @@ int ForceHealQueueCommand::runCommand(CreatureObject* creature, CreatureObject* 
 			}
 		}
 
-		if (healedStates == totalStates)
+		if (healedStates > 0 && healedStates == totalStates)
 			sendHealMessage(creature, targetCreature, HEAL_STATES, 0, 0);
-		else
-			sendHealMessage(creature, targetCreature, HEAL_STATES, 0, 1);
 	}
 
 	// Bleeding
@@ -177,6 +175,7 @@ int ForceHealQueueCommand::runCommand(CreatureObject* creature, CreatureObject* 
 		} else {
 			sendHealMessage(creature, targetCreature, HEAL_BLEEDING, 0, 0);
 		}
+
 		healPerformed = true;
 	}
 
@@ -196,6 +195,7 @@ int ForceHealQueueCommand::runCommand(CreatureObject* creature, CreatureObject* 
 		} else {
 			sendHealMessage(creature, targetCreature, HEAL_POISON, 0, 0);
 		}
+
 		healPerformed = true;
 	}
 
@@ -215,6 +215,7 @@ int ForceHealQueueCommand::runCommand(CreatureObject* creature, CreatureObject* 
 		} else {
 			sendHealMessage(creature, targetCreature, HEAL_DISEASE, 0, 0);
 		}
+
 		healPerformed = true;
 	}
 
@@ -226,9 +227,16 @@ int ForceHealQueueCommand::runCommand(CreatureObject* creature, CreatureObject* 
 		while (!result && (totalCost + healFireCost < currentForce) && (fireHealIterations == -1 || iteration <= fireHealIterations)) {
 			result = targetCreature->healDot(CreatureState::ONFIRE, 500, false);
 			totalCost += healFireCost;
-			healPerformed = true;
 			iteration++;
 		}
+
+		if (result) {
+			sendHealMessage(creature, targetCreature, HEAL_FIRE, 0, 1);
+		} else {
+			sendHealMessage(creature, targetCreature, HEAL_FIRE, 0, 0);
+		}
+
+		healPerformed = true;
 	}
 
 	bool selfHeal = creature->getObjectID() == targetCreature->getObjectID();
@@ -298,7 +306,7 @@ void ForceHealQueueCommand::sendHealMessage(CreatureObject* creature, CreatureOb
 				target->sendSystemMessage(message);
 			}
 		}
-	} else if (healType == HEAL_STATES && amount == 0) {
+	} else if (healType == HEAL_STATES && amount == 0 && !selfHeal) {
 		StringIdChatParameter message("jedi_spam", "stop_states_other");
 		message.setTT(targetID);
 		creature->sendSystemMessage(message);
@@ -331,6 +339,18 @@ void ForceHealQueueCommand::sendHealMessage(CreatureObject* creature, CreatureOb
 			StringIdChatParameter message("jedi_spam", "staunch_bleeding_other");
 			message.setTT(targetID);
 			creature->sendSystemMessage(message);
+		}
+	}
+
+	if (amount == 0) {
+		if (healType == HEAL_POISON) {
+			target->getDamageOverTimeList()->sendDecreaseMessage(target, CreatureState::POISONED);
+		} else if (healType == HEAL_DISEASE) {
+			target->getDamageOverTimeList()->sendDecreaseMessage(target, CreatureState::DISEASED);
+		} else if (healType == HEAL_BLEEDING) {
+			target->getDamageOverTimeList()->sendDecreaseMessage(target, CreatureState::BLEEDING);
+		} else if (healType == HEAL_FIRE) {
+			target->getDamageOverTimeList()->sendDecreaseMessage(target, CreatureState::ONFIRE);
 		}
 	}
 }

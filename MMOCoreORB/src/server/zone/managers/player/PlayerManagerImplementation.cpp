@@ -748,7 +748,7 @@ void PlayerManagerImplementation::killPlayer(TangibleObject* attacker, CreatureO
 	player->sendSystemMessage(stringId);
 
 	player->updateTimeOfDeath();
-	player->clearBuffs(true);
+	player->clearBuffs(true, false);
 
 	PlayerObject* ghost = player->getPlayerObject();
 
@@ -4692,8 +4692,6 @@ void PlayerManagerImplementation::disconnectAllPlayers() {
 			}
 		}
 	}
-
-	info("All players disconnected", true);
 }
 
 bool PlayerManagerImplementation::shouldRescheduleCorpseDestruction(CreatureObject* player, CreatureObject* ai) {
