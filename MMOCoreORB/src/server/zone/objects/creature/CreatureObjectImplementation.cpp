@@ -2631,9 +2631,11 @@ void CreatureObjectImplementation::updateGroupMFDPositions() {
 }
 
 void CreatureObjectImplementation::notifySelfPositionUpdate() {
-	if (getZoneUnsafe() != NULL) {
-		ManagedReference<PlanetManager*> planetManager =
-				getZoneUnsafe()->getPlanetManager();
+	auto zone = getZoneUnsafe();
+
+	if (zone != NULL && hasState(CreatureState::ONFIRE)) {
+		PlanetManager* planetManager =
+				zone->getPlanetManager();
 
 		if (planetManager != NULL) {
 			TerrainManager* terrainManager = planetManager->getTerrainManager();
@@ -2641,14 +2643,18 @@ void CreatureObjectImplementation::notifySelfPositionUpdate() {
 			if (terrainManager != NULL) {
 				float waterHeight;
 				
-				Reference<CreatureObject*> creature = _this.getReferenceUnsafeStaticCast();
+				CreatureObject* creature = asCreatureObject();
 				
-				if (creature->getParent() == NULL && terrainManager->getWaterHeight(creature->getPositionX(), creature->getPositionY(), waterHeight)) {
-					
-					if (creature->getPositionZ() + creature->getSwimHeight() - waterHeight < 0.2) {
+				if (parent == NULL && terrainManager->getWaterHeight(getPositionX(), getPositionY(), waterHeight)) {
+					if ((getPositionZ() + getSwimHeight() - waterHeight < 0.2)) {
+						Reference<CreatureObject*> strongRef = asCreatureObject();
 						
-						if (creature->hasState(CreatureState::ONFIRE))
-							creature->healDot(CreatureState::ONFIRE, 100);
+						Core::getTaskManager()->executeTask([strongRef] () {
+							Locker locker(strongRef);
+
+							if (strongRef->hasState(CreatureState::ONFIRE))
+								strongRef->healDot(CreatureState::ONFIRE, 100);
+						}, "CreoPositionUpdateHealFireLambda");
 					}
 				}
 			}
@@ -3050,8 +3056,13 @@ bool CreatureObjectImplementation::isHealableBy(CreatureObject* object) {
 
 	CreatureObject* targetCreo = asCreatureObject();
 
-	if (isPet())
-		targetCreo = getLinkedCreature().get();
+	if (isPet()) {
+		auto linkedCreature = getLinkedCreature().get();
+
+		if (linkedCreature != nullptr) {
+			targetCreo = linkedCreature.get();
+		}
+	}
 
 	uint32 targetFactionStatus = targetCreo->getFactionStatus();
 	uint32 currentFactionStatus = object->getFactionStatus();
