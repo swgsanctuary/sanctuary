@@ -1687,7 +1687,7 @@ void PlayerObjectImplementation::checkForNewSpawns() {
 	Vector<SpawnArea*> worldSpawnAreas;
 
 	for (int i = 0; i < areas.size(); ++i) {
-		ManagedReference<ActiveArea*> area = areas.get(i);
+		ManagedReference<ActiveArea*>& area = areas.get(i);
 
 		if (area->isNoSpawnArea()) {
 			return;
@@ -1745,9 +1745,16 @@ void PlayerObjectImplementation::checkForNewSpawns() {
 		return;
 	}
 
+	String zoneName;
+	auto zone = creature->getZone();
+
+	if (zone != nullptr) {
+		zoneName = zone->getZoneName();
+	}
+
 	Core::getTaskManager()->executeTask([=] () {
 		finalArea->tryToSpawn(creature);
-	}, "TryToSpawnLambda");
+	}, "TryToSpawnLambda", zoneName.toCharArray());
 }
 
 void PlayerObjectImplementation::activateRecovery() {
