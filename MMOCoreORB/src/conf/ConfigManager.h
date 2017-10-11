@@ -48,6 +48,7 @@ namespace conf {
 		String revision;
 
 		String metricsHost;
+		String metricsPrefix;
 		int metricsPort;
 
 		int purgeDeletedCharacters;
@@ -74,6 +75,9 @@ namespace conf {
 
 		Vector<String> treFiles;
 		SortedVector<String> enabledZones;
+
+		String logFile;
+		int logFileLevel;
 
 	public:
 
@@ -202,6 +206,10 @@ namespace conf {
 			return metricsHost;
 		}
 
+		inline const String& getMetricsPrefix() const {
+			return metricsPrefix;
+		}
+
 		inline int getMetricsPort() const {
 			return metricsPort;
 		}
@@ -292,6 +300,14 @@ namespace conf {
 
 		inline int getMaxNavMeshJobs() const {
 			return maxNavMeshJobs;
+		}
+
+		inline const String& getLogFile() const {
+			return logFile;
+		}
+
+		inline int getLogFileLevel() const {
+			return logFileLevel;
 		}
 
 		inline void setProgressMonitors(bool val) {
