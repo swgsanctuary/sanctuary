@@ -53,10 +53,9 @@ all: #build
 	#cd build/unix && cmake ../.. && make
 	#cp build/unix/src/core3 bin
 
-build: idl gtest
+build: idl gtest gitlog
 	cd build/unix && make -j4 UNITTEST_DIRECTIVES="$(UNITTEST_DIRECTIVES)" #CC=clang CXX=clang++
 	cp build/unix/src/core3* bin
-	cd bin/conf && git log --pretty=format:'%h was %an, %ar, message: %s' -10 > rev.txt
 	rm build/unix/src/core3
 	rm build/unix/src/core3client
 	#done
@@ -64,7 +63,16 @@ build: idl gtest
 unittest: UNITTEST_DIRECTIVES = -fprofile-arcs -ftest-coverage
 unittest: build
 
+unittest-cmake: UNITTEST_DIRECTIVES = -fprofile-arcs -ftest-coverage
+unittest-cmake: build-cmake
+
+sanitizers-cmake: UNITTEST_DIRECTIVES = -fsanitize=address 
+sanitizers-cmake: build-cmake
+
 rebuild: clean build
+
+gitlog: 
+	cd bin/conf && git log --pretty=format:'%h was %an, %ar, message: %s' -10 > rev.txt
 
 idl:
 	$(IDLC) $(IDL_DIRECTIVES) -sd src anyadEclipse
@@ -109,8 +117,8 @@ ifeq ($(PLATFORM),Darwin)
 endif
 endif
 
-build-cmake: idl gtest
-	cd build/unix && cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../.. ../.. && make -j$(CPU_CORES)
+build-cmake: idl gtest gitlog
+	cd build/unix && cmake -DCMAKE_INSTALL_PREFIX=`pwd`/../.. -DCMAKE_CXX_FLAGS="$(UNITTEST_DIRECTIVES)" ../.. && make -j$(CPU_CORES)
 	cd build/unix && make install
 
 clean-cmake: cleanidl-cmake
