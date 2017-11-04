@@ -28,3 +28,7 @@ includeFile("custom_content/building/heroic/tusken_tatooine_shuttleport.lua")
 includeFile("custom_content/building/heroic/tusken_tatooine_starport.lua")
 includeFile("custom_content/building/heroic/tusken_tatooine_university.lua")
 includeFile("custom_content/building/heroic/tusken_tatooine_watto_shop.lua")
+includeFile("custom_content/building/heroic/frozen_tauntaun.lua")
+includeFile("custom_content/building/heroic/golan_laser_battery.lua")
+includeFile("custom_content/building/heroic/hoth_ion.lua")
+

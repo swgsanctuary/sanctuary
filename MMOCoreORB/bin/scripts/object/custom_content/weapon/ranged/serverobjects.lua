@@ -46,6 +46,7 @@
 includeFile("weapon/ranged/carbine/base/serverobjects.lua")
 includeFile("weapon/ranged/pistol/base/serverobjects.lua")
 includeFile("weapon/ranged/rifle/base/serverobjects.lua")
+includeFile("custom_content/weapon/ranged/creature/serverobjects.lua")
 
 -- Server Objects
 -- Post 14 Carbines

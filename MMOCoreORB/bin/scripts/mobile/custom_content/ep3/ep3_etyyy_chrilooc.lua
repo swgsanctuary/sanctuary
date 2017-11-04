@@ -27,6 +27,7 @@ ep3_etyyy_chrilooc = Creature:new {
 	diet = HERBIVORE,
 
 	templates = {"object/mobile/ep3/ep3_etyyy_chrilooc.iff"},
+	scale = 1.25,
 	lootGroups = {},
 	weapons = {},
 	conversationTemplate = "",

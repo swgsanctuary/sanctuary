@@ -27,6 +27,7 @@ ep3_kymayrr = Creature:new {
 	diet = HERBIVORE,
 
 	templates = {"object/mobile/ep3/ep3_kymayrr.iff"},
+	scale = 1.18,
 	lootGroups = {},
 	weapons = {},
 	conversationTemplate = "",
