@@ -1,5 +1,5 @@
 ep3_criss_nepomi = Creature:new {
-	customName = "Criss Nepomi",
+	customName = "Dr Criss Nepomi",
 	--randomNameType = NAME_GENERIC_TAG,
 	socialGroup = "townsperson",
 	faction = "",

@@ -1,5 +1,5 @@
 ep3_orooroo_betrayer = Creature:new {
-	customName = "Orooroo Betrayer",
+	customName = "Orooroo the Betrayer",
 	--randomNameType = NAME_GENERIC_TAG,
 	socialGroup = "townsperson",
 	faction = "",
@@ -27,6 +27,7 @@ ep3_orooroo_betrayer = Creature:new {
 	diet = HERBIVORE,
 
 	templates = {"object/mobile/ep3/ep3_orooroo_betrayer.iff"},
+	scale = 1.2,
 	lootGroups = {},
 	weapons = {},
 	conversationTemplate = "",

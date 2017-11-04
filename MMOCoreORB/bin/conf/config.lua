@@ -91,23 +91,20 @@ ZoneOnlineCharactersPerAccount = 2 --How many characters are allowed online from
 --To save on RAM and CPU usage, you should only enable the zones you need.
 --In order to disable a zone, all you have to do is comment it out.
 ZonesEnabled = {
-	--"09",
-	--"10",
-	--"11",
-	--"character_farm",
-	--"cinco_city_test_m5",
+--[[
+	"tatooine",
+	"tutorial"
+--]]
+---[[
+	"chandrila",
 	"corellia",
-	--"creature_test",
+	"coruscant",
 	"dantooine",
 	"dathomir",
-	--"dungeon1",
 	"dungeon1",
 	"endor",
-	--"endor_asommers",
-	--"floratest",
-	--"godclient_test",
-	--"hoth",
-	--"kaas",
+	"hoth",
+	"kaas",
 	"kashyyyk",
 	"kashyyyk_hunting",
 	"kashyyyk_rryatt_trail",
@@ -117,15 +114,11 @@ ZonesEnabled = {
 	"kashyyyk_pob_dungeons",
 	"kashyyyk_dead_forest",
 	"lok",
-	--"mandalore",
-	--"mustafar",
+	"mandalore",
+	--"moraband",
+	"mustafar",
 	"naboo",
-	--"otoh_gunga",
-	--"rivertest",
 	"rori",
-	--"runtimerules",
-	--"simple",
-	--"space_09",
 	--"space_corellia",
 	--"space_corellia_2",
 	--"space_dantooine",
@@ -141,14 +134,11 @@ ZonesEnabled = {
 	--"space_tatooine",
 	--"space_tatooine_2",
 	--"space_yavin4",
-	--"taanab",
+	"taanab",
 	"talus",
 	"tatooine",
-	--"test_wearables",
 	"tutorial",
-	--"umbra",
-	--"watertabletest",
-	"yavin4"
+	"yavin4"--]]
 }
 
 
@@ -156,6 +146,7 @@ ZonesEnabled = {
 TrePath = "/home/swgemu/workspace/tre"
 
 TreFiles = {
+	"mtg_patch_022.tre",
 	"mtg_planets.tre",
 	"mtg_patch_021.tre",
 	--"mtg_patch_020.tre",

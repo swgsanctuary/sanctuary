@@ -27,6 +27,7 @@ ep3_clone_relics_ovarra = Creature:new {
 	diet = HERBIVORE,
 
 	templates = {"object/mobile/ep3/ep3_clone_relics_ovarra.iff"},
+	scale = 1.15,
 	lootGroups = {},
 	weapons = {},
 	conversationTemplate = "",

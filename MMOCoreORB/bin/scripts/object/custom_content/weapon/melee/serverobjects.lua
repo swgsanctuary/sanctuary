@@ -101,7 +101,7 @@ includeFile("custom_content/weapon/melee/sword_lightsaber_two_handed_gen5_eow.lu
 includeFile("custom_content/weapon/melee/sword_lightsaber_two_handed_gen5_sith.lua")
 includeFile("custom_content/weapon/melee/sword_lightsaber_two_handed_pvp_bf.lua")
 includeFile("custom_content/weapon/melee/sword_lightsaber_two_handed_pvp_bf_gen5.lua")
-
+includeFile("custom_content/weapon/melee/sword_lightsaber_two_handed_gen6_must.lua")
 
 --BATON
 includeFile("custom_content/weapon/melee/baton_avatar_trando_stun_stick.lua")

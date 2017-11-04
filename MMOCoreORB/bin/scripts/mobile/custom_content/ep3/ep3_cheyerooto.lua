@@ -27,6 +27,7 @@ ep3_cheyerooto = Creature:new {
 	diet = HERBIVORE,
 
 	templates = {"object/mobile/ep3/ep3_cheyerooto.iff"},
+	scale = 1.26,
 	lootGroups = {},
 	weapons = {},
 	conversationTemplate = "",
