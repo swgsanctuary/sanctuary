@@ -17,32 +17,81 @@ link_directories(${CMAKE_BINARY_DIR}/src/server/login)
 link_directories(${CMAKE_BINARY_DIR}/src/server/zone)
 link_directories(${CMAKE_BINARY_DIR}/src/server/chat)
 
-file(GLOB_RECURSE autogen_sources "autogen/*.cpp")
+if(BUILD_IDL)
+	file(GLOB_RECURSE idls "${CMAKE_SOURCE_DIR}/src/*.idl")
 
-add_library(idlobjects STATIC ${autogen_sources})
+	set(autogen_sources)
+	set(autogen_headers)
+	foreach(idl ${idls})
+		string(REPLACE "src/" "src/autogen/" autogen_base ${idl})
+		string(REPLACE ".idl" ".cpp" autogen_cpp ${autogen_base})
+		string(REPLACE ".idl" ".h" autogen_h ${autogen_base})
+		set(autogen_sources ${autogen_sources} "${autogen_cpp}")
+		set(autogen_headers ${autogen_headers} "${autogen_h}")
+
+		string(REGEX REPLACE ".+\/src\/" "" idl_f ${idl})
+		string(CONCAT idl_b "src/" ${idl_f})
+
+		get_filename_component(idl_we ${idl} NAME_WE)
+
+		add_custom_command(OUTPUT "${autogen_cpp}" "${autogen_h}"
+			COMMAND ${Java_JAVA_EXECUTABLE} -Xmx128M -cp ${IDLC_BIN_DIR}/idlc.jar org.sr.idlc.compiler.Compiler ${IDL_DIRECTIVES} -silence -rebuild -sd src ${idl_f}
+			WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+			DEPENDS ${idl}
+			COMMENT "Building IDL object ${idl_b}"
+			VERBATIM)
+	endforeach()
+
+	set_source_files_properties(${${autogen_sources}} ${${autogen_headers}} PROPERTIES GENERATED TRUE)
+
+	add_library(idlobjects STATIC ${autogen_sources} ${autogen_headers})
+else(BUILD_IDL)
+	file(GLOB_RECURSE autogen_sources "autogen/*.cpp")
+	file(GLOB_RECURSE autogen_headers "autogen/*.h")
+
+	add_library(idlobjects STATIC ${autogen_sources} ${autogen_headers})
+endif()
+
+set_target_properties(idlobjects PROPERTIES LINKER_LANGUAGE CXX)
+
+#add_subdirectory(server/zone)
+
+file(GLOB_RECURSE zone3_sources "server/zone/*.cpp")
+file(GLOB_RECURSE zone3_headers "server/zone/*.h")
+
+file(GLOB_RECURSE tre3_sources "tre3/*.cpp")
+file(GLOB_RECURSE tre3_headers "tre3/*.h")
 
 # Create core3 binary
-add_executable(core3 server/ServerCore.cpp tre3/TreeFile.cpp main.cpp)
-add_dependencies(core3 zone3 idlobjects)
+add_executable(core3 server/ServerCore.cpp ${tre3_sources} ${tre3_headers} ${zone3_sources} ${zone3_headers} main.cpp)
+add_dependencies(core3 gmock idlobjects)
 
 # Add libraries
 if(APPLE)
     target_link_libraries(core3
             -Wl,-all_load
-            db3 conf3 web3 status3 ping3 login3 zone3 chat3 core3terrain core3templates core3pathfinding idlobjects
+            db3 conf3 web3 status3 ping3 login3 chat3 core3terrain core3templates core3pathfinding idlobjects
             -Wl,-noall_load
             ${ENGINE3_LIBRARIES}
-            ${ZLIB_LIBRARIES} Threads::Threads ${MYSQL_CLIENT_LIBS} ${LUA_LIBRARIES} ${DB_LIBRARIES} ${CMAKE_DL_LIBS} ${OPENSSL_LIBRARIES} gtest)
+            ${ZLIB_LIBRARIES} Threads::Threads ${MYSQL_CLIENT_LIBS} ${LUA_LIBRARIES} ${DB_LIBRARIES} ${CMAKE_DL_LIBS} ${OPENSSL_LIBRARIES} gmock)
 elseif(UNIX)
     target_link_libraries(core3
-        -Wl,--whole-archive
-        db3 conf3 web3 status3 ping3 login3 zone3 chat3 core3terrain core3templates core3pathfinding idlobjects
-        -Wl,--no-whole-archive
-        ${ENGINE3_LIBRARIES}
-        ${ZLIB_LIBRARIES} Threads::Threads ${MYSQL_CLIENT_LIBS} ${LUA_LIBRARIES} ${DB_LIBRARIES} ${CMAKE_DL_LIBS} ${OPENSSL_LIBRARIES} gtest)
+        	-Wl,--whole-archive
+        	db3 conf3 web3 status3 ping3 login3 chat3 core3terrain core3templates core3pathfinding idlobjects
+        	-Wl,--no-whole-archive
+        	${ENGINE3_LIBRARIES}
+        	${ZLIB_LIBRARIES} Threads::Threads ${MYSQL_CLIENT_LIBS} ${LUA_LIBRARIES} ${DB_LIBRARIES} ${CMAKE_DL_LIBS} ${OPENSSL_LIBRARIES} gmock)
 endif()
 
-# Install core3 binary
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/core3 DESTINATION bin)
-install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/client/core3client DESTINATION bin)
+# Copy core3 binary
+add_custom_command(
+	TARGET core3 POST_BUILD
+	COMMAND ${CMAKE_COMMAND} -E copy
+	${CMAKE_CURRENT_BINARY_DIR}/core3
+	${CMAKE_SOURCE_DIR}/bin/)
 
+if(GIT_FOUND)
+    add_custom_command(
+        TARGET core3 POST_BUILD
+        COMMAND ${GIT_EXECUTABLE} log --pretty=format:'%h was %an, %ar, message: %s' -10 > ${CMAKE_SOURCE_DIR}/bin/conf/rev.txt)
+endif()
