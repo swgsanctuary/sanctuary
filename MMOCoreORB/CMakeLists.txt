@@ -8,9 +8,10 @@ project(core3 CXX C)
 # Set cmake paths
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-OPTION(BUILD_IDL "Generate idl c++ sources with cmake" ON) # Enabled by default
-OPTION(IDL_NOPRELOCKS "Disables all prelock annotations" OFF) # Enabled by default
-OPTION(ENABLE_CCACHE "Enables ccache search and usage" OFF) # Enabled by default
+option(BUILD_IDL "Generate idl c++ sources with cmake" ON) # Enabled by default
+option(IDL_NOPRELOCKS "Disables all prelock annotations" OFF) # Disabled by default
+option(ENABLE_CCACHE "Enables ccache search and usage" OFF) # Disabled by default
+option(RUN_GIT "Runs git log to dump last commit messages into rev.txt" OFF) # Disabled by default
 
 # Add lua includes and libraries
 find_package(Lua "5.3" REQUIRED)
@@ -24,7 +25,7 @@ find_package(MySql REQUIRED)
 find_package(Berkeley REQUIRED)
 include_directories(${DB_INCLUDE_DIR})
 
-find_package(Java COMPONENTS Runtime REQUIRED)
+find_package(Java 1.7 COMPONENTS Runtime REQUIRED )
 
 # Find engine3 includes and libraries
 find_package(Engine3 REQUIRED)
@@ -42,14 +43,14 @@ find_package(Threads REQUIRED)
 
 find_package(Git QUIET)
 
-if (ENABLE_CCACHE)
+if(ENABLE_CCACHE)
     find_program(CCACHE_FOUND ccache)
+
     if(CCACHE_FOUND)
         set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
         set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
     endif(CCACHE_FOUND)
 endif(ENABLE_CCACHE)
-
 
 if(IDL_NOPRELOCKS)
     set(IDL_DIRECTIVES ${IDL_DIRECTIVES} -noprelocks)
