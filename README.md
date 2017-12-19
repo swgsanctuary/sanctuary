@@ -18,6 +18,8 @@ The complete set of consolidated tre files are [**here.**](https://mega.nz/#F!fw
 * Chiss Backpack
 * BARC Speeder
 * NGE Housing
+* NGE Collection Items
+* TCG Items
 
 It's purpose is to add all of the NGE assets and anything released by the kind contributors to the MTG website.
 
