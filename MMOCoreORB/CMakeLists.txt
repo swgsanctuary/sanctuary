@@ -18,6 +18,7 @@ option(IDL_NOPRELOCKS "Disables all prelock annotations" OFF) # Disabled by defa
 option(ENABLE_CCACHE "Enables ccache search and usage" OFF) # Disabled by default
 option(RUN_GIT "Runs git log to dump last commit messages into rev.txt" OFF) # Disabled by default
 option(COMPILE_TESTS "Enables mock generation in idlc and test compiling" ON) # Enabled by default
+option(LOGIN_SERVER_EXTRA_PORTS "Enables login server with extra ports config" OFF) # Disabled by default
 
 # Add lua includes and libraries
 find_package(Lua "5.3" REQUIRED)
@@ -85,12 +86,16 @@ else(COMPILE_TESTS)
     set(IDL_DIRECTIVES ${IDL_DIRECTIVES} -nomocks)
 endif(COMPILE_TESTS)
 
+if (LOGIN_SERVER_EXTRA_PORTS)
+    add_definitions(-DUSE_RANDOM_EXTRA_PORTS)
+endif(LOGIN_SERVER_EXTRA_PORTS)
+
 include_directories(${CMAKE_SOURCE_DIR}/src)
 include_directories(${CMAKE_SOURCE_DIR}/src/autogen)
 include_directories(${CMAKE_SOURCE_DIR}/utils)
 
 # Define global build gcc compatible flags
-set(GCCEXTRAFLAGS "-Wall -Wextra -Wno-unused -Wno-sign-compare -Wno-multichar -Wno-unused-parameter -Wno-overloaded-virtual -Wno-missing-declarations -Werror")
+set(GCCEXTRAFLAGS "-Wall -Wextra -Wno-unused -Wno-sign-compare -Wno-multichar -Wno-unused-parameter -Wno-overloaded-virtual -Wno-missing-declarations -Werror -ggdb")
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang" OR CMAKE_CXX_COMPILER_ID MATCHES "GNU")
     set(CMAKE_CXX_FLAGS ${CMAKE_CXX_FLAGS} ${GCCEXTRAFLAGS})
