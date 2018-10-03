@@ -2,7 +2,7 @@ enhanced_kwi = Creature:new {
 	objectName = "@mob/creature_names:geonosian_enhanced_kwi",
 	socialGroup = "geonosian_creature",
 	faction = "",
-	level = 106,
+	level = 85,
 	chanceHit = 1.75,
 	damageMin = 690,
 	damageMax = 1090,
@@ -18,7 +18,7 @@ enhanced_kwi = Creature:new {
 	boneType = "bone_mammal",
 	boneAmount = 75,
 	milk = 0,
-	tamingChance = 0,
+	tamingChance = 0.25,
 	ferocity = 16,
 	pvpBitmask = AGGRESSIVE + ATTACKABLE + ENEMY,
 	creatureBitmask = PACK + KILLER,
@@ -30,9 +30,11 @@ enhanced_kwi = Creature:new {
 	lootGroups = {
 		{
 			groups = {
-				{group = "enhanced_kwi", chance = 10000000}
+				{group = "enhanced_kwi", chance = 5000000},
+				{group = "geonosian_common", chance = 2500000},
+				{group = "geonosian_hard", chance = 2500000}
 			},
-			lootChance = 3120000
+			lootChance = 10000000
 		}
 	},
 	weapons = {},

@@ -29,7 +29,37 @@ general_grievous = Creature:new {
 	scale = 1.5,
 
 	templates = {"object/mobile/ep3/general_grievous.iff"},
-	lootGroups = {},
+	lootGroups = {
+		{
+			groups = {
+				{group = "g_carbine_heroic_sd", chance = 500000},
+				{group = "g_carbine_kun_massassi", chance = 500000},
+				{group = "g_polearm_heroic_sd", chance = 500000},
+				{group = "g_pvp_bf_knuckler", chance = 500000},
+				{group = "g_sword_pvp_bf_01", chance = 500000},
+				{group = "g_pistol_heroic_exar", chance = 500000},
+				{group = "g_pistol_heroic_sd", chance = 500000},
+				{group = "g_som_2h_sword_obsidian", chance = 500000},
+				{group = "g_som_2h_sword_tulrus", chance = 500000},
+				{group = "g_som_sword_obsidian", chance = 500000},
+				{group = "weapons_all", chance = 4300000},
+				{group = "g_ep3_chiss_poacher_backpack", chance = 200000},
+				{group = "g_ep3_loot_necrosis", chance = 500000}
+			},
+			lootChance = 10000000
+		},
+		  {
+			groups = {
+				{group = "cyborgroup1", chance = 1666667},
+				{group = "cyborgroup2", chance = 1666666},
+				{group = "cyborgroup3", chance = 1666667},
+				{group = "cyborgroup4", chance = 1666666},
+				{group = "cyborgroup5", chance = 1666667}
+				{group = "cyborgroup6", chance = 1666666}
+		},
+			lootChance = 10000000
+		  },
+	},
 	weapons = {"dark_jedi_weapons_gen4"},
 	conversationTemplate = "",
 	attacks = merge(lightsabermaster)

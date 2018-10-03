@@ -194,6 +194,14 @@ factional_rebel_destroy_missions = {
 			maxDifficulty = 32,
 			size = 25,
 		},
+--Added Dark Jedi Missions-->
+		{
+			lairTemplateName = "global_imperial_dark_jedi_knight_camp_imperial_large_theater",
+			minDifficulty = 120,
+			maxDifficulty = 300,
+			size = 25,
+		},  -- <---
+
 	}
 }
 

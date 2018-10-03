@@ -61,13 +61,13 @@ function RancorCaveScreenPlay:spawnMobiles()
         spawnMobile("dathomir", "rancor_youth", 3600, -77.6, -45.8, -148.0, -19, 4335473)
 
         --Cell[4335465]
-        spawnMobile("dathomir", "mutant_rancor", 3600, -87.1, -62.2, -14.9, -178, 4335465)
+        spawnMobile("dathomir", "ancient_bull_rancor", 3600, -87.1, -62.2, -14.9, -178, 4335465)
 
         --Cell[4335466]
         spawnMobile("dathomir", "gnarled_rancor", 3600, -79.0, -76.7, -89.2, 4, 4335466)
 
         --Cell[4335467]
-        spawnMobile("dathomir", "mutant_rancor", 3600, -95.4, -66.3, -109.3, 172, 4335467)
+        spawnMobile("dathomir", "ancient_bull_rancor", 3600, -95.4, -66.3, -109.3, 172, 4335467)
 
         --Cell[4335470]
           --Mutant/Enraged
@@ -78,7 +78,9 @@ function RancorCaveScreenPlay:spawnMobiles()
 
           --Ancient
         --Cell[4335471]
-        spawnMobile("dathomir", "ancient_bull_rancor", 5400, -189.9, -66.5, -102.1, 87, 4335471)
-	spawnMobile("dathomir", "ancient_bull_rancor", 5400, -4224.2, 25.3, -2091.7, 132, 0)
+--        spawnMobile("dathomir", "ancient_bull_rancor", 5400, -189.9, -66.5, -102.1, 87, 4335471)
+	spawnMobile("dathomir", "ancient_bull_rancor", 3600, -4224.2, 25.3, -2091.7, 132, 0)
+	spawnMobile("dathomir", "custom_rancor_king", 5400, -189.9, -66.5, -102.1, 87, 4335471)
+
 
 end

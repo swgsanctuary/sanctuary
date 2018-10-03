@@ -312,6 +312,7 @@ includeFile("events/eventPromoter.lua")
 includeFile("events/lifeDay.lua")
 includeFile("events/buffTerminalMenuComponent.lua")
 includeFile("events/race_droid.lua")
+includeFile("events/painting_exchange_dealer.lua")
 
 -- Hero of Tatooine
 includeFile("tasks/hero_of_tatooine/conversations/hermitConvoHandler.lua")
@@ -656,5 +657,15 @@ includeFile("record_keepers/record_keepers.lua")
 includeFile("tests/tests.lua")
 
 --Custom Screenplays
-includeFile("custom_screenplays/screenplays.lua")
+includeFile("custom_content/random/oola_screenplay.lua")
+includeFile("custom_content/random/engineer_screenplay.lua")
+includeFile("custom_content/random/hellucard_screenplay.lua")
+--includeFile("custom_content/random/droid_pvp_screenplay.lua") Requires Kaas to be enabled
+includeFile("custom_content/random/oola_screenplay.lua")
 
+--Cave
+includeFile("custom_content/cave/tatooine_tusken_bunker_boss.lua")
+includeFile("custom_content/world_boss/outbreak_screenplay.lua")
+includeFile("custom_content/cave/dantooine_janta_cave_boss.lua")
+includeFile("custom_screenplays/screenplays.lua")
+includeFile("events/black_sun.lua") --Added 09/11/18

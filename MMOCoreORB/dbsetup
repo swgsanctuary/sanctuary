@@ -1,0 +1,37 @@
+#!/bin/bash
+#
+# dbsetup - MySQL database builder.
+#
+# Original Script: Lord Kator <lordkator@swgemu.com>
+#
+# Created: Sun Apr 21 14:25:10 UTC 2013
+#
+# Modified by: Sygnum <June 12 2018>
+##############################################################################
+logstep "MySQL database"
+##############################################################################
+
+if  [[ ! "$(/usr/sbin/service mysql status)" =~ "start/running" ]]
+then
+    sudo service mysql start
+fi
+
+if mysql -p123456 -NB -e 'show databases'|grep swgemu > /dev/null 2>&1; then
+  echo "swgemu database already exists"
+  :
+else
+  echo "Enter mysql root password"
+  createdb swgemu swgemu 123456      # See createdb script in /home/bin
+  echo "Restore blank swgemu database to mysql"
+  mysql -p123456 -e source -e ~/workspace/Core3/MMOCoreORB/sql/swgemu.sql;
+  echo "Enter mysql root password"
+  createdb mantis swgemu 123456      # See createdb script in /home/bin
+  echo "Restore blank mantis database to mysql"
+  mysql -p123456 -e source -e ~/workspace/Core3/MMOCoreORB/sql/mantis.sql;
+  for sql in ~/workspace/Core3/MMOCoreORB/sql/updates/*.sql
+  do
+    echo "Runing mysql update: $sql"
+    mysql -p123456 swgemu -e source -e $sql
+  done
+fi
+

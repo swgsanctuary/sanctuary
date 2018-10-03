@@ -41,17 +41,18 @@
 --which carries forward this exception.
 
 --Determines how often exceptional and legendary items can drop.
-yellowChance = 1000 -- 1 in 1,000
-exceptionalChance = 100000 --1 in 100,000
-legendaryChance = 1000000 --1 in 1,000,000
---yellowChance = 50 --1 in 50 for testing
---exceptionalChance = 100 --1 in 100 for testing
---legendaryChance = 1000 --1 in 1000 for testing
+yellowChance = 50 -- 1 in 50
+exceptionalChance = 500 --1 in 250
+legendaryChance = 1000 --1 in 500
+--yellowChance = 50 --1 in 50
+--exceptionalChance = 100 --1 in 250
+--legendaryChance = 500 --1 in 500
 
 --Determines how much of an increase in the base stats will be applied to the object.
-yellowModifier = 1.5
-exceptionalModifier = 2.5
-legendaryModifier = 5.0
+yellowModifier = .50
+exceptionalModifier = 1.25
+legendaryModifier = 1.50
+
 
 --The chance for random skill mods to be on looted weapons/wearables
 skillModChance = 500 -- 1 in 500
@@ -136,7 +137,44 @@ lootableArmorAttachmentStatMods = {
 	"unarmed_damage",
 	"unarmed_speed",
 	"volley",
-	"warcry"
+	"warcry",
+	"heavy_flame_thrower_accuracy",
+	"heavy_flame_thrower_speed",
+	"camp",
+	"tame_level",
+	"bio_engineer_assembly",
+	"bio_engineer_experimentation",
+	"combat_healing_ability",
+	"combat_medic_effectiveness",
+	"healing_ability",
+	"creature_harvesting",
+	"creature_hit_bonus",
+	"dna_harvesting",
+	"luck",
+	"combat_healing_ability",
+	"healing_ability",
+	"keep_creature",
+	"stored_pets",
+	"combat_medic_effectiveness",
+	"mindblast_accuracy",
+	"jedi_saber_assembly",
+	"jedi_saber_experimentation",
+	"jedi_force_power_max",
+	"onehandlightsaber_accuracy",
+	"onehandlightsaber_speed",
+	"polearmlightsaber_accuracy",
+	"polearmlightsaber_speed",
+	"twohandlightsaber_accuracy",
+	"twohandlightsaber_speed",
+	"force_assembly",
+	"forcethrow_accuracy",
+	"force_experimentation",
+	"force_failure_reduction",
+	"force_repair_bonus",
+	"forceintimidate_accuracy",
+	"forceknockdown_accuracy",
+	"forcelightning_accuracy",
+	"forceweaken_accuracy"
 }
 
 lootableClothingAttachmentStatMods = {
@@ -252,7 +290,47 @@ lootableClothingAttachmentStatMods = {
 	"warcry",
 	"weapon_assembly",
 	"weapon_experimentation",
-	"weapon_repair"
+	"weapon_repair",
+	"camp",
+	"tame_level",
+	"combat_healing_ability",
+	"combat_medic_effectiveness",
+	"healing_ability",
+	"bio_engineer_assembly",
+	"bio_engineer_experimentation",
+	"creature_hit_bonus",
+	"creature_knowledge",
+	"dna_harvesting",
+	"heavy_flame_thrower_accuracy",
+	"heavy_flame_thrower_speed",
+	"luck",
+	"combat_healing_ability",
+	"healing_ability",
+	"keep_creature",
+	"stored_pets",
+	"combat_medic_effectiveness",
+	"mindblast_accuracy",
+	"jedi_saber_assembly",
+	"jedi_saber_experimentation",
+	"jedi_force_power_regen",
+	"jedi_force_power_max",
+	"onehandlightsaber_accuracy",
+	"onehandlightsaber_speed",
+	"polearmlightsaber_accuracy",
+	"polearmlightsaber_speed",
+	"twohandlightsaber_accuracy",
+	"twohandlightsaber_speed",
+	"force_assembly",
+	"force_choke",
+	"forcethrow_accuracy",
+	"force_experimentation",
+	"force_failure_reduction",
+	"force_repair_bonus",
+	"forceintimidate_accuracy",
+	"forceknockdown_accuracy",
+	"forcelightning_accuracy",
+	"forceweaken_accuracy",
+	"jedi_saber_assembly"
 }
 
 lootableArmorStatMods = {
@@ -363,7 +441,12 @@ lootableArmorStatMods = {
 	"warcry",
 	"weapon_assembly",
 	"weapon_experimentation",
-	"weapon_repair"
+	"weapon_repair",
+	"combat_healing_ability",
+	"healing_ability",
+	"keep_creature",
+	"stored_pets",
+	"combat_medic_effectiveness",
 }
 
 lootableClothingStatMods = {
@@ -474,7 +557,12 @@ lootableClothingStatMods = {
 	"warcry",
 	"weapon_assembly",
 	"weapon_experimentation",
-	"weapon_repair"
+	"weapon_repair",
+	"combat_healing_ability",
+	"healing_ability",
+	"keep_creature",
+	"stored_pets",
+	"combat_medic_effectiveness",
 }
 
 lootableOneHandedMeleeStatMods = {
@@ -804,7 +892,7 @@ lootableHeavyWeaponStatMods = {
 -- Values used to generate lightsaber crystal stats
 jediCrystalStats = {
 	lightsaber_module_force_crystal = {
-		minDamage = 0,
+		minDamage = 20,
 		maxDamage = 50,
 		minHitpoints = 700,
 		maxHitpoints = 1400,
@@ -816,14 +904,14 @@ jediCrystalStats = {
 		maxMindSac = -9,
 		minAttackSpeed = 0,
 		maxAttackSpeed = -0.6,
-		minForceCost = 0,
+		minForceCost = 2,
 		maxForceCost = -9.9,
 		minWoundChance = 0,
 		maxWoundChance = 4,
 	},
 	lightsaber_module_krayt_dragon_pearl = {
 		minDamage = 20,
-		maxDamage = 50,
+		maxDamage = 75,
 		minHitpoints = 900,
 		maxHitpoints = 1400,
 		minHealthSac = -6,
@@ -834,7 +922,7 @@ jediCrystalStats = {
 		maxMindSac = -9,
 		minAttackSpeed = -0.3,
 		maxAttackSpeed = -0.6,
-		minForceCost = -5.0,
+		minForceCost = -7.0,
 		maxForceCost = -9.9,
 		minWoundChance = 2,
 		maxWoundChance = 4,

@@ -54,15 +54,16 @@ object_tangible_wearables_robe_robe_s32_h1 = object_tangible_wearables_robe_shar
 				"object/creature/player/zabrak_male.iff",
 				"object/creature/player/zabrak_female.iff" },
 				
-				skillMods = {
-				    {"jedi_force_power_max", 900},
-				    {"jedi_force_power_regen", 300}
-				},
+	skillMods = {
+		{"jedi_force_power_max", 500},
+		{"jedi_force_power_regen", 25},
+		{"lightsaber_toughness", 25},
+		{"jedi_toughness", 25}
+		},
 
-				noTrade = 1,
 
 				objectMenuComponent = "RobeObjectMenuComponent",
-				certificationsRequired = {"force_rank_light_rank_10"},
+				certificationsRequired = {"force_title_jedi_rank_02"},
 				attributeListComponent = "JediRobeAttributeListComponent",
 }
 ObjectTemplates:addTemplate(object_tangible_wearables_robe_robe_s32_h1, "object/tangible/wearables/robe/robe_s32_h1.iff")

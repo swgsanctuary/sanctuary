@@ -1,0 +1,6 @@
+#! /bin/bash
+#
+# Unit Tests
+
+cd /bin
+./core3 RunUnitTests 

@@ -219,11 +219,11 @@ void PetControlDeviceImplementation::callObject(CreatureObject* player) {
 
 		Reference<CallPetTask*> callPet = new CallPetTask(_this.getReferenceUnsafeStaticCast(), player, "call_pet");
 
-		StringIdChatParameter message("pet/pet_menu", "call_pet_delay"); // Calling pet in %DI seconds. Combat will terminate pet call.
+		StringIdChatParameter message("pet/pet_menu", "call_pet_delay"); // Calling pet now. Combat will terminate pet call.
 		message.setDI(15);
 		player->sendSystemMessage(message);
 
-		player->addPendingTask("call_pet", callPet, 15 * 1000);
+		player->addPendingTask("call_pet", callPet, 0 * 1000);
 
 		if (petControlObserver == NULL) {
 			petControlObserver = new PetControlObserver(_this.getReferenceUnsafeStaticCast());
@@ -454,8 +454,8 @@ void PetControlDeviceImplementation::storeObject(CreatureObject* player, bool fo
 
 	assert(pet->isLockedByCurrentThread());
 
-	if (!force && (pet->isInCombat() || player->isInCombat() || player->isDead()))
-		return;
+	/*if (!force && (pet->isInCombat() || player->isInCombat() || player->isDead()))
+		return;*/
 
 	if (player->isRidingMount() && player->getParent() == pet) {
 
@@ -491,8 +491,8 @@ void PetControlDeviceImplementation::storeObject(CreatureObject* player, bool fo
 	}
 	else {
 		if (pet->getPendingTask("store_pet") == NULL) {
-			player->sendSystemMessage( "Storing pet in 60 seconds");
-			pet->addPendingTask("store_pet", task, 60 * 1000);
+			player->sendSystemMessage( "Storing pet in 10 seconds");
+			pet->addPendingTask("store_pet", task, 10 * 1000);
 		}
 		else {
 			Time nextExecution;

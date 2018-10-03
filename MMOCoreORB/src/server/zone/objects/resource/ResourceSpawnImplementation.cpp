@@ -245,7 +245,9 @@ Reference<ResourceContainer*> ResourceSpawnImplementation::createResource(int un
    	if (units != 0)
    		newResource->setQuantity(units);
 
-   	newResource->setCustomObjectName(getFamilyName(), false);
+        //newResource->setCustomObjectName(getFamilyName(), false); (original line) Changed to next 2 lines to display resource names.
+	String resourceFuckingName = getFinalClass() + " (" + getName() + ")"; 
+    	newResource->setCustomObjectName(resourceFuckingName, false);
 
    	++containerReferenceCount;
 

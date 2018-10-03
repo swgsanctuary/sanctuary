@@ -40,60 +40,6 @@
 --this exception also makes it possible to release a modified version
 --which carries forward this exception.
 
-object_tangible_component_armor_shared_armor_appearance_enhancement_base = SharedTangibleObjectTemplate:new {
-	clientTemplateFileName = "object/tangible/component/armor/shared_armor_appearance_enhancement_base.iff"
-}
-
-ObjectTemplates:addClientTemplate(object_tangible_component_armor_shared_armor_appearance_enhancement_base, "object/tangible/component/armor/shared_armor_appearance_enhancement_base.iff")
-------------------------------------------------------------------------------------------------------------------------------------
-object_tangible_component_armor_shared_armor_appearance_enhancement_base_two = SharedTangibleObjectTemplate:new {
-	clientTemplateFileName = "object/tangible/component/armor/shared_armor_appearance_enhancement_base_two.iff"
-}
-
-ObjectTemplates:addClientTemplate(object_tangible_component_armor_shared_armor_appearance_enhancement_base_two, "object/tangible/component/armor/shared_armor_appearance_enhancement_base_two.iff")
-------------------------------------------------------------------------------------------------------------------------------------
-object_tangible_component_armor_shared_armor_core_base = SharedTangibleObjectTemplate:new {
-	clientTemplateFileName = "object/tangible/component/armor/shared_armor_core_base.iff"
-}
-
-ObjectTemplates:addClientTemplate(object_tangible_component_armor_shared_armor_core_base, "object/tangible/component/armor/shared_armor_core_base.iff")
-------------------------------------------------------------------------------------------------------------------------------------
-object_tangible_component_armor_shared_armor_core_enhancement_base = SharedTangibleObjectTemplate:new {
-	clientTemplateFileName = "object/tangible/component/armor/shared_armor_core_enhancement_base.iff"
-}
-
-ObjectTemplates:addClientTemplate(object_tangible_component_armor_shared_armor_core_enhancement_base, "object/tangible/component/armor/shared_armor_core_enhancement_base.iff")
-------------------------------------------------------------------------------------------------------------------------------------
-object_tangible_component_armor_shared_armor_layer_new = SharedTangibleObjectTemplate:new {
-	clientTemplateFileName = "object/tangible/component/armor/shared_armor_layer_new.iff"
-}
-
-ObjectTemplates:addClientTemplate(object_tangible_component_armor_shared_armor_layer_new, "object/tangible/component/armor/shared_armor_layer_new.iff")
-------------------------------------------------------------------------------------------------------------------------------------
-object_tangible_component_armor_shared_armor_segment_enhancement_base = SharedTangibleObjectTemplate:new {
-	clientTemplateFileName = "object/tangible/component/armor/shared_armor_segment_enhancement_base.iff"
-}
-
-ObjectTemplates:addClientTemplate(object_tangible_component_armor_shared_armor_segment_enhancement_base, "object/tangible/component/armor/shared_armor_segment_enhancement_base.iff")
-------------------------------------------------------------------------------------------------------------------------------------
-object_tangible_component_armor_shared_armor_segment_new = SharedTangibleObjectTemplate:new {
-	clientTemplateFileName = "object/tangible/component/armor/shared_armor_segment_new.iff"
-}
-
-ObjectTemplates:addClientTemplate(object_tangible_component_armor_shared_armor_segment_new, "object/tangible/component/armor/shared_armor_segment_new.iff")
-------------------------------------------------------------------------------------------------------------------------------------
-object_tangible_component_armor_shared_bio_cartridge_base = SharedTangibleObjectTemplate:new {
-	clientTemplateFileName = "object/tangible/component/armor/shared_bio_cartridge_base.iff"
-}
-
-ObjectTemplates:addClientTemplate(object_tangible_component_armor_shared_bio_cartridge_base, "object/tangible/component/armor/shared_bio_cartridge_base.iff")
-------------------------------------------------------------------------------------------------------------------------------------
-
-
-
-
-
-
 
 object_tangible_component_armor_shared_armor_layer = SharedTangibleObjectTemplate:new {
 	clientTemplateFileName = "object/tangible/component/armor/shared_armor_layer.iff"
@@ -5286,3 +5232,28 @@ object_tangible_component_armor_shared_shield_generator_vehicular = SharedTangib
 }
 
 ObjectTemplates:addClientTemplate(object_tangible_component_armor_shared_shield_generator_vehicular, "object/tangible/component/armor/shared_shield_generator_vehicular.iff")
+
+object_tangible_component_armor_shared_mando_iron = SharedTangibleObjectTemplate:new {
+clientTemplateFileName = "object/tangible/component/armor/shared_mando_iron.iff"
+}
+
+ObjectTemplates:addClientTemplate(object_tangible_component_armor_shared_mando_iron, "object/tangible/component/armor/shared_mando_iron.iff")
+
+object_tangible_component_armor_shared_orbalisk_shell = SharedTangibleObjectTemplate:new {
+clientTemplateFileName = "object/tangible/component/armor/shared_orbalisk_shell.iff"
+}
+
+ObjectTemplates:addClientTemplate(object_tangible_component_armor_shared_orbalisk_shell, "object/tangible/component/armor/shared_orbalisk_shell.iff")
+
+object_tangible_component_armor_shared_wampa_blood = SharedTangibleObjectTemplate:new {
+clientTemplateFileName = "object/tangible/component/armor/shared_wampa_blood.iff"
+}
+
+ObjectTemplates: addClientTemplate(object_tangible_component_armor_shared_wampa_blood, "object/tangible/component/armor/shared_wampa_blood.iff")
+
+object_tangible_component_armor_shared_spoiled_wampa_blood = SharedTangibleObjectTemplate:new {
+clientTemplateFileName = "object/tangible/component/armor/shared_spoiled_wampa_blood.iff"
+}
+
+ObjectTemplates: addClientTemplate(object_tangible_component_armor_shared_spoiled_wampa_blood, "object/tangible/component/armor/shared_spoiled_wampa_blood.iff")
+

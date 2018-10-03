@@ -66,4 +66,7 @@ function BlueleafTempleScreenPlay:spawnMobiles()
 	
 	spawnMobile("yavin4", "kliknik_dark_warrior",600,12.4,-1.3,32.4,-93,468318)
 	spawnMobile("yavin4", "kliknik_dark_warrior",600,-12.8,-1.3,32,93,468318)
+
+	--Temple of Exar Kun
+	spawnMobile("yavin4", "custom_exar_kun_boss", 3600, 5108,73,5537,0,0)
 end

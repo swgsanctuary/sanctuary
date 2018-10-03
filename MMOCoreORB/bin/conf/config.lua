@@ -84,7 +84,7 @@ PingAllowedConnections = 3000
 ZoneProcessingThreads = 10
 ZoneAllowedConnections = 30000
 ZoneGalaxyID = 2 --The actual zone server's galaxyID. Should coordinate with your login server.
-
+ZoneOnlineCharactersPerAccount = 3 --How many characters are allowed online from a single account.
 
 --The following zones are enabled, and will be loaded with server start.
 --To save on RAM and CPU usage, you should only enable the zones you need.
@@ -95,27 +95,27 @@ ZonesEnabled = {
 	"tutorial"
 --]]
 ---[[
-	"chandrila",
+--	"chandrila",
 	"corellia",
-	"coruscant",
+--	"coruscant",
 	"dantooine",
 	"dathomir",
-	"dungeon1",
+--	"dungeon1",
 	"endor",
-	"hoth",
+--	"hoth",
 	"kaas",
-	"kashyyyk",
-	"kashyyyk_hunting",
-	"kashyyyk_rryatt_trail",
+--	"kashyyyk",
+--	"kashyyyk_hunting",
+--	"kashyyyk_rryatt_trail",
 	"kashyyyk_main",
-	"kashyyyk_south_dungeons",
-	"kashyyyk_north_dungeons",
-	"kashyyyk_pob_dungeons",
-	"kashyyyk_dead_forest",
+--	"kashyyyk_south_dungeons",
+--	"kashyyyk_north_dungeons",
+--	"kashyyyk_pob_dungeons",
+--	"kashyyyk_dead_forest",
 	"lok",
-	"mandalore",
+--	"mandalore",
 	--"moraband",
-	"mustafar",
+--	"mustafar",
 	"naboo",
 	"rori",
 	--"space_corellia",
@@ -142,9 +142,14 @@ ZonesEnabled = {
 
 
 -- directory of tres with live.cfg
-TrePath = "/home/swgemu/workspace/tre"
+TrePath = "/home/swgemu/Desktop/SWGEmu"
 
 TreFiles = {
+--	"sanctuary_jedi.tre",
+	"sanctuary_master.tre",
+	"tribute_flurry.tre",
+	"textures.tre",
+	"collection.tre",
 	"mtg_patch_022.tre",
 	"mtg_planets.tre",
 	"mtg_patch_021.tre",

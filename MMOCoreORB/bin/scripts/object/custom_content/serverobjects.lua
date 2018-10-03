@@ -13,6 +13,11 @@ includeFile("custom_content/static/serverobjects.lua")
 includeFile("custom_content/tangible/serverobjects.lua")
 includeFile("custom_content/weapon/serverobjects.lua")
 
+
+--includeFile("custom_content/mobile/ep3/serverobjects.lua")
+--includeFile("custom_content/mobile/som/serverobjects.lua")
+--includeFile("custom_content/mobile/vehicle/serverobjects.lua")
+
 -- Server Objects
 --includeFile("custom_content/new.lua")
 

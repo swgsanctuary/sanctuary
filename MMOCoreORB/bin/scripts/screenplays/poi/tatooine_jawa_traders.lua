@@ -109,6 +109,13 @@ function JawaTradersScreenPlay:spawnMobiles()
 	spawnMobile("tatooine", "jawa", 300, -6166.120, 8.800, 1882.970, 5.940, 0)
 	spawnMobile("tatooine", "jawa", 300, -6163.290, 9.208, 1887.390, -129.183, 0)
 
+	-- Ootini and Bodyguards
+	spawnMobile("tatooine", "custom_jawa_boss", 6200, -6180, 7, 1956, 15, 0)
+	spawnMobile("tatooine", "custom_jawa_bodyguard", 2200, -6157, 6, 1959, 15, 0)
+	spawnMobile("tatooine", "custom_jawa_bodyguard", 2200, -6190, 10, 1925, 15, 0)
+	spawnMobile("tatooine", "custom_jawa_bodyguard", 2200, -6262, 12, 1914, 15, 0)
+	spawnMobile("tatooine", "custom_jawa_bodyguard", 2200, -6214, 10, 1990, 15, 0)
+
  	-- Clothing & Apparel Junk Dealer
 	local pNpc = spawnMobile("tatooine", "junk_jawa", 0, -6142.8, 6.2, 1845, -40, 0)
 	if pNpc ~= nil then

@@ -24,10 +24,10 @@ junk = {
 		{itemTemplate = "expired_ticket", weight = 285500},
 		{itemTemplate = "hyperdrive_part", weight = 285500},
 		{itemTemplate = "ledger", weight = 285500},
-		{itemTemplate = "locked_briefcase", weight = 285500},
-		{itemTemplate = "locked_container", weight = 285500},
-		{itemTemplate = "loudspeaker", weight = 285500},
-		{itemTemplate = "palm_frond", weight = 285500},
+		{itemTemplate = "locked_briefcase", weight = 785500},
+		{itemTemplate = "locked_container", weight = 785500},
+		{itemTemplate = "loudspeaker", weight = 185500},
+		{itemTemplate = "palm_frond", weight = 185500},
 		{itemTemplate = "photographic_image", weight = 285500},
 		{itemTemplate = "recorded_image_1", weight = 285500},
 		{itemTemplate = "recording_rod", weight = 285500},
@@ -35,10 +35,10 @@ junk = {
 		{itemTemplate = "slave_collar", weight = 285500},
 		{itemTemplate = "used_ticket", weight = 285500},
 		{itemTemplate = "worklight", weight = 285500},
-		{itemTemplate = "magic_eight_ball", weight = 285500},
+		{itemTemplate = "magic_eight_ball", weight = 85500},
 		{groupTemplate = "coa_encoded_disk_fragments", weight = 80000},
-		{groupTemplate = "coa2_decoder_components", weight = 80000},
-		{groupTemplate = "data_storage_unit_parts", weight = 989500},
+		{groupTemplate = "coa2_decoder_components", weight = 50000},
+		{groupTemplate = "data_storage_unit_parts", weight = 689500},
 	}
 }
 

@@ -3,7 +3,8 @@ black_sun_assassin = Creature:new {
 	randomNameType = NAME_GENERIC,
 	randomNameTag = true,
 	socialGroup = "death_watch",
-	faction = "",
+	pvpFaction = "death_watch",
+	faction = "death_watch",
 	level = 107,
 	chanceHit = 1.75,
 	damageMin = 670,
@@ -32,15 +33,15 @@ black_sun_assassin = Creature:new {
 	lootGroups = {
 		{
 			groups = {
-				{group = "junk", chance = 6500000},
-				{group = "pistols", chance = 750000},
+				{group = "clothing_attachments", chance = 6000000},
 				{group = "rifles", chance = 750000},
-				{group = "carbines", chance = 750000},
-				{group = "bounty_hunter_armor", chance = 200000},
+				{group = "bounty_hunter_armor", chance = 1700000},
 				{group = "jetpack_base", chance = 50000},
-				{group = "wearables_common", chance = 500000},
-				{group = "wearables_uncommon", chance = 500000}
-			}
+				{group = "blacksunhelm1", chance = 500000},
+				{group = "armor_attachments", chance = 500000},
+				{group = "blacksun_rare", chance = 500000}
+			},
+			lootChance = 10000000
 		}
 	},
 	weapons = {"pirate_weapons_heavy"},

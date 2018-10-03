@@ -12,7 +12,7 @@ nightsister_sentinel = Creature:new {
 	baseHAM = 21000,
 	baseHAMmax = 26000,
 	armor = 1,
-	resists = {35,35,35,200,200,200,200,200,-1},
+	resists = {45,45,45,100,100,100,100,100,-1},
 	meatType = "",
 	meatAmount = 0,
 	hideType = "",
@@ -31,23 +31,23 @@ nightsister_sentinel = Creature:new {
 	lootGroups = {
 		{
 			groups = {
-				{group = "power_crystals", chance = 500000},
+				{group = "crystals_good", chance = 500000},
 				{group = "color_crystals", chance = 500000},
 				{group = "nightsister_common", chance = 2000000},
-				{group = "armor_attachments", chance = 250000},
-				{group = "clothing_attachments", chance = 250000},
+				{group = "armor_attachments", chance = 500000},
+				{group = "clothing_attachments", chance = 1000000},
 				{group = "melee_weapons", chance = 2500000},
 				{group = "rifles", chance = 1000000},
-				{group = "pistols", chance = 1000000},
-				{group = "carbines", chance = 1000000},
-				{group = "wearables_common", chance = 500000},
-				{group = "tailor_components", chance = 500000}
-			}
+				{group = "pistols", chance = 500000},
+				{group = "axkva_min", chance = 500000},
+				{group = "carbines", chance = 1000000}
+			},
+			lootChance = 10000000
 		}
 	},
 	weapons = {"mixed_force_weapons"},
 	conversationTemplate = "",
-	attacks = merge(fencermid,swordsmanmid,tkamid,pikemanmaster,brawlermaster,forcewielder)
+	attacks = merge(fencermid,swordsmanmid,tkamid,pikemanmaster,brawlermaster)
 }
 
 CreatureTemplates:addCreatureTemplate(nightsister_sentinel, "nightsister_sentinel")

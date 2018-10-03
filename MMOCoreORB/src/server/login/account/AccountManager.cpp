@@ -15,7 +15,7 @@
 #include "server/login/packets/LoginClusterStatus.h"
 #include "server/login/packets/LoginEnumCluster.h"
 #include "server/ServerCore.h"
-
+#include "server/login/objects.h"
 #include "server/zone/managers/object/ObjectManager.h"
 
 AccountManager::AccountManager(LoginServer* loginserv) : Logger("AccountManager") {
@@ -23,7 +23,7 @@ AccountManager::AccountManager(LoginServer* loginserv) : Logger("AccountManager"
 
 	autoRegistration = true;
 	requiredVersion = "";
-	maxOnlineCharacters = 1;
+	maxOnlineCharacters = 3;
 
 	setLogging(false);
 	setGlobalLogging(false);
@@ -89,6 +89,26 @@ void AccountManager::loginAccount(LoginClient* client, Message* packet) {
 	}
 
 	client->sendMessage(loginServer->getLoginEnumClusterMessage());
+
+if (client->getSession()->getAddress().getIPAddress().beginsWith("192")) {
+    GalaxyList galaxies;
+    uint32 galaxyCount = galaxies.size();
+
+    LoginClusterStatus* clusterStatusMessage = new LoginClusterStatus(galaxyCount);
+
+    while(galaxies.next()) {
+        uint32 galaxyID = galaxies.getGalaxyID();
+        String name;
+        galaxies.getGalaxyName(name);
+        String address = "192.168.1.205"; //Put in the local IP of your server here, leave the " "
+
+        clusterStatusMessage->addGalaxy(galaxyID, address, galaxies.getGalaxyPort(), galaxies.getGalaxyPingPort());
+    }
+    client->sendMessage(clusterStatusMessage);
+} else {
+    client->sendMessage(loginServer->getLoginClusterStatusMessage());
+}
+
 	client->sendMessage(loginServer->getLoginClusterStatusMessage());
 
 	Message* eci = new EnumerateCharacterID(account);

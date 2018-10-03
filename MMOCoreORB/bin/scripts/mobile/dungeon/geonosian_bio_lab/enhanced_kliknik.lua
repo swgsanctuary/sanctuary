@@ -2,7 +2,7 @@ enhanced_kliknik = Creature:new {
 	objectName = "@mob/creature_names:geonosian_kliknik_force_strong",
 	socialGroup = "geonosian_creature",
 	faction = "",
-	level = 109,
+	level = 85,
 	chanceHit = 2.2,
 	damageMin = 675,
 	damageMax = 1060,
@@ -18,7 +18,7 @@ enhanced_kliknik = Creature:new {
 	boneType = "",
 	boneAmount = 0,
 	milk = 0,
-	tamingChance = 0,
+	tamingChance = 0.25,
 	ferocity = 15,
 	pvpBitmask = AGGRESSIVE + ATTACKABLE + ENEMY,
 	creatureBitmask = PACK + KILLER,
@@ -30,9 +30,11 @@ enhanced_kliknik = Creature:new {
 	lootGroups = {
 	 {
 	        groups = {
-				{group = "geo_kliknik", chance = 10000000}
+				{group = "geo_kliknik", chance = 5000000},
+				{group = "geonosian_common", chance = 2500000},
+				{group = "geonosian_hard", chance = 2500000}
 			},
-			lootChance = 3180000
+			lootChance = 10000000
 		}
 	},
 	weapons = {"creature_spit_heavy_flame"},

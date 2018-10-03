@@ -1,6 +1,5 @@
 --Children folder includes
 includeFile("custom_content/draft_schematic/chemistry/component/serverobjects.lua")
-includeFile("custom_content/draft_schematic/chemistry/enhancer/serverobjects.lua")
 includeFile("custom_content/draft_schematic/chemistry/instant_stimpack/serverobjects.lua")
 
 -- Server Objects

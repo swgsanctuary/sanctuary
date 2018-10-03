@@ -45,16 +45,6 @@
 --Children folder includes
 
 -- Server Objects
-includeFile("tangible/component/armor/armor_core_base.lua")
-includeFile("tangible/component/armor/armor_core_enhancement_base.lua")
-includeFile("tangible/component/armor/armor_layer_new.lua")
-includeFile("tangible/component/armor/armor_segment_enhancement_base.lua")
-includeFile("tangible/component/armor/bio_cartridge_base.lua")
-includeFile("tangible/component/armor/armor_appearance_enhancement_base.lua")
-includeFile("tangible/component/armor/armor_appearance_enhancement_base_two.lua")
-includeFile("tangible/component/armor/armor_segment_new.lua")
-
-
 includeFile("tangible/component/armor/armor_layer.lua")
 includeFile("tangible/component/armor/armor_layer_acid.lua")
 includeFile("tangible/component/armor/armor_layer_blast.lua")
@@ -143,3 +133,9 @@ includeFile("tangible/component/armor/shield_generator_personal_b.lua")
 includeFile("tangible/component/armor/shield_generator_personal_c.lua")
 includeFile("tangible/component/armor/shield_generator_personal_imperial_test.lua")
 includeFile("tangible/component/armor/shield_generator_vehicular.lua")
+
+includeFile("tangible/component/armor/mando_iron.lua")
+includeFile("tangible/component/armor/orbalisk_shell.lua")
+includeFile("tangible/component/armor/wampa_blood.lua")
+includeFile("tangible/component/armor/spoiled_wampa_blood.lua")
+includeFile("tangible/component/armor/armor_core_base.lua")
